@@ -24,12 +24,16 @@ The search is exhaustive: for a given pattern size N, the tool finds **all** suc
 
 ## Results so far
 
-| Size N | Patterns found | Time (Rust) | Search nodes |
-|--------|---------------|-------------|-------------|
-| 10 | 32 | ~112s | 9.1M |
-| 11 | 0 | ~3720s | 54M |
-| 12 | 60 | ~55 min | 290M |
-| 13 | (running) | — | — |
+| Size N | Patterns found | Time | Search nodes | Rate |
+|--------|---------------|------|-------------|------|
+| 10 | 32 | 9s | 9.3M | 1.0M/s |
+| 11 | 0 | — | — | — |
+| 12 | 60 | ~55 min | 290M | 88k/s |
+| 13 | 832 | ~4.1h | 1.38B | 93k/s |
+
+N=10 time is with custom orbit computation. N=12 and N=13 were run with
+nauty orbits (before the custom module existed); re-running them with
+custom orbits would be substantially faster.
 
 No minimal 4-chromatic K₄-free patterns of size 11 exist.
 
@@ -83,9 +87,14 @@ chromatic-search search
   --max-seconds <S>       Stop after S seconds
   --roots <SPEC>          Starting cells: "0" (default), "0-8", "0,1,2"
   --no-symmetry           Disable all symmetry pruning (much slower)
+  --nauty-orbits          Use nauty for orbit computation (exact but ~12x slower)
   --compact               Print bitstrings only (no cell lists)
   --skip-file <FILE>      Skip patterns matching known bitstrings in FILE
 ```
+
+By default, orbit pruning uses a custom permutation-pool algorithm
+(see below). Pass `--nauty-orbits` to use nauty instead — this gives
+slightly tighter orbits but is much slower per node.
 
 ## How the algorithm works
 
@@ -121,9 +130,13 @@ Every vertex in a 4-critical graph has degree at least 3 within the pattern. If 
 
 This is the most powerful pruning technique and the key to making exhaustive search feasible. The idea: if two candidate cells can be swapped by a symmetry that fixes the current partial pattern, they are equivalent — exploring both would produce duplicate results. So we only try one representative from each equivalence class.
 
-Technically, we compute the *automorphism group* of the current partial pattern (using the nauty library, described below) and partition the candidate cells into orbits of that group. We only branch on one cell per orbit.
-
 For example, if the current pattern has a mirror symmetry and two candidate cells are mirror images of each other, only one is explored.
+
+There are two implementations (selectable via `--nauty-orbits`):
+
+- **Custom (default):** A pool of ~161 precomputed permutations from the sudoku symmetry group is filtered at each node for those that stabilize the current pattern. Candidate orbits are computed via union-find over the filtered permutations. This is very fast (~1 μs per node) and produces nearly identical orbits to the exact method.
+
+- **Nauty (exact):** Calls the nauty C library at each node to compute the full automorphism group of a 108-vertex auxiliary graph. This gives exact orbits but costs ~12 μs per node due to FFI overhead and graph construction.
 
 **4. Leaf deduplication**
 
@@ -141,7 +154,20 @@ The sudoku grid has a rich symmetry group of 3,359,232 transformations that pres
 
 Two patterns that are related by any combination of these symmetries are considered equivalent.
 
-To detect equivalences, we don't implement these transformations directly. Instead, we build an auxiliary graph:
+#### Custom orbit computation (default)
+
+At startup, the tool builds a pool of ~161 group elements by:
+1. Constructing the 17 natural generators (6 row swaps, 6 column swaps, 2 band swaps, 2 stack swaps, 1 transpose)
+2. Computing Schreier generators for the stabilizer of cell 0 (the search root)
+3. Expanding with pairwise products
+
+Each element is stored as a simple permutation array `[u8; 81]`. At each search node, the pool is filtered for elements that map the chosen set to itself (checked by iterating the set bits of the chosen mask — typically only 2–14 cells). Candidate orbits are then computed via union-find over the filtered permutations.
+
+This avoids all FFI overhead and graph construction. The trade-off is that the pool captures a subset of the full stabilizer, so orbits may occasionally be finer than the true orbits — meaning slightly more nodes are explored. In practice, the orbit counts match nauty almost exactly.
+
+#### Nauty-based canonicalization (leaves only, or full with --nauty-orbits)
+
+For **leaf deduplication**, we always use nauty to compute a canonical form. This is done via a 108-vertex auxiliary graph:
 
 - **108 vertices**: the 81 cell vertices, plus 9 "row" nodes, 9 "column" nodes, and 9 "box" nodes
 - **Edges**: each cell connects to its row node, its column node, and its box node
@@ -151,10 +177,9 @@ To detect equivalences, we don't implement these transformations directly. Inste
   - Selected cells get a third color
   - Unselected cells get a fourth color
 
-The symmetries of this colored auxiliary graph are exactly the symmetries of the sudoku grid that map selected cells to selected cells. We pass this structure to **nauty** (a highly optimized C library for graph automorphisms), which computes:
+The symmetries of this colored graph are exactly the sudoku symmetries that map selected cells to selected cells. nauty computes a canonical labeling, and two patterns are equivalent if and only if their canonical forms match.
 
-- A canonical form for the pattern (used for deduplication at leaves)
-- The partition of candidate cells into orbits (used for pruning during search)
+With `--nauty-orbits`, nauty is also used at intermediate nodes for orbit computation (exact but slower).
 
 ### Coloring test
 
@@ -168,7 +193,8 @@ The 3-colorability test uses **DSATUR backtracking**: a standard exact algorithm
 src/
   main.rs          CLI entry point (clap-based)
   search.rs        Recursive backtracking search engine
-  canonical.rs     nauty FFI: canonicalization and orbit computation
+  symmetry.rs      Custom orbit computation via precomputed permutation pool
+  canonical.rs     nauty FFI: canonicalization and (optional) orbit computation
   coloring.rs      DSATUR 3-colorability solver
   validation.rs    Full pattern validation (connected, K₄-free, critical)
   sudoku_graph.rs  81-vertex graph: neighbor bitmasks, induced subgraph
