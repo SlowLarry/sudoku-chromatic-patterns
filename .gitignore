@@ -1,0 +1,22 @@
+# Python
+.venv/
+.venv-wsl/
+.venv39/
+__pycache__/
+*.pyc
+*.pyo
+
+# Rust
+rust/target/
+
+# Logs
+*.log
+run_log.txt
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Misc
+ersUserchromatic pattern search*
+results_n11_rust.txt
