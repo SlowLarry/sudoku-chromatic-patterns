@@ -30,9 +30,10 @@ The search is exhaustive: for a given pattern size N, the tool finds **all** suc
 | 11 | 0 | — | — | — |
 | 12 | 60 | ~55 min | 290M | 88k/s |
 | 13 | 832 | ~4.1h | 1.38B | 93k/s |
+| 14 | 620 | ~2h | 5.9B | 891k/s |
 
-N=10 time is with custom orbit computation. N=12 and N=13 were run with
-nauty orbits (before the custom module existed); re-running them with
+N=10 and N=14 times use custom orbit computation. N=12 and N=13 were run
+with nauty orbits (before the custom module existed); re-running them with
 custom orbits would be substantially faster.
 
 No minimal 4-chromatic K₄-free patterns of size 11 exist.
@@ -74,6 +75,18 @@ cargo run --release -- validate results.txt
 ```
 
 Independently checks each pattern in the file against all five criteria (connected, K₄-free, minimum degree ≥ 3, not 3-colorable, deletion-critical).
+
+### Compute minlex canonical forms
+
+```bash
+cargo run --release -- minlex --input results.txt --output results_minlex.txt
+```
+
+Computes the **minlex** (lexicographically smallest under all sudoku symmetries) form of each pattern. This is the community-standard canonical form for comparing patterns across different tools and lists.
+
+The output is sorted and deduplicated. If `--output` is omitted, results are printed to stdout.
+
+The minlex computation enumerates all 3,359,232 geometric sudoku symmetries via the group's product structure (transpose × band/stack permutations × row/column permutations), using early termination to skip unpromising permutations quickly.
 
 ### All search options
 
@@ -194,6 +207,7 @@ src/
   main.rs          CLI entry point (clap-based)
   search.rs        Recursive backtracking search engine
   symmetry.rs      Custom orbit computation via precomputed permutation pool
+  minlex.rs        Minlex canonicalization under the full sudoku symmetry group
   canonical.rs     nauty FFI: canonicalization and (optional) orbit computation
   coloring.rs      DSATUR 3-colorability solver
   validation.rs    Full pattern validation (connected, K₄-free, critical)

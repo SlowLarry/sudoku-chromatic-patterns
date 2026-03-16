@@ -3,6 +3,8 @@
 mod bitset;
 mod canonical;
 mod coloring;
+mod minlex;
+mod proof;
 mod search;
 mod sudoku_graph;
 mod symmetry;
@@ -75,6 +77,36 @@ enum Commands {
     Validate {
         /// Path to file of 81-char 0/1 patterns
         file: String,
+    },
+
+    /// Compute minlex canonical forms of patterns
+    Minlex {
+        /// Input file of 81-char 0/1 patterns
+        #[arg(long)]
+        input: String,
+
+        /// Output file (stdout if omitted)
+        #[arg(long)]
+        output: Option<String>,
+
+        /// Output in input order (no sort/dedup)
+        #[arg(long)]
+        preserve_order: bool,
+    },
+
+    /// Generate human-readable proofs of non-3-colorability
+    Prove {
+        /// Input file of 81-char 0/1 patterns
+        #[arg(long)]
+        input: String,
+
+        /// Output file (stdout if omitted)
+        #[arg(long)]
+        output: Option<String>,
+
+        /// Print only the summary line per pattern
+        #[arg(long)]
+        summary_only: bool,
     },
 }
 
@@ -224,6 +256,115 @@ fn main() {
                 }
             }
             eprintln!("validated: {}/{} patterns valid", valid, total);
+        }
+
+        Commands::Minlex { input, output, preserve_order } => {
+            let contents = fs::read_to_string(&input).expect("cannot read input file");
+            let mut masks: Vec<u128> = Vec::new();
+            for line in contents.lines() {
+                let line = line.trim();
+                if line.is_empty() || line.starts_with('#') {
+                    continue;
+                }
+                if let Some(mask) = minlex::str81_to_mask(line) {
+                    masks.push(mask);
+                }
+            }
+            eprintln!("minlex: processing {} patterns...", masks.len());
+
+            let mut results: Vec<String> = masks
+                .iter()
+                .enumerate()
+                .map(|(i, &mask)| {
+                    let ml = minlex::minlex_pattern(mask);
+                    if (i + 1) % 100 == 0 {
+                        eprintln!("  {}/{}", i + 1, masks.len());
+                    }
+                    minlex::mask_to_81str(ml)
+                })
+                .collect();
+
+            if !preserve_order {
+                results.sort();
+            }
+            let before = results.len();
+            if !preserve_order {
+                results.dedup();
+            }
+            let after = results.len();
+
+            let out_str = results.join("\n") + "\n";
+            if let Some(ref path) = output {
+                fs::write(path, &out_str).expect("cannot write output file");
+                eprintln!("minlex: wrote {} patterns to {} ({} duplicates removed)", after, path, before - after);
+            } else {
+                print!("{}", out_str);
+                eprintln!("minlex: {} patterns ({} duplicates removed)", after, before - after);
+            }
+        }
+
+        Commands::Prove { input, output, summary_only } => {
+            let contents = fs::read_to_string(&input).expect("cannot read input file");
+            let mut patterns: Vec<(String, Vec<u8>)> = Vec::new();
+            for line in contents.lines() {
+                let line = line.trim();
+                if line.is_empty() || line.starts_with('#') {
+                    continue;
+                }
+                if line.len() == 81 && line.chars().all(|c| c == '0' || c == '1') {
+                    let verts = bitstring_to_vertices(line);
+                    patterns.push((line.to_string(), verts));
+                }
+            }
+            eprintln!("prove: processing {} patterns...", patterns.len());
+
+            let mut out = String::new();
+            let mut proved = 0;
+            let mut failed = 0;
+            let mut max_branches = 0usize;
+
+            for (i, (bitstr, cells)) in patterns.iter().enumerate() {
+                let result = proof::prove_pattern(cells);
+                let complete = result.proof.is_complete();
+                let branches = result.proof.branch_count();
+                max_branches = max_branches.max(branches);
+
+                if complete { proved += 1; } else { failed += 1; }
+
+                let summary = format!(
+                    "pattern {}/{}: {} cells={} {}",
+                    i + 1, patterns.len(),
+                    if complete { "PROVED" } else { "FAILED" },
+                    cells.len(),
+                    result.summary(),
+                );
+
+                if summary_only {
+                    out += &format!("{}\n", summary);
+                } else {
+                    out += &format!("{}\n{}\n", summary, bitstr);
+                    out += &result.text;
+                    out += "\n";
+                }
+
+                if (i + 1) % 100 == 0 {
+                    eprintln!("  {}/{}", i + 1, patterns.len());
+                }
+            }
+
+            if let Some(ref path) = output {
+                fs::write(path, &out).expect("cannot write output file");
+                eprintln!(
+                    "prove: wrote {} proofs to {} (proved={}, failed={}, max_branches={})",
+                    patterns.len(), path, proved, failed, max_branches,
+                );
+            } else {
+                print!("{}", out);
+                eprintln!(
+                    "prove: {} patterns (proved={}, failed={}, max_branches={})",
+                    patterns.len(), proved, failed, max_branches,
+                );
+            }
         }
     }
 }

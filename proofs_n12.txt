@@ -1,0 +1,1205 @@
+pattern 1/60: PROVED cells=12 depth=7 diamonds=7 branches=0 complete=true
+110100000100000100000000000101000100010000000000000000010100100000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c1} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c1). Identify.
+  2.  Diamond {r1c2, r1c1, [r1c4=r2c1], r4c1} (spine r1c1—[r1c4=r2c1]).
+      → color(r1c2) = color(r4c1). Identify.
+  3.  Diamond {r4c7, [r1c2=r4c1], r4c3, r5c2} (spine [r1c2=r4c1]—r4c3).
+      → color(r4c7) = color(r5c2). Identify.
+  4.  Diamond {r4c3, [r1c2=r4c1], [r4c7=r5c2], r7c2} (spine [r1c2=r4c1]—[r4c7=r5c2]).
+      → color(r4c3) = color(r7c2). Identify.
+  5.  Diamond {[r1c2=r4c1], [r4c3=r7c2], [r4c7=r5c2], r7c7} (spine [r4c3=r7c2]—[r4c7=r5c2]).
+      → color([r1c2=r4c1]) = color(r7c7). Identify.
+  6.  Diamond {r1c1, [r1c2=r4c1=r7c7], [r1c4=r2c1], r2c7} (spine [r1c2=r4c1=r7c7]—[r1c4=r2c1]).
+      → color(r1c1) = color(r2c7). Identify.
+  7.  Diamond {[r1c4=r2c1], [r1c1=r2c7], [r1c2=r4c1=r7c7], [r4c7=r5c2]} (spine [r1c1=r2c7]—[r1c2=r4c1=r7c7]).
+      → color([r1c4=r2c1]) = color([r4c7=r5c2]). Identify.
+  8.  K₄ on {[r1c2=r4c1=r7c7], [r1c4=r2c1=r4c7=r5c2], [r4c3=r7c2], r7c4}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 2/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000100000000000110100100001100000010000000010000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c1} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c1). Identify.
+  2.  Diamond {r1c2, r1c1, [r1c4=r2c1], r4c1} (spine r1c1—[r1c4=r2c1]).
+      → color(r1c2) = color(r4c1). Identify.
+  3.  Diamond {[r1c4=r2c1], r3c4, r3c5, r3c7} (spine r3c4—r3c5).
+      → color([r1c4=r2c1]) = color(r3c7). Identify.
+  4.  Diamond {r1c1, [r1c2=r4c1], [r1c4=r2c1=r3c7], r4c7} (spine [r1c2=r4c1]—[r1c4=r2c1=r3c7]).
+      → color(r1c1) = color(r4c7). Identify.
+  5.  Diamond {[r1c4=r2c1=r3c7], [r1c1=r4c7], [r1c2=r4c1], r4c6} (spine [r1c1=r4c7]—[r1c2=r4c1]).
+      → color([r1c4=r2c1=r3c7]) = color(r4c6). Identify.
+  6.  K₄ on {[r1c4=r2c1=r3c7=r4c6], r3c5, r5c5, r6c5}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 3/60: PROVED cells=12 depth=6 diamonds=6 branches=0 complete=true
+110100000100000000000100100100100100000011100000000000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c1} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c1). Identify.
+  2.  Diamond {r1c2, r1c1, [r1c4=r2c1], r4c1} (spine r1c1—[r1c4=r2c1]).
+      → color(r1c2) = color(r4c1). Identify.
+  3.  Diamond {r1c1, [r1c2=r4c1], [r1c4=r2c1], r4c4} (spine [r1c2=r4c1]—[r1c4=r2c1]).
+      → color(r1c1) = color(r4c4). Identify.
+  4.  Diamond {[r1c4=r2c1], [r1c1=r4c4], [r1c2=r4c1], r4c7} (spine [r1c1=r4c4]—[r1c2=r4c1]).
+      → color([r1c4=r2c1]) = color(r4c7). Identify.
+  5.  Diamond {[r1c2=r4c1], [r1c1=r4c4], [r1c4=r2c1=r4c7], r3c4} (spine [r1c1=r4c4]—[r1c4=r2c1=r4c7]).
+      → color([r1c2=r4c1]) = color(r3c4). Identify.
+  6.  Diamond {[r1c1=r4c4], [r1c2=r3c4=r4c1], [r1c4=r2c1=r4c7], r3c7} (spine [r1c2=r3c4=r4c1]—[r1c4=r2c1=r4c7]).
+      → color([r1c1=r4c4]) = color(r3c7). Identify.
+  7.  K₄ on {[r1c1=r3c7=r4c4], r5c5, r5c6, r5c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 4/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000100000000000011100100010100000001000000001000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c1} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c1). Identify.
+  2.  Diamond {r1c2, r1c1, [r1c4=r2c1], r4c1} (spine r1c1—[r1c4=r2c1]).
+      → color(r1c2) = color(r4c1). Identify.
+  3.  Diamond {[r1c4=r2c1], r3c5, r3c6, r3c7} (spine r3c5—r3c6).
+      → color([r1c4=r2c1]) = color(r3c7). Identify.
+  4.  Diamond {r1c1, [r1c2=r4c1], [r1c4=r2c1=r3c7], r4c7} (spine [r1c2=r4c1]—[r1c4=r2c1=r3c7]).
+      → color(r1c1) = color(r4c7). Identify.
+  5.  Diamond {[r1c4=r2c1=r3c7], [r1c1=r4c7], [r1c2=r4c1], r4c5} (spine [r1c1=r4c7]—[r1c2=r4c1]).
+      → color([r1c4=r2c1=r3c7]) = color(r4c5). Identify.
+  6.  K₄ on {[r1c4=r2c1=r3c7=r4c5], r3c6, r5c6, r6c6}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 5/60: PROVED cells=12 depth=6 diamonds=6 branches=0 complete=true
+110100000100000000000000000100100100000011100000000000000100100000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c1} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c1). Identify.
+  2.  Diamond {r1c2, r1c1, [r1c4=r2c1], r4c1} (spine r1c1—[r1c4=r2c1]).
+      → color(r1c2) = color(r4c1). Identify.
+  3.  Diamond {r1c1, [r1c2=r4c1], [r1c4=r2c1], r4c4} (spine [r1c2=r4c1]—[r1c4=r2c1]).
+      → color(r1c1) = color(r4c4). Identify.
+  4.  Diamond {[r1c4=r2c1], [r1c1=r4c4], [r1c2=r4c1], r4c7} (spine [r1c1=r4c4]—[r1c2=r4c1]).
+      → color([r1c4=r2c1]) = color(r4c7). Identify.
+  5.  Diamond {[r1c2=r4c1], [r1c1=r4c4], [r1c4=r2c1=r4c7], r7c4} (spine [r1c1=r4c4]—[r1c4=r2c1=r4c7]).
+      → color([r1c2=r4c1]) = color(r7c4). Identify.
+  6.  Diamond {[r1c1=r4c4], [r1c2=r4c1=r7c4], [r1c4=r2c1=r4c7], r7c7} (spine [r1c2=r4c1=r7c4]—[r1c4=r2c1=r4c7]).
+      → color([r1c1=r4c4]) = color(r7c7). Identify.
+  7.  K₄ on {[r1c1=r4c4=r7c7], r5c5, r5c6, r5c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 6/60: PROVED cells=12 depth=7 diamonds=7 branches=0 complete=true
+110100000100000000000000000100100100000010100000000000000110100000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c1} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c1). Identify.
+  2.  Diamond {r1c2, r1c1, [r1c4=r2c1], r4c1} (spine r1c1—[r1c4=r2c1]).
+      → color(r1c2) = color(r4c1). Identify.
+  3.  Diamond {r1c1, [r1c2=r4c1], [r1c4=r2c1], r4c4} (spine [r1c2=r4c1]—[r1c4=r2c1]).
+      → color(r1c1) = color(r4c4). Identify.
+  4.  Diamond {[r1c4=r2c1], [r1c1=r4c4], [r1c2=r4c1], r4c7} (spine [r1c1=r4c4]—[r1c2=r4c1]).
+      → color([r1c4=r2c1]) = color(r4c7). Identify.
+  5.  Diamond {[r1c2=r4c1], [r1c1=r4c4], [r1c4=r2c1=r4c7], r7c4} (spine [r1c1=r4c4]—[r1c4=r2c1=r4c7]).
+      → color([r1c2=r4c1]) = color(r7c4). Identify.
+  6.  Diamond {[r1c1=r4c4], [r1c2=r4c1=r7c4], [r1c4=r2c1=r4c7], r7c7} (spine [r1c2=r4c1=r7c4]—[r1c4=r2c1=r4c7]).
+      → color([r1c1=r4c4]) = color(r7c7). Identify.
+  7.  Diamond {[r1c4=r2c1=r4c7], [r1c1=r4c4=r7c7], [r1c2=r4c1=r7c4], r7c5} (spine [r1c1=r4c4=r7c7]—[r1c2=r4c1=r7c4]).
+      → color([r1c4=r2c1=r4c7]) = color(r7c5). Identify.
+  8.  K₄ on {[r1c1=r4c4=r7c7], [r1c4=r2c1=r4c7=r7c5], r5c5, r5c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 7/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000100010100000010000010010100010000100000000000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c1} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c1). Identify.
+  2.  Diamond {r2c7, [r1c4=r2c1], r2c5, r3c5} (spine [r1c4=r2c1]—r2c5).
+      → color(r2c7) = color(r3c5). Identify.
+  3.  Diamond {[r1c4=r2c1], r2c5, [r2c7=r3c5], r4c5} (spine r2c5—[r2c7=r3c5]).
+      → color([r1c4=r2c1]) = color(r4c5). Identify.
+  4.  Diamond {r1c1, r1c2, [r1c4=r2c1=r4c5], r4c2} (spine r1c2—[r1c4=r2c1=r4c5]).
+      → color(r1c1) = color(r4c2). Identify.
+  5.  Diamond {[r1c4=r2c1=r4c5], [r1c1=r4c2], r1c2, r5c2} (spine [r1c1=r4c2]—r1c2).
+      → color([r1c4=r2c1=r4c5]) = color(r5c2). Identify.
+  6.  K₄ on {[r1c4=r2c1=r4c5=r5c2], [r2c7=r3c5], r4c7, r5c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 8/60: PROVED cells=12 depth=5 diamonds=6 branches=1 complete=true
+110100000100000100000010000010010100010010100000000000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c1} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c1). Identify.
+  2.  Branch on [r1c4=r2c1], r4c5:
+      Case A: color([r1c4=r2c1]) = color(r4c5). Identify.
+        3.  Diamond {r1c1, r1c2, [r1c4=r2c1=r4c5], r4c2} (spine r1c2—[r1c4=r2c1=r4c5]).
+            → color(r1c1) = color(r4c2). Identify.
+        4.  Diamond {[r1c4=r2c1=r4c5], [r1c1=r4c2], r1c2, r5c2} (spine [r1c1=r4c2]—r1c2).
+            → color([r1c4=r2c1=r4c5]) = color(r5c2). Identify.
+        5.  K₄ on {[r1c4=r2c1=r4c5=r5c2], r2c7, r4c7, r5c7}. Contradiction.
+      Case B: color([r1c4=r2c1]) ≠ color(r4c5). Add edge.
+        6.  Diamond {[r1c4=r2c1], r3c5, r4c5, r5c5} (spine r3c5—r4c5).
+            → color([r1c4=r2c1]) = color(r5c5). Identify.
+        7.  Diamond {r1c1, r1c2, [r1c4=r2c1=r5c5], r5c2} (spine r1c2—[r1c4=r2c1=r5c5]).
+            → color(r1c1) = color(r5c2). Identify.
+        8.  Diamond {[r1c4=r2c1=r5c5], [r1c1=r5c2], r1c2, r4c2} (spine [r1c1=r5c2]—r1c2).
+            → color([r1c4=r2c1=r5c5]) = color(r4c2). Identify.
+        9.  K₄ on {[r1c4=r2c1=r4c2=r5c5], r2c7, r4c7, r5c7}. Contradiction.
+      Both cases contradict 3-colorability.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 9/60: PROVED cells=12 depth=4 diamonds=4 branches=0 complete=true
+110100000100000100000000000010100100010010100000100000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c1} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c1). Identify.
+  2.  Diamond {[r1c4=r2c1], r4c4, r6c4, r5c5} (spine r4c4—r6c4).
+      → color([r1c4=r2c1]) = color(r5c5). Identify.
+  3.  Diamond {r1c1, r1c2, [r1c4=r2c1=r5c5], r5c2} (spine r1c2—[r1c4=r2c1=r5c5]).
+      → color(r1c1) = color(r5c2). Identify.
+  4.  Diamond {[r1c4=r2c1=r5c5], [r1c1=r5c2], r1c2, r4c2} (spine [r1c1=r5c2]—r1c2).
+      → color([r1c4=r2c1=r5c5]) = color(r4c2). Identify.
+  5.  K₄ on {[r1c4=r2c1=r4c2=r5c5], r2c7, r4c7, r5c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 10/60: PROVED cells=12 depth=3 diamonds=3 branches=0 complete=true
+110100000100000110000000001010000000010000000001100001000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c1} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c1). Identify.
+  2.  Diamond {[r1c4=r2c1], r2c7, r2c8, r3c9} (spine r2c7—r2c8).
+      → color([r1c4=r2c1]) = color(r3c9). Identify.
+  3.  Diamond {r1c2, r4c2, r5c2, r6c3} (spine r4c2—r5c2).
+      → color(r1c2) = color(r6c3). Identify.
+  4.  K₄ on {[r1c2=r6c3], [r1c4=r2c1=r3c9], r6c4, r6c9}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 11/60: PROVED cells=12 depth=5 diamonds=6 branches=1 complete=true
+110100000100000100000000000010010100010010100000100000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c1} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c1). Identify.
+  2.  Branch on [r1c4=r2c1], r4c5:
+      Case A: color([r1c4=r2c1]) = color(r4c5). Identify.
+        3.  Diamond {r1c1, r1c2, [r1c4=r2c1=r4c5], r4c2} (spine r1c2—[r1c4=r2c1=r4c5]).
+            → color(r1c1) = color(r4c2). Identify.
+        4.  Diamond {[r1c4=r2c1=r4c5], [r1c1=r4c2], r1c2, r5c2} (spine [r1c1=r4c2]—r1c2).
+            → color([r1c4=r2c1=r4c5]) = color(r5c2). Identify.
+        5.  K₄ on {[r1c4=r2c1=r4c5=r5c2], r2c7, r4c7, r5c7}. Contradiction.
+      Case B: color([r1c4=r2c1]) ≠ color(r4c5). Add edge.
+        6.  Diamond {[r1c4=r2c1], r4c5, r6c4, r5c5} (spine r4c5—r6c4).
+            → color([r1c4=r2c1]) = color(r5c5). Identify.
+        7.  Diamond {r1c1, r1c2, [r1c4=r2c1=r5c5], r5c2} (spine r1c2—[r1c4=r2c1=r5c5]).
+            → color(r1c1) = color(r5c2). Identify.
+        8.  Diamond {[r1c4=r2c1=r5c5], [r1c1=r5c2], r1c2, r4c2} (spine [r1c1=r5c2]—r1c2).
+            → color([r1c4=r2c1=r5c5]) = color(r4c2). Identify.
+        9.  K₄ on {[r1c4=r2c1=r4c2=r5c5], r2c7, r4c7, r5c7}. Contradiction.
+      Both cases contradict 3-colorability.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 12/60: PROVED cells=12 depth=5 diamonds=6 branches=1 complete=true
+110100000100000100000000000010010100010001100000100000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c1} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c1). Identify.
+  2.  Branch on [r1c4=r2c1], r4c5:
+      Case A: color([r1c4=r2c1]) = color(r4c5). Identify.
+        3.  Diamond {r1c1, r1c2, [r1c4=r2c1=r4c5], r4c2} (spine r1c2—[r1c4=r2c1=r4c5]).
+            → color(r1c1) = color(r4c2). Identify.
+        4.  Diamond {[r1c4=r2c1=r4c5], [r1c1=r4c2], r1c2, r5c2} (spine [r1c1=r4c2]—r1c2).
+            → color([r1c4=r2c1=r4c5]) = color(r5c2). Identify.
+        5.  K₄ on {[r1c4=r2c1=r4c5=r5c2], r2c7, r4c7, r5c7}. Contradiction.
+      Case B: color([r1c4=r2c1]) ≠ color(r4c5). Add edge.
+        6.  Diamond {[r1c4=r2c1], r4c5, r6c4, r5c6} (spine r4c5—r6c4).
+            → color([r1c4=r2c1]) = color(r5c6). Identify.
+        7.  Diamond {r1c1, r1c2, [r1c4=r2c1=r5c6], r5c2} (spine r1c2—[r1c4=r2c1=r5c6]).
+            → color(r1c1) = color(r5c2). Identify.
+        8.  Diamond {[r1c4=r2c1=r5c6], [r1c1=r5c2], r1c2, r4c2} (spine [r1c1=r5c2]—r1c2).
+            → color([r1c4=r2c1=r5c6]) = color(r4c2). Identify.
+        9.  K₄ on {[r1c4=r2c1=r4c2=r5c6], r2c7, r4c7, r5c7}. Contradiction.
+      Both cases contradict 3-colorability.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 13/60: PROVED cells=12 depth=4 diamonds=4 branches=0 complete=true
+110100000100000100000000000010000100010000100001100010000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c1} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c1). Identify.
+  2.  Diamond {r1c2, r4c2, r5c2, r6c3} (spine r4c2—r5c2).
+      → color(r1c2) = color(r6c3). Identify.
+  3.  Diamond {r1c1, [r1c2=r6c3], [r1c4=r2c1], r6c4} (spine [r1c2=r6c3]—[r1c4=r2c1]).
+      → color(r1c1) = color(r6c4). Identify.
+  4.  Diamond {[r1c4=r2c1], [r1c1=r6c4], [r1c2=r6c3], r6c8} (spine [r1c1=r6c4]—[r1c2=r6c3]).
+      → color([r1c4=r2c1]) = color(r6c8). Identify.
+  5.  K₄ on {[r1c4=r2c1=r6c8], r2c7, r4c7, r5c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 14/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000100010100000010000010010100000000000000000000010000100000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c1} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c1). Identify.
+  2.  Diamond {r2c7, [r1c4=r2c1], r2c5, r3c5} (spine [r1c4=r2c1]—r2c5).
+      → color(r2c7) = color(r3c5). Identify.
+  3.  Diamond {[r1c4=r2c1], r2c5, [r2c7=r3c5], r4c5} (spine r2c5—[r2c7=r3c5]).
+      → color([r1c4=r2c1]) = color(r4c5). Identify.
+  4.  Diamond {r1c1, r1c2, [r1c4=r2c1=r4c5], r4c2} (spine r1c2—[r1c4=r2c1=r4c5]).
+      → color(r1c1) = color(r4c2). Identify.
+  5.  Diamond {[r1c4=r2c1=r4c5], [r1c1=r4c2], r1c2, r7c2} (spine [r1c1=r4c2]—r1c2).
+      → color([r1c4=r2c1=r4c5]) = color(r7c2). Identify.
+  6.  K₄ on {[r1c4=r2c1=r4c5=r7c2], [r2c7=r3c5], r4c7, r7c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 15/60: PROVED cells=12 depth=5 diamonds=6 branches=1 complete=true
+110100000100000100000010000010010100000000000000000000010010100000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c1} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c1). Identify.
+  2.  Branch on [r1c4=r2c1], r4c5:
+      Case A: color([r1c4=r2c1]) = color(r4c5). Identify.
+        3.  Diamond {r1c1, r1c2, [r1c4=r2c1=r4c5], r4c2} (spine r1c2—[r1c4=r2c1=r4c5]).
+            → color(r1c1) = color(r4c2). Identify.
+        4.  Diamond {[r1c4=r2c1=r4c5], [r1c1=r4c2], r1c2, r7c2} (spine [r1c1=r4c2]—r1c2).
+            → color([r1c4=r2c1=r4c5]) = color(r7c2). Identify.
+        5.  K₄ on {[r1c4=r2c1=r4c5=r7c2], r2c7, r4c7, r7c7}. Contradiction.
+      Case B: color([r1c4=r2c1]) ≠ color(r4c5). Add edge.
+        6.  Diamond {[r1c4=r2c1], r3c5, r4c5, r7c5} (spine r3c5—r4c5).
+            → color([r1c4=r2c1]) = color(r7c5). Identify.
+        7.  Diamond {r1c1, r1c2, [r1c4=r2c1=r7c5], r7c2} (spine r1c2—[r1c4=r2c1=r7c5]).
+            → color(r1c1) = color(r7c2). Identify.
+        8.  Diamond {[r1c4=r2c1=r7c5], [r1c1=r7c2], r1c2, r4c2} (spine [r1c1=r7c2]—r1c2).
+            → color([r1c4=r2c1=r7c5]) = color(r4c2). Identify.
+        9.  K₄ on {[r1c4=r2c1=r4c2=r7c5], r2c7, r4c7, r7c7}. Contradiction.
+      Both cases contradict 3-colorability.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 16/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000100000100000000000010100100000000000000000000010000011000000100000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c1} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c1). Identify.
+  2.  Diamond {r7c2, r7c8, r7c9, r8c7} (spine r7c8—r7c9).
+      → color(r7c2) = color(r8c7). Identify.
+  3.  Diamond {r4c4, r4c2, r4c7, [r7c2=r8c7]} (spine r4c2—r4c7).
+      → color(r4c4) = color([r7c2=r8c7]). Identify.
+  4.  Diamond {r1c1, r1c2, [r1c4=r2c1], [r4c4=r7c2=r8c7]} (spine r1c2—[r1c4=r2c1]).
+      → color(r1c1) = color([r4c4=r7c2=r8c7]). Identify.
+  5.  Diamond {[r1c4=r2c1], [r1c1=r4c4=r7c2=r8c7], r1c2, r4c2} (spine [r1c1=r4c4=r7c2=r8c7]—r1c2).
+      → color([r1c4=r2c1]) = color(r4c2). Identify.
+  6.  K₄ on {[r1c1=r4c4=r7c2=r8c7], [r1c4=r2c1=r4c2], r2c7, r4c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 17/60: PROVED cells=12 depth=4 diamonds=4 branches=0 complete=true
+110100000100000100000000000010010100000100000000100000010000100000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c1} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c1). Identify.
+  2.  Diamond {[r1c4=r2c1], r5c4, r6c4, r4c5} (spine r5c4—r6c4).
+      → color([r1c4=r2c1]) = color(r4c5). Identify.
+  3.  Diamond {r1c1, r1c2, [r1c4=r2c1=r4c5], r4c2} (spine r1c2—[r1c4=r2c1=r4c5]).
+      → color(r1c1) = color(r4c2). Identify.
+  4.  Diamond {[r1c4=r2c1=r4c5], [r1c1=r4c2], r1c2, r7c2} (spine [r1c1=r4c2]—r1c2).
+      → color([r1c4=r2c1=r4c5]) = color(r7c2). Identify.
+  5.  K₄ on {[r1c4=r2c1=r4c5=r7c2], r2c7, r4c7, r7c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 18/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000001000000000000000100000000100000000010110000001110000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r6c4, [r1c4=r2c3], r7c4, r7c3} (spine [r1c4=r2c3]—r7c4).
+      → color(r6c4) = color(r7c3). Identify.
+  3.  Diamond {r1c1, r4c1, r5c1, r6c2} (spine r4c1—r5c1).
+      → color(r1c1) = color(r6c2). Identify.
+  4.  Diamond {r1c2, [r1c1=r6c2], [r1c4=r2c3], [r6c4=r7c3]} (spine [r1c1=r6c2]—[r1c4=r2c3]).
+      → color(r1c2) = color([r6c4=r7c3]). Identify.
+  5.  Diamond {[r1c4=r2c3], [r1c1=r6c2], [r1c2=r6c4=r7c3], r6c5} (spine [r1c1=r6c2]—[r1c2=r6c4=r7c3]).
+      → color([r1c4=r2c3]) = color(r6c5). Identify.
+  6.  K₄ on {[r1c2=r6c4=r7c3], [r1c4=r2c3=r6c5], r7c4, r7c5}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 19/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000001000000000000000100000000100000000010100100001100100000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r6c4, [r1c4=r2c3], r7c4, r7c3} (spine [r1c4=r2c3]—r7c4).
+      → color(r6c4) = color(r7c3). Identify.
+  3.  Diamond {r1c1, r4c1, r5c1, r6c2} (spine r4c1—r5c1).
+      → color(r1c1) = color(r6c2). Identify.
+  4.  Diamond {r1c2, [r1c1=r6c2], [r1c4=r2c3], [r6c4=r7c3]} (spine [r1c1=r6c2]—[r1c4=r2c3]).
+      → color(r1c2) = color([r6c4=r7c3]). Identify.
+  5.  Diamond {[r1c4=r2c3], [r1c1=r6c2], [r1c2=r6c4=r7c3], r6c7} (spine [r1c1=r6c2]—[r1c2=r6c4=r7c3]).
+      → color([r1c4=r2c3]) = color(r6c7). Identify.
+  6.  K₄ on {[r1c2=r6c4=r7c3], [r1c4=r2c3=r6c7], r7c4, r7c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 20/60: PROVED cells=12 depth=3 diamonds=3 branches=0 complete=true
+110100000001000110000000001100000000100000000010100001000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {[r1c4=r2c3], r2c7, r2c8, r3c9} (spine r2c7—r2c8).
+      → color([r1c4=r2c3]) = color(r3c9). Identify.
+  3.  Diamond {r1c1, r4c1, r5c1, r6c2} (spine r4c1—r5c1).
+      → color(r1c1) = color(r6c2). Identify.
+  4.  K₄ on {[r1c1=r6c2], [r1c4=r2c3=r3c9], r6c4, r6c9}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 21/60: PROVED cells=12 depth=4 diamonds=4 branches=0 complete=true
+110100000001000100000000000100000100100000100010100010000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r1c1, r4c1, r5c1, r6c2} (spine r4c1—r5c1).
+      → color(r1c1) = color(r6c2). Identify.
+  3.  Diamond {r1c2, [r1c1=r6c2], [r1c4=r2c3], r6c4} (spine [r1c1=r6c2]—[r1c4=r2c3]).
+      → color(r1c2) = color(r6c4). Identify.
+  4.  Diamond {[r1c4=r2c3], [r1c1=r6c2], [r1c2=r6c4], r6c8} (spine [r1c1=r6c2]—[r1c2=r6c4]).
+      → color([r1c4=r2c3]) = color(r6c8). Identify.
+  5.  K₄ on {[r1c4=r2c3=r6c8], r2c7, r4c7, r5c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 22/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000001010100000010000100010100100000100000000000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r2c7, [r1c4=r2c3], r2c5, r3c5} (spine [r1c4=r2c3]—r2c5).
+      → color(r2c7) = color(r3c5). Identify.
+  3.  Diamond {[r1c4=r2c3], r2c5, [r2c7=r3c5], r4c5} (spine r2c5—[r2c7=r3c5]).
+      → color([r1c4=r2c3]) = color(r4c5). Identify.
+  4.  Diamond {r1c2, r1c1, [r1c4=r2c3=r4c5], r4c1} (spine r1c1—[r1c4=r2c3=r4c5]).
+      → color(r1c2) = color(r4c1). Identify.
+  5.  Diamond {[r1c4=r2c3=r4c5], r1c1, [r1c2=r4c1], r5c1} (spine r1c1—[r1c2=r4c1]).
+      → color([r1c4=r2c3=r4c5]) = color(r5c1). Identify.
+  6.  K₄ on {[r1c4=r2c3=r4c5=r5c1], [r2c7=r3c5], r4c7, r5c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 23/60: PROVED cells=12 depth=5 diamonds=6 branches=1 complete=true
+110100000001000100000010000100010100100010100000000000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Branch on [r1c4=r2c3], r4c5:
+      Case A: color([r1c4=r2c3]) = color(r4c5). Identify.
+        3.  Diamond {r1c2, r1c1, [r1c4=r2c3=r4c5], r4c1} (spine r1c1—[r1c4=r2c3=r4c5]).
+            → color(r1c2) = color(r4c1). Identify.
+        4.  Diamond {[r1c4=r2c3=r4c5], r1c1, [r1c2=r4c1], r5c1} (spine r1c1—[r1c2=r4c1]).
+            → color([r1c4=r2c3=r4c5]) = color(r5c1). Identify.
+        5.  K₄ on {[r1c4=r2c3=r4c5=r5c1], r2c7, r4c7, r5c7}. Contradiction.
+      Case B: color([r1c4=r2c3]) ≠ color(r4c5). Add edge.
+        6.  Diamond {[r1c4=r2c3], r3c5, r4c5, r5c5} (spine r3c5—r4c5).
+            → color([r1c4=r2c3]) = color(r5c5). Identify.
+        7.  Diamond {r1c2, r1c1, [r1c4=r2c3=r5c5], r5c1} (spine r1c1—[r1c4=r2c3=r5c5]).
+            → color(r1c2) = color(r5c1). Identify.
+        8.  Diamond {[r1c4=r2c3=r5c5], r1c1, [r1c2=r5c1], r4c1} (spine r1c1—[r1c2=r5c1]).
+            → color([r1c4=r2c3=r5c5]) = color(r4c1). Identify.
+        9.  K₄ on {[r1c4=r2c3=r4c1=r5c5], r2c7, r4c7, r5c7}. Contradiction.
+      Both cases contradict 3-colorability.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 24/60: PROVED cells=12 depth=4 diamonds=4 branches=0 complete=true
+110100000001000100000000000100100100100010100000100000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {[r1c4=r2c3], r4c4, r6c4, r5c5} (spine r4c4—r6c4).
+      → color([r1c4=r2c3]) = color(r5c5). Identify.
+  3.  Diamond {r1c2, r1c1, [r1c4=r2c3=r5c5], r5c1} (spine r1c1—[r1c4=r2c3=r5c5]).
+      → color(r1c2) = color(r5c1). Identify.
+  4.  Diamond {[r1c4=r2c3=r5c5], r1c1, [r1c2=r5c1], r4c1} (spine r1c1—[r1c2=r5c1]).
+      → color([r1c4=r2c3=r5c5]) = color(r4c1). Identify.
+  5.  K₄ on {[r1c4=r2c3=r4c1=r5c5], r2c7, r4c7, r5c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 25/60: PROVED cells=12 depth=5 diamonds=6 branches=1 complete=true
+110100000001000100000000000100010100100010100000100000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Branch on [r1c4=r2c3], r4c5:
+      Case A: color([r1c4=r2c3]) = color(r4c5). Identify.
+        3.  Diamond {r1c2, r1c1, [r1c4=r2c3=r4c5], r4c1} (spine r1c1—[r1c4=r2c3=r4c5]).
+            → color(r1c2) = color(r4c1). Identify.
+        4.  Diamond {[r1c4=r2c3=r4c5], r1c1, [r1c2=r4c1], r5c1} (spine r1c1—[r1c2=r4c1]).
+            → color([r1c4=r2c3=r4c5]) = color(r5c1). Identify.
+        5.  K₄ on {[r1c4=r2c3=r4c5=r5c1], r2c7, r4c7, r5c7}. Contradiction.
+      Case B: color([r1c4=r2c3]) ≠ color(r4c5). Add edge.
+        6.  Diamond {[r1c4=r2c3], r4c5, r6c4, r5c5} (spine r4c5—r6c4).
+            → color([r1c4=r2c3]) = color(r5c5). Identify.
+        7.  Diamond {r1c2, r1c1, [r1c4=r2c3=r5c5], r5c1} (spine r1c1—[r1c4=r2c3=r5c5]).
+            → color(r1c2) = color(r5c1). Identify.
+        8.  Diamond {[r1c4=r2c3=r5c5], r1c1, [r1c2=r5c1], r4c1} (spine r1c1—[r1c2=r5c1]).
+            → color([r1c4=r2c3=r5c5]) = color(r4c1). Identify.
+        9.  K₄ on {[r1c4=r2c3=r4c1=r5c5], r2c7, r4c7, r5c7}. Contradiction.
+      Both cases contradict 3-colorability.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 26/60: PROVED cells=12 depth=5 diamonds=6 branches=1 complete=true
+110100000001000100000000000100010100100001100000100000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Branch on [r1c4=r2c3], r4c5:
+      Case A: color([r1c4=r2c3]) = color(r4c5). Identify.
+        3.  Diamond {r1c2, r1c1, [r1c4=r2c3=r4c5], r4c1} (spine r1c1—[r1c4=r2c3=r4c5]).
+            → color(r1c2) = color(r4c1). Identify.
+        4.  Diamond {[r1c4=r2c3=r4c5], r1c1, [r1c2=r4c1], r5c1} (spine r1c1—[r1c2=r4c1]).
+            → color([r1c4=r2c3=r4c5]) = color(r5c1). Identify.
+        5.  K₄ on {[r1c4=r2c3=r4c5=r5c1], r2c7, r4c7, r5c7}. Contradiction.
+      Case B: color([r1c4=r2c3]) ≠ color(r4c5). Add edge.
+        6.  Diamond {[r1c4=r2c3], r4c5, r6c4, r5c6} (spine r4c5—r6c4).
+            → color([r1c4=r2c3]) = color(r5c6). Identify.
+        7.  Diamond {r1c2, r1c1, [r1c4=r2c3=r5c6], r5c1} (spine r1c1—[r1c4=r2c3=r5c6]).
+            → color(r1c2) = color(r5c1). Identify.
+        8.  Diamond {[r1c4=r2c3=r5c6], r1c1, [r1c2=r5c1], r4c1} (spine r1c1—[r1c2=r5c1]).
+            → color([r1c4=r2c3=r5c6]) = color(r4c1). Identify.
+        9.  K₄ on {[r1c4=r2c3=r4c1=r5c6], r2c7, r4c7, r5c7}. Contradiction.
+      Both cases contradict 3-colorability.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 27/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000001000000000010000100000000011010000000000000101010000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r4c1, r5c2, r5c3, r5c5} (spine r5c2—r5c3).
+      → color(r4c1) = color(r5c5). Identify.
+  3.  Diamond {r1c1, [r4c1=r5c5], r7c1, r7c5} (spine [r4c1=r5c5]—r7c1).
+      → color(r1c1) = color(r7c5). Identify.
+  4.  Diamond {r1c2, [r1c1=r7c5], [r1c4=r2c3], r3c5} (spine [r1c1=r7c5]—[r1c4=r2c3]).
+      → color(r1c2) = color(r3c5). Identify.
+  5.  Diamond {[r1c4=r2c3], [r1c1=r7c5], [r1c2=r3c5], [r4c1=r5c5]} (spine [r1c1=r7c5]—[r1c2=r3c5]).
+      → color([r1c4=r2c3]) = color([r4c1=r5c5]). Identify.
+  6.  K₄ on {[r1c1=r7c5], [r1c4=r2c3=r4c1=r5c5], r7c1, r7c3}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 28/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000001000000000000000100100000010011000001000000100100000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r4c4, r5c5, r5c6, r5c2} (spine r5c5—r5c6).
+      → color(r4c4) = color(r5c2). Identify.
+  3.  Diamond {r1c1, r1c2, [r1c4=r2c3], [r4c4=r5c2]} (spine r1c2—[r1c4=r2c3]).
+      → color(r1c1) = color([r4c4=r5c2]). Identify.
+  4.  Diamond {r1c2, [r1c1=r4c4=r5c2], [r1c4=r2c3], r6c3} (spine [r1c1=r4c4=r5c2]—[r1c4=r2c3]).
+      → color(r1c2) = color(r6c3). Identify.
+  5.  Diamond {[r1c4=r2c3], [r1c1=r4c4=r5c2], [r1c2=r6c3], r4c1} (spine [r1c1=r4c4=r5c2]—[r1c2=r6c3]).
+      → color([r1c4=r2c3]) = color(r4c1). Identify.
+  6.  K₄ on {[r1c1=r4c4=r5c2], [r1c4=r2c3=r4c1], r7c1, r7c4}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 29/60: PROVED cells=12 depth=6 diamonds=6 branches=0 complete=true
+110100000001000000000000000100000000011100000000000000101010000000100000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r5c4, [r1c4=r2c3], r5c3, r7c3} (spine [r1c4=r2c3]—r5c3).
+      → color(r5c4) = color(r7c3). Identify.
+  3.  Diamond {r5c3, [r1c4=r2c3], [r5c4=r7c3], r8c4} (spine [r1c4=r2c3]—[r5c4=r7c3]).
+      → color(r5c3) = color(r8c4). Identify.
+  4.  Diamond {r4c1, r5c2, [r5c3=r8c4], [r5c4=r7c3]} (spine r5c2—[r5c3=r8c4]).
+      → color(r4c1) = color([r5c4=r7c3]). Identify.
+  5.  Diamond {r1c2, r1c1, [r1c4=r2c3], [r4c1=r5c4=r7c3]} (spine r1c1—[r1c4=r2c3]).
+      → color(r1c2) = color([r4c1=r5c4=r7c3]). Identify.
+  6.  Diamond {[r1c4=r2c3], r1c1, [r1c2=r4c1=r5c4=r7c3], r7c1} (spine r1c1—[r1c2=r4c1=r5c4=r7c3]).
+      → color([r1c4=r2c3]) = color(r7c1). Identify.
+  7.  K₄ on {[r1c2=r4c1=r5c4=r7c3], [r1c4=r2c3=r7c1], [r5c3=r8c4], r7c5}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 30/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000001000000000000000101000000010011000000100000100100000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r5c2, r5c5, r5c6, r6c4} (spine r5c5—r5c6).
+      → color(r5c2) = color(r6c4). Identify.
+  3.  Diamond {r1c1, r1c2, [r1c4=r2c3], [r5c2=r6c4]} (spine r1c2—[r1c4=r2c3]).
+      → color(r1c1) = color([r5c2=r6c4]). Identify.
+  4.  Diamond {r1c2, [r1c1=r5c2=r6c4], [r1c4=r2c3], r4c3} (spine [r1c1=r5c2=r6c4]—[r1c4=r2c3]).
+      → color(r1c2) = color(r4c3). Identify.
+  5.  Diamond {[r1c4=r2c3], [r1c1=r5c2=r6c4], [r1c2=r4c3], r4c1} (spine [r1c1=r5c2=r6c4]—[r1c2=r4c3]).
+      → color([r1c4=r2c3]) = color(r4c1). Identify.
+  6.  K₄ on {[r1c1=r5c2=r6c4], [r1c4=r2c3=r4c1], r7c1, r7c4}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 31/60: PROVED cells=12 depth=4 diamonds=4 branches=0 complete=true
+110100000001000000000000000100000000010011000001100000100100000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r6c3, [r1c4=r2c3], r6c4, r7c4} (spine [r1c4=r2c3]—r6c4).
+      → color(r6c3) = color(r7c4). Identify.
+  3.  Diamond {r5c2, r4c1, [r6c3=r7c4], r7c1} (spine r4c1—[r6c3=r7c4]).
+      → color(r5c2) = color(r7c1). Identify.
+  4.  Diamond {[r1c4=r2c3], r1c1, r1c2, [r5c2=r7c1]} (spine r1c1—r1c2).
+      → color([r1c4=r2c3]) = color([r5c2=r7c1]). Identify.
+  5.  K₄ on {[r1c4=r2c3=r5c2=r7c1], r5c5, r5c6, r6c4}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 32/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000001000100000000000100000000011000100000000000100100100000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r4c1, r5c2, r5c3, r5c7} (spine r5c2—r5c3).
+      → color(r4c1) = color(r5c7). Identify.
+  3.  Diamond {r1c1, [r4c1=r5c7], r7c1, r7c7} (spine [r4c1=r5c7]—r7c1).
+      → color(r1c1) = color(r7c7). Identify.
+  4.  Diamond {r1c2, [r1c1=r7c7], [r1c4=r2c3], r2c7} (spine [r1c1=r7c7]—[r1c4=r2c3]).
+      → color(r1c2) = color(r2c7). Identify.
+  5.  Diamond {[r1c4=r2c3], [r1c1=r7c7], [r1c2=r2c7], [r4c1=r5c7]} (spine [r1c1=r7c7]—[r1c2=r2c7]).
+      → color([r1c4=r2c3]) = color([r4c1=r5c7]). Identify.
+  6.  K₄ on {[r1c1=r7c7], [r1c4=r2c3=r4c1=r5c7], r7c1, r7c4}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 33/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000001010100000010000100010100000000000000000000100000100000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r2c7, [r1c4=r2c3], r2c5, r3c5} (spine [r1c4=r2c3]—r2c5).
+      → color(r2c7) = color(r3c5). Identify.
+  3.  Diamond {[r1c4=r2c3], r2c5, [r2c7=r3c5], r4c5} (spine r2c5—[r2c7=r3c5]).
+      → color([r1c4=r2c3]) = color(r4c5). Identify.
+  4.  Diamond {r1c2, r1c1, [r1c4=r2c3=r4c5], r4c1} (spine r1c1—[r1c4=r2c3=r4c5]).
+      → color(r1c2) = color(r4c1). Identify.
+  5.  Diamond {[r1c4=r2c3=r4c5], r1c1, [r1c2=r4c1], r7c1} (spine r1c1—[r1c2=r4c1]).
+      → color([r1c4=r2c3=r4c5]) = color(r7c1). Identify.
+  6.  K₄ on {[r1c4=r2c3=r4c5=r7c1], [r2c7=r3c5], r4c7, r7c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 34/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000001000000000010000100101000000010000000000000101010000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r4c1, r4c4, r4c6, r5c5} (spine r4c4—r4c6).
+      → color(r4c1) = color(r5c5). Identify.
+  3.  Diamond {r1c1, [r4c1=r5c5], r7c1, r7c5} (spine [r4c1=r5c5]—r7c1).
+      → color(r1c1) = color(r7c5). Identify.
+  4.  Diamond {r1c2, [r1c1=r7c5], [r1c4=r2c3], r3c5} (spine [r1c1=r7c5]—[r1c4=r2c3]).
+      → color(r1c2) = color(r3c5). Identify.
+  5.  Diamond {[r1c4=r2c3], [r1c1=r7c5], [r1c2=r3c5], [r4c1=r5c5]} (spine [r1c1=r7c5]—[r1c2=r3c5]).
+      → color([r1c4=r2c3]) = color([r4c1=r5c5]). Identify.
+  6.  K₄ on {[r1c1=r7c5], [r1c4=r2c3=r4c1=r5c5], r7c1, r7c3}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 35/60: PROVED cells=12 depth=5 diamonds=6 branches=1 complete=true
+110100000001000100000010000100010100000000000000000000100010100000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Branch on [r1c4=r2c3], r4c5:
+      Case A: color([r1c4=r2c3]) = color(r4c5). Identify.
+        3.  Diamond {r1c2, r1c1, [r1c4=r2c3=r4c5], r4c1} (spine r1c1—[r1c4=r2c3=r4c5]).
+            → color(r1c2) = color(r4c1). Identify.
+        4.  Diamond {[r1c4=r2c3=r4c5], r1c1, [r1c2=r4c1], r7c1} (spine r1c1—[r1c2=r4c1]).
+            → color([r1c4=r2c3=r4c5]) = color(r7c1). Identify.
+        5.  K₄ on {[r1c4=r2c3=r4c5=r7c1], r2c7, r4c7, r7c7}. Contradiction.
+      Case B: color([r1c4=r2c3]) ≠ color(r4c5). Add edge.
+        6.  Diamond {[r1c4=r2c3], r3c5, r4c5, r7c5} (spine r3c5—r4c5).
+            → color([r1c4=r2c3]) = color(r7c5). Identify.
+        7.  Diamond {r1c2, r1c1, [r1c4=r2c3=r7c5], r7c1} (spine r1c1—[r1c4=r2c3=r7c5]).
+            → color(r1c2) = color(r7c1). Identify.
+        8.  Diamond {[r1c4=r2c3=r7c5], r1c1, [r1c2=r7c1], r4c1} (spine r1c1—[r1c2=r7c1]).
+            → color([r1c4=r2c3=r7c5]) = color(r4c1). Identify.
+        9.  K₄ on {[r1c4=r2c3=r4c1=r7c5], r2c7, r4c7, r7c7}. Contradiction.
+      Both cases contradict 3-colorability.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 36/60: PROVED cells=12 depth=3 diamonds=3 branches=0 complete=true
+110100000001000000000000000101100000000010000000010000100110000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r4c3, [r1c4=r2c3], r4c4, r7c4} (spine [r1c4=r2c3]—r4c4).
+      → color(r4c3) = color(r7c4). Identify.
+  3.  Diamond {r4c4, r4c1, [r4c3=r7c4], r7c1} (spine r4c1—[r4c3=r7c4]).
+      → color(r4c4) = color(r7c1). Identify.
+  4.  K₄ on {[r4c4=r7c1], r5c5, r6c5, r7c5}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 37/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000001000100000000000100100100000000000000000000100000011000000100000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r7c1, r7c8, r7c9, r8c7} (spine r7c8—r7c9).
+      → color(r7c1) = color(r8c7). Identify.
+  3.  Diamond {r4c4, r4c1, r4c7, [r7c1=r8c7]} (spine r4c1—r4c7).
+      → color(r4c4) = color([r7c1=r8c7]). Identify.
+  4.  Diamond {r1c2, r1c1, [r1c4=r2c3], [r4c4=r7c1=r8c7]} (spine r1c1—[r1c4=r2c3]).
+      → color(r1c2) = color([r4c4=r7c1=r8c7]). Identify.
+  5.  Diamond {[r1c4=r2c3], r1c1, [r1c2=r4c4=r7c1=r8c7], r4c1} (spine r1c1—[r1c2=r4c4=r7c1=r8c7]).
+      → color([r1c4=r2c3]) = color(r4c1). Identify.
+  6.  K₄ on {[r1c2=r4c4=r7c1=r8c7], [r1c4=r2c3=r4c1], r2c7, r4c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 38/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000001000000000000000100110000000000000000000000101001000000010000000010000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r4c5, r8c5, r9c5, r7c6} (spine r8c5—r9c5).
+      → color(r4c5) = color(r7c6). Identify.
+  3.  Diamond {r4c4, r4c1, [r4c5=r7c6], r7c1} (spine r4c1—[r4c5=r7c6]).
+      → color(r4c4) = color(r7c1). Identify.
+  4.  Diamond {r1c2, r1c1, [r1c4=r2c3], [r4c4=r7c1]} (spine r1c1—[r1c4=r2c3]).
+      → color(r1c2) = color([r4c4=r7c1]). Identify.
+  5.  Diamond {[r1c4=r2c3], r1c1, [r1c2=r4c4=r7c1], r4c1} (spine r1c1—[r1c2=r4c4=r7c1]).
+      → color([r1c4=r2c3]) = color(r4c1). Identify.
+  6.  K₄ on {[r1c2=r4c4=r7c1], [r1c4=r2c3=r4c1], [r4c5=r7c6], r7c3}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 39/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000001000000000000000100100100000000010000000010101000010000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r4c7, r5c8, r6c8, r7c8} (spine r5c8—r6c8).
+      → color(r4c7) = color(r7c8). Identify.
+  3.  Diamond {r4c4, r4c1, [r4c7=r7c8], r7c1} (spine r4c1—[r4c7=r7c8]).
+      → color(r4c4) = color(r7c1). Identify.
+  4.  Diamond {r1c2, r1c1, [r1c4=r2c3], [r4c4=r7c1]} (spine r1c1—[r1c4=r2c3]).
+      → color(r1c2) = color([r4c4=r7c1]). Identify.
+  5.  Diamond {[r1c4=r2c3], r1c1, [r1c2=r4c4=r7c1], r4c1} (spine r1c1—[r1c2=r4c4=r7c1]).
+      → color([r1c4=r2c3]) = color(r4c1). Identify.
+  6.  K₄ on {[r1c2=r4c4=r7c1], [r1c4=r2c3=r4c1], [r4c7=r7c8], r7c3}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 40/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000001000000000000000100100100000000000000000000101000010000000100000000100
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r4c7, r8c7, r9c7, r7c8} (spine r8c7—r9c7).
+      → color(r4c7) = color(r7c8). Identify.
+  3.  Diamond {r4c4, r4c1, [r4c7=r7c8], r7c1} (spine r4c1—[r4c7=r7c8]).
+      → color(r4c4) = color(r7c1). Identify.
+  4.  Diamond {r1c2, r1c1, [r1c4=r2c3], [r4c4=r7c1]} (spine r1c1—[r1c4=r2c3]).
+      → color(r1c2) = color([r4c4=r7c1]). Identify.
+  5.  Diamond {[r1c4=r2c3], r1c1, [r1c2=r4c4=r7c1], r4c1} (spine r1c1—[r1c2=r4c4=r7c1]).
+      → color([r1c4=r2c3]) = color(r4c1). Identify.
+  6.  K₄ on {[r1c2=r4c4=r7c1], [r1c4=r2c3=r4c1], [r4c7=r7c8], r7c3}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 41/60: PROVED cells=12 depth=4 diamonds=4 branches=0 complete=true
+110100000001000100000000000100010100000100000000100000100000100000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {[r1c4=r2c3], r5c4, r6c4, r4c5} (spine r5c4—r6c4).
+      → color([r1c4=r2c3]) = color(r4c5). Identify.
+  3.  Diamond {r1c2, r1c1, [r1c4=r2c3=r4c5], r4c1} (spine r1c1—[r1c4=r2c3=r4c5]).
+      → color(r1c2) = color(r4c1). Identify.
+  4.  Diamond {[r1c4=r2c3=r4c5], r1c1, [r1c2=r4c1], r7c1} (spine r1c1—[r1c2=r4c1]).
+      → color([r1c4=r2c3=r4c5]) = color(r7c1). Identify.
+  5.  K₄ on {[r1c4=r2c3=r4c5=r7c1], r2c7, r4c7, r7c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 42/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000001000000000000000100000100001100100000000000101000100000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r5c4, [r1c4=r2c3], r5c3, r7c3} (spine [r1c4=r2c3]—r5c3).
+      → color(r5c4) = color(r7c3). Identify.
+  3.  Diamond {[r1c4=r2c3], r5c3, [r5c4=r7c3], r5c7} (spine r5c3—[r5c4=r7c3]).
+      → color([r1c4=r2c3]) = color(r5c7). Identify.
+  4.  Diamond {r5c3, [r1c4=r2c3=r5c7], [r5c4=r7c3], r7c7} (spine [r1c4=r2c3=r5c7]—[r5c4=r7c3]).
+      → color(r5c3) = color(r7c7). Identify.
+  5.  Diamond {r4c7, [r1c4=r2c3=r5c7], [r5c3=r7c7], [r5c4=r7c3]} (spine [r1c4=r2c3=r5c7]—[r5c3=r7c7]).
+      → color(r4c7) = color([r5c4=r7c3]). Identify.
+  6.  K₄ on {r4c1, [r4c7=r5c4=r7c3], [r5c3=r7c7], r7c1}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 43/60: PROVED cells=12 depth=4 diamonds=4 branches=0 complete=true
+110100000001100100000000000110000100001000000000000000001100000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r2c7, [r1c4=r2c3], r2c4, r7c4} (spine [r1c4=r2c3]—r2c4).
+      → color(r2c7) = color(r7c4). Identify.
+  3.  Diamond {r2c4, [r1c4=r2c3], [r2c7=r7c4], r7c3} (spine [r1c4=r2c3]—[r2c7=r7c4]).
+      → color(r2c4) = color(r7c3). Identify.
+  4.  Diamond {[r2c7=r7c4], [r1c4=r2c3], [r2c4=r7c3], r5c3} (spine [r1c4=r2c3]—[r2c4=r7c3]).
+      → color([r2c7=r7c4]) = color(r5c3). Identify.
+  5.  K₄ on {[r2c7=r5c3=r7c4], r4c1, r4c2, r4c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 44/60: PROVED cells=12 depth=3 diamonds=3 branches=0 complete=true
+110100000001100100000010000100010100001000000001000000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r2c7, [r1c4=r2c3], r2c4, r3c5} (spine [r1c4=r2c3]—r2c4).
+      → color(r2c7) = color(r3c5). Identify.
+  3.  Diamond {[r2c7=r3c5], r4c5, r4c7, r4c1} (spine r4c5—r4c7).
+      → color([r2c7=r3c5]) = color(r4c1). Identify.
+  4.  K₄ on {[r1c4=r2c3], [r2c7=r3c5=r4c1], r5c3, r6c3}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 45/60: PROVED cells=12 depth=4 diamonds=4 branches=0 complete=true
+110100000001100100000000000100010100001100000001000000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r2c7, [r1c4=r2c3], r2c4, r5c4} (spine [r1c4=r2c3]—r2c4).
+      → color(r2c7) = color(r5c4). Identify.
+  3.  Diamond {r2c4, [r1c4=r2c3], [r2c7=r5c4], r5c3} (spine [r1c4=r2c3]—[r2c7=r5c4]).
+      → color(r2c4) = color(r5c3). Identify.
+  4.  Diamond {[r2c7=r5c4], [r1c4=r2c3], [r2c4=r5c3], r6c3} (spine [r1c4=r2c3]—[r2c4=r5c3]).
+      → color([r2c7=r5c4]) = color(r6c3). Identify.
+  5.  K₄ on {[r2c7=r5c4=r6c3], r4c1, r4c5, r4c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 46/60: PROVED cells=12 depth=3 diamonds=3 branches=0 complete=true
+110100000001010100000001000100001100001000000001000000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r2c7, [r1c4=r2c3], r2c5, r3c6} (spine [r1c4=r2c3]—r2c5).
+      → color(r2c7) = color(r3c6). Identify.
+  3.  Diamond {[r2c7=r3c6], r4c6, r4c7, r4c1} (spine r4c6—r4c7).
+      → color([r2c7=r3c6]) = color(r4c1). Identify.
+  4.  K₄ on {[r1c4=r2c3], [r2c7=r3c6=r4c1], r5c3, r6c3}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 47/60: PROVED cells=12 depth=4 diamonds=4 branches=0 complete=true
+110100000001100100000000010001100010001000010000000000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r2c7, [r1c4=r2c3], r2c4, r4c4} (spine [r1c4=r2c3]—r2c4).
+      → color(r2c7) = color(r4c4). Identify.
+  3.  Diamond {r2c4, [r1c4=r2c3], [r2c7=r4c4], r4c3} (spine [r1c4=r2c3]—[r2c7=r4c4]).
+      → color(r2c4) = color(r4c3). Identify.
+  4.  Diamond {[r2c7=r4c4], [r1c4=r2c3], [r2c4=r4c3], r5c3} (spine [r1c4=r2c3]—[r2c4=r4c3]).
+      → color([r2c7=r4c4]) = color(r5c3). Identify.
+  5.  K₄ on {[r2c7=r4c4=r5c3], r3c8, r4c8, r5c8}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 48/60: PROVED cells=12 depth=4 diamonds=4 branches=0 complete=true
+110100000001100100000000000001100010001000010000000100000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r2c7, [r1c4=r2c3], r2c4, r4c4} (spine [r1c4=r2c3]—r2c4).
+      → color(r2c7) = color(r4c4). Identify.
+  3.  Diamond {r2c4, [r1c4=r2c3], [r2c7=r4c4], r4c3} (spine [r1c4=r2c3]—[r2c7=r4c4]).
+      → color(r2c4) = color(r4c3). Identify.
+  4.  Diamond {[r2c7=r4c4], [r1c4=r2c3], [r2c4=r4c3], r5c3} (spine [r1c4=r2c3]—[r2c4=r4c3]).
+      → color([r2c7=r4c4]) = color(r5c3). Identify.
+  5.  K₄ on {[r2c7=r4c4=r5c3], r4c8, r5c8, r6c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 49/60: PROVED cells=12 depth=4 diamonds=4 branches=0 complete=true
+110100000001100100000000000001100010001000001000000100000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r2c7, [r1c4=r2c3], r2c4, r4c4} (spine [r1c4=r2c3]—r2c4).
+      → color(r2c7) = color(r4c4). Identify.
+  3.  Diamond {r2c4, [r1c4=r2c3], [r2c7=r4c4], r4c3} (spine [r1c4=r2c3]—[r2c7=r4c4]).
+      → color(r2c4) = color(r4c3). Identify.
+  4.  Diamond {[r2c7=r4c4], [r1c4=r2c3], [r2c4=r4c3], r5c3} (spine [r1c4=r2c3]—[r2c4=r4c3]).
+      → color([r2c7=r4c4]) = color(r5c3). Identify.
+  5.  K₄ on {[r2c7=r4c4=r5c3], r4c8, r5c9, r6c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 50/60: PROVED cells=12 depth=4 diamonds=4 branches=0 complete=true
+110100000001100100000000000001100000001000011000000100000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r2c7, [r1c4=r2c3], r2c4, r4c4} (spine [r1c4=r2c3]—r2c4).
+      → color(r2c7) = color(r4c4). Identify.
+  3.  Diamond {r2c4, [r1c4=r2c3], [r2c7=r4c4], r4c3} (spine [r1c4=r2c3]—[r2c7=r4c4]).
+      → color(r2c4) = color(r4c3). Identify.
+  4.  Diamond {[r2c7=r4c4], [r1c4=r2c3], [r2c4=r4c3], r5c3} (spine [r1c4=r2c3]—[r2c4=r4c3]).
+      → color([r2c7=r4c4]) = color(r5c3). Identify.
+  5.  K₄ on {[r2c7=r4c4=r5c3], r5c8, r5c9, r6c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 51/60: PROVED cells=12 depth=4 diamonds=4 branches=0 complete=true
+110100000001100100000000010001100010000000000000000000001000010000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r2c7, [r1c4=r2c3], r2c4, r4c4} (spine [r1c4=r2c3]—r2c4).
+      → color(r2c7) = color(r4c4). Identify.
+  3.  Diamond {r2c4, [r1c4=r2c3], [r2c7=r4c4], r4c3} (spine [r1c4=r2c3]—[r2c7=r4c4]).
+      → color(r2c4) = color(r4c3). Identify.
+  4.  Diamond {[r2c7=r4c4], [r1c4=r2c3], [r2c4=r4c3], r7c3} (spine [r1c4=r2c3]—[r2c4=r4c3]).
+      → color([r2c7=r4c4]) = color(r7c3). Identify.
+  5.  K₄ on {[r2c7=r4c4=r7c3], r3c8, r4c8, r7c8}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 52/60: PROVED cells=12 depth=4 diamonds=4 branches=0 complete=true
+110100000001100100000000000001100000000000000000000000001000010000000100000000100
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r2c7, [r1c4=r2c3], r2c4, r4c4} (spine [r1c4=r2c3]—r2c4).
+      → color(r2c7) = color(r4c4). Identify.
+  3.  Diamond {r2c4, [r1c4=r2c3], [r2c7=r4c4], r4c3} (spine [r1c4=r2c3]—[r2c7=r4c4]).
+      → color(r2c4) = color(r4c3). Identify.
+  4.  Diamond {[r2c7=r4c4], [r1c4=r2c3], [r2c4=r4c3], r7c3} (spine [r1c4=r2c3]—[r2c4=r4c3]).
+      → color([r2c7=r4c4]) = color(r7c3). Identify.
+  5.  K₄ on {[r2c7=r4c4=r7c3], r7c8, r8c7, r9c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 53/60: PROVED cells=12 depth=4 diamonds=4 branches=0 complete=true
+110100000001100100000000000001100000000000000000000000001000011000000100000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r2c7, [r1c4=r2c3], r2c4, r4c4} (spine [r1c4=r2c3]—r2c4).
+      → color(r2c7) = color(r4c4). Identify.
+  3.  Diamond {r2c4, [r1c4=r2c3], [r2c7=r4c4], r4c3} (spine [r1c4=r2c3]—[r2c7=r4c4]).
+      → color(r2c4) = color(r4c3). Identify.
+  4.  Diamond {[r2c7=r4c4], [r1c4=r2c3], [r2c4=r4c3], r7c3} (spine [r1c4=r2c3]—[r2c4=r4c3]).
+      → color([r2c7=r4c4]) = color(r7c3). Identify.
+  5.  K₄ on {[r2c7=r4c4=r7c3], r7c8, r7c9, r8c7}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 54/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000001000100000100010001100010001000100000000000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r4c4, [r1c4=r2c3], r4c3, r5c3} (spine [r1c4=r2c3]—r4c3).
+      → color(r4c4) = color(r5c3). Identify.
+  3.  Diamond {r3c4, [r1c4=r2c3], [r4c4=r5c3], r4c3} (spine [r1c4=r2c3]—[r4c4=r5c3]).
+      → color(r3c4) = color(r4c3). Identify.
+  4.  Diamond {[r1c4=r2c3], [r3c4=r4c3], [r4c4=r5c3], r4c8} (spine [r3c4=r4c3]—[r4c4=r5c3]).
+      → color([r1c4=r2c3]) = color(r4c8). Identify.
+  5.  Diamond {r3c8, [r1c4=r2c3=r4c8], r2c7, r5c7} (spine [r1c4=r2c3=r4c8]—r2c7).
+      → color(r3c8) = color(r5c7). Identify.
+  6.  K₄ on {[r1c4=r2c3=r4c8], [r3c4=r4c3], [r3c8=r5c7], [r4c4=r5c3]}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 55/60: PROVED cells=12 depth=5 diamonds=5 branches=0 complete=true
+110100000001000000000000000001100100000010100000000000000110100000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r1c4, r1c1, r1c2, r2c3} (spine r1c1—r1c2).
+      → color(r1c4) = color(r2c3). Identify.
+  2.  Diamond {r4c3, [r1c4=r2c3], r4c4, r7c4} (spine [r1c4=r2c3]—r4c4).
+      → color(r4c3) = color(r7c4). Identify.
+  3.  Diamond {[r1c4=r2c3], [r4c3=r7c4], r4c4, r4c7} (spine [r4c3=r7c4]—r4c4).
+      → color([r1c4=r2c3]) = color(r4c7). Identify.
+  4.  Diamond {r4c4, [r1c4=r2c3=r4c7], [r4c3=r7c4], r7c7} (spine [r1c4=r2c3=r4c7]—[r4c3=r7c4]).
+      → color(r4c4) = color(r7c7). Identify.
+  5.  Diamond {[r4c3=r7c4], [r1c4=r2c3=r4c7], [r4c4=r7c7], r5c7} (spine [r1c4=r2c3=r4c7]—[r4c4=r7c7]).
+      → color([r4c3=r7c4]) = color(r5c7). Identify.
+  6.  K₄ on {[r4c3=r5c7=r7c4], [r4c4=r7c7], r5c5, r7c5}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 56/60: PROVED cells=12 depth=4 diamonds=4 branches=1 complete=true
+110100000000010000000000000110010000000100000000000000100110000010000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Branch on r4c2, r7c1:
+      Case A: color(r4c2) = color(r7c1). Identify.
+        2.  Diamond {r1c4, r1c1, r1c2, [r4c2=r7c1]} (spine r1c1—r1c2).
+            → color(r1c4) = color([r4c2=r7c1]). Identify.
+        3.  K₄ on {[r1c4=r4c2=r7c1], r2c5, r4c5, r7c5}. Contradiction.
+      Case B: color(r4c2) ≠ color(r7c1). Add edge.
+        4.  Diamond {r4c5, r4c1, r4c2, r7c1} (spine r4c1—r4c2).
+            → color(r4c5) = color(r7c1). Identify.
+        5.  Diamond {r1c1, r4c1, [r4c5=r7c1], r4c2} (spine r4c1—[r4c5=r7c1]).
+            → color(r1c1) = color(r4c2). Identify.
+        6.  Diamond {r1c4, [r1c1=r4c2], r1c2, r8c2} (spine [r1c1=r4c2]—r1c2).
+            → color(r1c4) = color(r8c2). Identify.
+        7.  K₄ on {[r1c4=r8c2], [r4c5=r7c1], r5c4, r7c4}. Contradiction.
+      Both cases contradict 3-colorability.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 57/60: PROVED cells=12 depth=4 diamonds=6 branches=1 complete=true
+110100000000010000000000000100110000010000000000000000100100000010010000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Branch on r7c1, r8c5:
+      Case A: color(r7c1) = color(r8c5). Identify.
+        2.  Diamond {r4c4, r4c1, r4c5, [r7c1=r8c5]} (spine r4c1—r4c5).
+            → color(r4c4) = color([r7c1=r8c5]). Identify.
+        3.  Diamond {r1c2, r1c1, r1c4, [r4c4=r7c1=r8c5]} (spine r1c1—r1c4).
+            → color(r1c2) = color([r4c4=r7c1=r8c5]). Identify.
+        4.  Diamond {r1c4, r1c1, [r1c2=r4c4=r7c1=r8c5], r4c1} (spine r1c1—[r1c2=r4c4=r7c1=r8c5]).
+            → color(r1c4) = color(r4c1). Identify.
+        5.  K₄ on {[r1c2=r4c4=r7c1=r8c5], [r1c4=r4c1], r2c5, r4c5}. Contradiction.
+      Case B: color(r7c1) ≠ color(r8c5). Add edge.
+        6.  Diamond {r7c4, r7c1, r8c5, r8c2} (spine r7c1—r8c5).
+            → color(r7c4) = color(r8c2). Identify.
+        7.  Diamond {r1c1, r1c2, r1c4, [r7c4=r8c2]} (spine r1c2—r1c4).
+            → color(r1c1) = color([r7c4=r8c2]). Identify.
+        8.  Diamond {r1c4, [r1c1=r7c4=r8c2], r1c2, r5c2} (spine [r1c1=r7c4=r8c2]—r1c2).
+            → color(r1c4) = color(r5c2). Identify.
+        9.  K₄ on {[r1c1=r7c4=r8c2], [r1c4=r5c2], r4c1, r4c4}. Contradiction.
+      Both cases contradict 3-colorability.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 58/60: PROVED cells=12 depth=6 diamonds=7 branches=1 complete=true
+110100000000010000000000000100110000010000000000000000100000000010010000000100000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Branch on r1c4, r8c5:
+      Case A: color(r1c4) = color(r8c5). Identify.
+        2.  Diamond {r1c1, r1c2, [r1c4=r8c5], r8c2} (spine r1c2—[r1c4=r8c5]).
+            → color(r1c1) = color(r8c2). Identify.
+        3.  Diamond {[r1c4=r8c5], [r1c1=r8c2], r1c2, r5c2} (spine [r1c1=r8c2]—r1c2).
+            → color([r1c4=r8c5]) = color(r5c2). Identify.
+        4.  K₄ on {[r1c4=r5c2=r8c5], r4c1, r4c4, r4c5}. Contradiction.
+      Case B: color(r1c4) ≠ color(r8c5). Add edge.
+        5.  Diamond {r2c5, r1c4, r8c5, r9c4} (spine r1c4—r8c5).
+            → color(r2c5) = color(r9c4). Identify.
+        6.  Diamond {r4c4, r1c4, [r2c5=r9c4], r8c5} (spine r1c4—[r2c5=r9c4]).
+            → color(r4c4) = color(r8c5). Identify.
+        7.  Diamond {r1c4, [r2c5=r9c4], [r4c4=r8c5], r4c5} (spine [r2c5=r9c4]—[r4c4=r8c5]).
+            → color(r1c4) = color(r4c5). Identify.
+        8.  Diamond {r1c2, r1c1, [r1c4=r4c5], r4c1} (spine r1c1—[r1c4=r4c5]).
+            → color(r1c2) = color(r4c1). Identify.
+        9.  Diamond {[r1c4=r4c5], r1c1, [r1c2=r4c1], r7c1} (spine r1c1—[r1c2=r4c1]).
+            → color([r1c4=r4c5]) = color(r7c1). Identify.
+        10.  K₄ on {[r1c2=r4c1], [r1c4=r4c5=r7c1], [r4c4=r8c5], r8c2}. Contradiction.
+      Both cases contradict 3-colorability.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 59/60: PROVED cells=12 depth=5 diamonds=7 branches=1 complete=true
+100100100010000000000000000010100010000000100000000000000100000010010100000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Branch on r2c2, r4c8:
+      Case A: color(r2c2) = color(r4c8). Identify.
+        2.  Diamond {r4c4, [r2c2=r4c8], r4c2, r8c2} (spine [r2c2=r4c8]—r4c2).
+            → color(r4c4) = color(r8c2). Identify.
+        3.  Diamond {r1c4, [r4c4=r8c2], r7c4, r8c5} (spine [r4c4=r8c2]—r7c4).
+            → color(r1c4) = color(r8c5). Identify.
+        4.  Diamond {r1c1, [r1c4=r8c5], r1c7, r8c7} (spine [r1c4=r8c5]—r1c7).
+            → color(r1c1) = color(r8c7). Identify.
+        5.  Diamond {r1c7, [r1c1=r8c7], [r1c4=r8c5], [r4c4=r8c2]} (spine [r1c1=r8c7]—[r1c4=r8c5]).
+            → color(r1c7) = color([r4c4=r8c2]). Identify.
+        6.  K₄ on {[r1c1=r8c7], [r1c7=r4c4=r8c2], [r2c2=r4c8], r5c7}. Contradiction.
+      Case B: color(r2c2) ≠ color(r4c8). Add edge.
+        7.  Diamond {r4c8, r2c2, r4c2, r8c2} (spine r2c2—r4c2).
+            → color(r4c8) = color(r8c2). Identify.
+        8.  Diamond {r2c2, r4c2, [r4c8=r8c2], r4c4} (spine r4c2—[r4c8=r8c2]).
+            → color(r2c2) = color(r4c4). Identify.
+        9.  Diamond {r1c7, r1c1, r1c4, [r2c2=r4c4]} (spine r1c1—r1c4).
+            → color(r1c7) = color([r2c2=r4c4]). Identify.
+        10.  K₄ on {[r1c7=r2c2=r4c4], [r4c8=r8c2], r5c7, r8c7}. Contradiction.
+      Both cases contradict 3-colorability.
+
+  Therefore the pattern is not 3-colorable. □
+
+pattern 60/60: PROVED cells=12 depth=5 diamonds=7 branches=3 complete=true
+100100000010010000001001000100100000010001000001010000000000000000000000000000000
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Branch on r1c1, r4c4:
+      Case A: color(r1c1) = color(r4c4). Identify.
+        2.  Branch on r2c2, r5c6:
+            Case A: color(r2c2) = color(r5c6). Identify.
+              3.  Diamond {r3c3, [r1c1=r4c4], [r2c2=r5c6], r6c5} (spine [r1c1=r4c4]—[r2c2=r5c6]).
+                  → color(r3c3) = color(r6c5). Identify.
+              4.  K₄ on {[r2c2=r5c6], r2c5, [r3c3=r6c5], r3c6}. Contradiction.
+            Case B: color(r2c2) ≠ color(r5c6). Add edge.
+              5.  Diamond {r3c3, [r1c1=r4c4], r2c2, r5c6} (spine [r1c1=r4c4]—r2c2).
+                  → color(r3c3) = color(r5c6). Identify.
+              6.  Diamond {r2c2, [r1c1=r4c4], [r3c3=r5c6], r6c5} (spine [r1c1=r4c4]—[r3c3=r5c6]).
+                  → color(r2c2) = color(r6c5). Identify.
+              7.  K₄ on {[r2c2=r6c5], [r3c3=r5c6], r5c2, r6c3}. Contradiction.
+            Both cases contradict 3-colorability.
+      Case B: color(r1c1) ≠ color(r4c4). Add edge.
+        8.  Diamond {r1c4, r1c1, r4c4, r4c1} (spine r1c1—r4c4).
+            → color(r1c4) = color(r4c1). Identify.
+        9.  Branch on r2c5, r5c2:
+            Case A: color(r2c5) = color(r5c2). Identify.
+              10.  Diamond {r3c6, [r1c4=r4c1], [r2c5=r5c2], r6c3} (spine [r1c4=r4c1]—[r2c5=r5c2]).
+                  → color(r3c6) = color(r6c3). Identify.
+              11.  K₄ on {[r2c5=r5c2], [r3c6=r6c3], r5c6, r6c5}. Contradiction.
+            Case B: color(r2c5) ≠ color(r5c2). Add edge.
+              12.  Diamond {r3c6, [r1c4=r4c1], r2c5, r5c2} (spine [r1c4=r4c1]—r2c5).
+                  → color(r3c6) = color(r5c2). Identify.
+              13.  Diamond {r2c5, [r1c4=r4c1], [r3c6=r5c2], r6c3} (spine [r1c4=r4c1]—[r3c6=r5c2]).
+                  → color(r2c5) = color(r6c3). Identify.
+              14.  K₄ on {r2c2, [r2c5=r6c3], r3c3, [r3c6=r5c2]}. Contradiction.
+            Both cases contradict 3-colorability.
+      Both cases contradict 3-colorability.
+
+  Therefore the pattern is not 3-colorable. □
+

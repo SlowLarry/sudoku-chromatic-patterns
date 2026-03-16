@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minimal 4-Chromatic Sudoku Patterns</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <h1>Minimal 4-Chromatic Sudoku Patterns</h1>
+  <p class="subtitle">Exhaustive search results for K₄-free, vertex-critical 4-chromatic induced subgraphs of the 81-vertex sudoku graph</p>
+</header>
+
+<div id="app">
+  <div id="sidebar">
+    <div id="filters">
+      <h3>Filters</h3>
+      <div class="filter-group">
+        <label>Pattern size</label>
+        <div id="size-buttons" class="btn-group">
+          <button class="btn active" data-size="all">All</button>
+          <button class="btn" data-size="10">N=10 <span class="count"></span></button>
+          <button class="btn" data-size="12">N=12 <span class="count"></span></button>
+          <button class="btn" data-size="13">N=13 <span class="count"></span></button>
+          <button class="btn" data-size="14">N=14 <span class="count"></span></button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Proof complexity</label>
+        <div id="branch-buttons" class="btn-group">
+          <button class="btn active" data-branches="all">All</button>
+          <button class="btn" data-branches="0">No branches</button>
+          <button class="btn" data-branches="1">1 branch</button>
+          <button class="btn" data-branches="2">2 branches</button>
+          <button class="btn" data-branches="3">3 branches</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Bands occupied</label>
+        <div id="band-buttons" class="btn-group">
+          <button class="btn active" data-bands="all">All</button>
+          <button class="btn" data-bands="2">2 bands</button>
+          <button class="btn" data-bands="3">3 bands</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Degree sequence contains</label>
+        <select id="degree-filter">
+          <option value="all">Any</option>
+          <option value="3">Min degree 3</option>
+          <option value="4">Min degree 4</option>
+          <option value="5">Min degree 5</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Search by ID</label>
+        <input type="text" id="search-id" placeholder="e.g. N12_0042">
+      </div>
+      <div id="filter-stats"></div>
+    </div>
+
+    <div id="pattern-list">
+      <div id="pattern-list-header">
+        <span class="col-id">ID</span>
+        <span class="col-edges">Edges</span>
+        <span class="col-deg">Degrees</span>
+        <span class="col-proof">Proof</span>
+      </div>
+      <div id="pattern-list-body"></div>
+    </div>
+  </div>
+
+  <div id="main-panel">
+    <div id="detail-placeholder">
+      <p>Select a pattern from the list to view its sudoku grid and proof.</p>
+    </div>
+    <div id="detail-view" style="display:none">
+      <div id="detail-header">
+        <h2 id="detail-title"></h2>
+        <div id="detail-meta"></div>
+      </div>
+      <div id="detail-content">
+        <div id="grid-container">
+          <h3>Sudoku Grid</h3>
+          <div id="grid-controls">
+            <label><input type="checkbox" id="show-edges" checked> Show edges</label>
+            <label><input type="checkbox" id="show-labels" checked> Show labels</label>
+          </div>
+          <svg id="sudoku-grid" viewBox="0 0 360 360"></svg>
+          <div id="bitstring-display">
+            <code id="bitstring-text"></code>
+            <button id="copy-bitstring" class="icon-btn" title="Copy bitstring">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+            </button>
+            <button id="copy-grid" class="icon-btn" title="Copy grid image">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M16 13.25A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25V2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75ZM1.75 2.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25Zm10.03 2.22a.749.749 0 0 1 1.06 0l.97.97a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215l-.44-.44-3.81 3.81a.75.75 0 0 1-1.06 0L5.5 8.18l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75a.75.75 0 0 1 1.06 0L7.97 8.53l3.28-3.28-.44-.44a.749.749 0 0 1 0-1.06l.97-.03Z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div id="proof-container">
+          <div class="proof-header">
+            <h3>Proof of non-3-colorability</h3>
+            <button id="copy-proof" class="icon-btn" title="Copy proof text">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+            </button>
+          </div>
+          <div id="proof-view"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
