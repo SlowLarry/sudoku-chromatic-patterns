@@ -300,7 +300,7 @@ def parse_proof_steps(lines):
 
 def main():
     base = Path(__file__).parent
-    sizes = [10, 12, 13, 14]
+    sizes = [10, 12, 13, 14, 15]
     all_patterns = []
 
     for n in sizes:
