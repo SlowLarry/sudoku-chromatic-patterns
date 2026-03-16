@@ -8,6 +8,7 @@ mod proof;
 mod search;
 mod sudoku_graph;
 mod symmetry;
+mod te_depth;
 mod validation;
 
 use std::collections::HashSet;
@@ -107,6 +108,21 @@ enum Commands {
         /// Print only the summary line per pattern
         #[arg(long)]
         summary_only: bool,
+    },
+
+    /// Compute T&E (Trial & Error) depth for patterns
+    TeDepth {
+        /// Input file of 81-char 0/1 patterns
+        #[arg(long)]
+        input: String,
+
+        /// Output file (one depth per line; stdout if omitted)
+        #[arg(long)]
+        output: Option<String>,
+
+        /// Maximum T&E depth to check (default: 5)
+        #[arg(long, default_value_t = 5)]
+        max_depth: u32,
     },
 }
 
@@ -300,6 +316,58 @@ fn main() {
             } else {
                 print!("{}", out_str);
                 eprintln!("minlex: {} patterns ({} duplicates removed)", after, before - after);
+            }
+        }
+
+        Commands::TeDepth { input, output, max_depth } => {
+            let contents = fs::read_to_string(&input).expect("cannot read input file");
+            let mut patterns: Vec<Vec<u8>> = Vec::new();
+            for line in contents.lines() {
+                let line = line.trim();
+                if line.is_empty() || line.starts_with('#') {
+                    continue;
+                }
+                if line.len() == 81 && line.chars().all(|c| c == '0' || c == '1') {
+                    patterns.push(bitstring_to_vertices(line));
+                }
+            }
+            eprintln!("te-depth: processing {} patterns (max_depth={})...", patterns.len(), max_depth);
+
+            let mut results: Vec<i32> = Vec::with_capacity(patterns.len());
+            let mut counts = std::collections::HashMap::new();
+            let t0 = std::time::Instant::now();
+
+            for (i, cells) in patterns.iter().enumerate() {
+                let d = te_depth::compute_te_depth(cells, max_depth);
+                results.push(d);
+                *counts.entry(d).or_insert(0usize) += 1;
+
+                if (i + 1) % 100 == 0 || (i + 1) == patterns.len() {
+                    let elapsed = t0.elapsed().as_secs_f64();
+                    let rate = (i + 1) as f64 / elapsed;
+                    eprintln!("  {}/{} ({:.1}s, {:.1}/s)", i + 1, patterns.len(), elapsed, rate);
+                }
+            }
+
+            let elapsed = t0.elapsed().as_secs_f64();
+            eprintln!("\nDone in {:.1}s", elapsed);
+            eprintln!("Distribution:");
+            let mut sorted_counts: Vec<_> = counts.into_iter().collect();
+            sorted_counts.sort();
+            for (d, cnt) in &sorted_counts {
+                if *d >= 0 {
+                    eprintln!("  T&E({}): {}", d, cnt);
+                } else {
+                    eprintln!("  UNKNOWN: {}", cnt);
+                }
+            }
+
+            let out_str: String = results.iter().map(|d| format!("{}\n", d)).collect();
+            if let Some(ref path) = output {
+                fs::write(path, &out_str).expect("cannot write output file");
+                eprintln!("Wrote {} results to {}", results.len(), path);
+            } else {
+                print!("{}", out_str);
             }
         }
 

@@ -41,17 +41,20 @@ function populateCounts() {
 function applyFilters() {
   const sizeBtn = document.querySelector('#size-buttons .btn.active');
   const branchBtn = document.querySelector('#branch-buttons .btn.active');
+  const teBtn = document.querySelector('#te-buttons .btn.active');
   const bandBtn = document.querySelector('#band-buttons .btn.active');
   const degFilter = document.getElementById('degree-filter').value;
   const searchId = document.getElementById('search-id').value.trim().toUpperCase();
 
   const sizeFilter = sizeBtn?.dataset.size || 'all';
   const branchFilter = branchBtn?.dataset.branches || 'all';
+  const teFilter = teBtn?.dataset.te || 'all';
   const bandFilter = bandBtn?.dataset.bands || 'all';
 
   filteredPatterns = DATA.patterns.filter(p => {
     if (sizeFilter !== 'all' && p.size !== parseInt(sizeFilter)) return false;
     if (branchFilter !== 'all' && (p.proof?.branches ?? 0) !== parseInt(branchFilter)) return false;
+    if (teFilter !== 'all' && (p.te_depth ?? 0) !== parseInt(teFilter)) return false;
     if (bandFilter !== 'all' && p.num_bands !== parseInt(bandFilter)) return false;
     if (degFilter !== 'all' && p.min_degree < parseInt(degFilter)) return false;
     if (searchId && !p.id.toUpperCase().includes(searchId)) return false;
@@ -119,6 +122,7 @@ function renderDetail(p) {
     metaItem('Degrees', `[${p.degree_sequence.join(', ')}]`),
     metaItem('Bands', p.num_bands),
     metaItem('Rows', p.rows_used.map(r => r + 1).join(', ')),
+    metaItem('T&amp;E depth', p.te_depth ?? '?'),
     metaItem('Proof depth', p.proof?.depth ?? '?'),
     metaItem('Diamonds', p.proof?.diamonds ?? '?'),
     metaItem('Branches', p.proof?.branches ?? 0),
@@ -402,6 +406,15 @@ function setupEventListeners() {
   for (const btn of document.querySelectorAll('#branch-buttons .btn')) {
     btn.addEventListener('click', () => {
       document.querySelector('#branch-buttons .btn.active')?.classList.remove('active');
+      btn.classList.add('active');
+      applyFilters();
+    });
+  }
+
+  // T&E depth filter buttons
+  for (const btn of document.querySelectorAll('#te-buttons .btn')) {
+    btn.addEventListener('click', () => {
+      document.querySelector('#te-buttons .btn.active')?.classList.remove('active');
       btn.classList.add('active');
       applyFilters();
     });
