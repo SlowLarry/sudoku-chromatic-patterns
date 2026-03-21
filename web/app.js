@@ -139,9 +139,25 @@ function computeAccumulatedColors(proofContainer, targetEl) {
       } else if (stepData.type === 'branch') {
         const brA = parseCellsFromLabel(stepData.vertex_a);
         const brB = parseCellsFromLabel(stepData.vertex_b);
-        for (const a of brA) {
-          for (const b of brB) {
-            addVirtEdge(a, b);
+        // Find the Case A block that follows this branch step
+        let caseABlock = el.nextElementSibling;
+        while (caseABlock && !caseABlock.classList.contains('case-a')) {
+          caseABlock = caseABlock.nextElementSibling;
+        }
+        const inCaseA = caseABlock && caseABlock.contains(targetEl);
+        if (inCaseA) {
+          // Case A: cells identified (same color) → merge
+          for (const a of brA) {
+            for (const b of brB) {
+              uf.union(a, b);
+            }
+          }
+        } else {
+          // Case B: cells different colors → virtual edge
+          for (const a of brA) {
+            for (const b of brB) {
+              addVirtEdge(a, b);
+            }
           }
         }
       }
