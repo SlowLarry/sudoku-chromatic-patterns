@@ -119,6 +119,16 @@ select:focus, input:focus {
   padding: 3px 10px;
 }
 
+#github-link {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  color: #484f58;
+  transition: color 0.2s;
+  z-index: 100;
+}
+#github-link:hover { color: #c9d1d9; }
+
 /* ── Pattern List ────────────────────────────────────────────── */
 #pattern-list {
   flex: 1;
