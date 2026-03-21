@@ -126,18 +126,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 10/832: PROVED cells=13 depth=2 diamonds=1 odd_wheels=1 circular_ladders=0 bridged_hexagons=0 set_equivalences=1 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
+pattern 10/832: PROVED cells=13 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=1 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
 000000000000000000000000000000000000000001001001000110000001011001000001011001000
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Diamond {r7c6, r7c8, r7c9, r8c9} (spine r7c8—r7c9).
-      → color(r7c6) = color(r8c9). Identify.
-  2.  SET: {row 6, row 7, row 9} − {box 6, box 7, box 9}.
-      Remainder: {r6c3, [r7c6=r8c9], r9c6} = {r5c9, [r7c6=r8c9], r8c3}.
-      → Both sides forced all-distinct. Virtual edges added.
-  3.  Odd wheel: hub [r7c6=r8c9] forces rim to 2 colors.
-      Bivalue oddagon {r5c6, r5c9, r8c3, r6c3, r9c6} (length 5) cannot be 2-colored. Contradiction.
+  1.  Diamond {r5c9, r6c7, r6c8, r6c3} (spine r6c7—r6c8).
+      → color(r5c9) = color(r6c3). Identify.
+  2.  Diamond {[r5c9=r6c3], r7c9, r8c9, r7c8} (spine r7c9—r8c9).
+      → color([r5c9=r6c3]) = color(r7c8). Identify.
+  3.  Bridged hexagon: ring {r7c6, r7c9, r8c9, r8c3, r9c2, r9c6}
+      Bridges: [r5c9=r6c3=r7c8]—r9c3 (edges r7c6—r7c9 ↔ r8c3—r9c2), [r5c9=r6c3=r7c8]—r9c3 (edges r7c9—r8c9 ↔ r9c2—r9c6), [r5c9=r6c3=r7c8]—r5c6 (edges r8c9—r8c3 ↔ r9c6—r7c6).
+      Each bridge forces opposite edges to miss different colors,
+      but every 3-coloring of C₆ requires at least one matching pair. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -2425,10 +2426,10 @@ Proof of non-3-colorability:
         4.  Diamond {r6c8, r5c9, r8c8, r7c9} (spine r5c9—r8c8).
             → color(r6c8) = color(r7c9). Identify.
         5.  Parity transport:
-            row 5 {r5c3, r5c6, r5c9} spans all 3 stacks
-            row 6 {r6c3, r6c5, [r6c8=r7c9]} spans all 3 stacks
-            row 8 {r8c3, r8c5, r8c8} spans all 3 stacks
-            row 9 {r9c2, r9c6, r9c7} spans all 3 stacks
+            row 5 {r5c3, r5c6, r5c9}
+            row 6 {r6c3, r6c5, [r6c8=r7c9]}
+            row 8 {r8c3, r8c5, r8c8}
+            row 9 {r9c2, r9c6, r9c7}
             Parallel links: row 5↔row 6 (col, box, box); row 6↔row 8 (col, col, col); row 8↔row 9 (box, box, box)
             → same permutation parity.
             Each pair shares a column → distinct permutations.
@@ -3434,19 +3435,20 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 231/832: PROVED cells=13 depth=3 diamonds=3 odd_wheels=1 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
+pattern 231/832: PROVED cells=13 depth=2 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=1 set_equivalences=1 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
 000000000000000000000000000000000001000001001001010010001000000001001001010001010
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Diamond {r6c8, r4c9, r5c9, r8c9} (spine r4c9—r5c9).
-      → color(r6c8) = color(r8c9). Identify.
-  2.  Diamond {r6c5, r6c3, [r6c8=r8c9], r8c3} (spine r6c3—[r6c8=r8c9]).
-      → color(r6c5) = color(r8c3). Identify.
-  3.  Diamond {[r6c5=r8c3], r5c6, r8c6, r9c6} (spine r5c6—r8c6).
-      → color([r6c5=r8c3]) = color(r9c6). Identify.
-  4.  Odd wheel: hub [r6c5=r8c3=r9c6] forces rim to 2 colors.
-      Bivalue oddagon {r6c3, [r6c8=r8c9], r9c8, r9c2, r7c3} (length 5) cannot be 2-colored. Contradiction.
+  1.  SET: {col 3, col 9} − {box 6, box 7}.
+      Remainder: {r6c3, r8c9} = {r6c8, r9c2}.
+      → Both sides forced all-distinct. Virtual edges added.
+  2.  Diamond {r7c3, r6c3, r8c3, r8c9} (spine r6c3—r8c3).
+      → color(r7c3) = color(r8c9). Identify.
+  3.  Bridged hexagon: ring {r6c3, r6c8, r9c8, r9c6, r8c6, r8c3}
+      Bridges: r6c5—r5c6 (edges r6c3—r6c8 ↔ r9c6—r8c6), r9c2—[r7c3=r8c9] (edges r6c8—r9c8 ↔ r8c6—r8c3), r9c2—[r7c3=r8c9] (edges r9c8—r9c6 ↔ r8c3—r6c3).
+      Each bridge forces opposite edges to miss different colors,
+      but every 3-coloring of C₆ requires at least one matching pair. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -3481,19 +3483,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 234/832: PROVED cells=13 depth=3 diamonds=2 odd_wheels=1 circular_ladders=1 bridged_hexagons=0 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
+pattern 234/832: PROVED cells=13 depth=2 diamonds=1 odd_wheels=0 circular_ladders=1 bridged_hexagons=1 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
 000000000000000000000000000000000001000001010001000100000001100001001001001010010
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Circular ladder {r8c3—r9c3, r8c6—r9c5, r8c9—r9c8}:
-      Satellites r6c3 (rung 1), r7c6 (rung 2), r7c7 (rung 3) forced to distinct colors. Add triangle.
-  2.  Diamond {r6c7, r6c3, r7c7, r7c6} (spine r6c3—r7c7).
-      → color(r6c7) = color(r7c6). Identify.
-  3.  Diamond {r5c8, r5c6, [r6c7=r7c6], r8c6} (spine r5c6—[r6c7=r7c6]).
-      → color(r5c8) = color(r8c6). Identify.
-  4.  Odd wheel: hub [r5c8=r8c6] forces rim to 2 colors.
-      Bivalue oddagon {r4c9, [r6c7=r7c6], r9c5, r9c8, r8c9} (length 5) cannot be 2-colored. Contradiction.
+  1.  Diamond {r5c6, r7c6, r8c6, r9c5} (spine r7c6—r8c6).
+      → color(r5c6) = color(r9c5). Identify.
+  2.  Circular ladder {[r5c6=r9c5]—r8c6, r9c3—r8c3, r9c8—r8c9}:
+      Satellites r7c6 (rung 1), r6c3 (rung 2), r7c7 (rung 3) forced to distinct colors. Add triangle.
+  3.  Bridged hexagon: ring {[r5c6=r9c5], r5c8, r6c7, r6c3, r8c3, r8c6}
+      Bridges: r9c8—r9c3 (edges [r5c6=r9c5]—r5c8 ↔ r6c3—r8c3), r4c9—r8c9 (edges r5c8—r6c7 ↔ r8c3—r8c6), r7c7—r7c6 (edges r6c7—r6c3 ↔ r8c6—[r5c6=r9c5]).
+      Each bridge forces opposite edges to miss different colors,
+      but every 3-coloring of C₆ requires at least one matching pair. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -4931,18 +4933,17 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 333/832: PROVED cells=13 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=1 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
+pattern 333/832: PROVED cells=13 depth=1 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=1 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
 000000000000000000000001001000000000000000001000001110000000001001001010011000010
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Diamond {r5c9, r6c7, r6c8, r6c6} (spine r6c7—r6c8).
-      → color(r5c9) = color(r6c6). Identify.
-  2.  Diamond {r3c9, r3c6, [r5c9=r6c6], r8c6} (spine r3c6—[r5c9=r6c6]).
-      → color(r3c9) = color(r8c6). Identify.
-  3.  SET: {row 8, row 9} − {box 7, box 9}.
-      Remainder: {[r3c9=r8c6]} = {r7c9}.
-      → color([r3c9=r8c6]) = color(r7c9), but they share a house. Contradiction.
+  1.  Diamond {r8c3, r9c2, r9c3, r9c8} (spine r9c2—r9c3).
+      → color(r8c3) = color(r9c8). Identify.
+  2.  Bridged hexagon: ring {r5c9, r6c7, r6c6, r8c6, [r8c3=r9c8], r7c9}
+      Bridges: r6c8—r8c8 (edges r5c9—r6c7 ↔ r8c6—[r8c3=r9c8]), r6c8—r8c8 (edges r6c7—r6c6 ↔ [r8c3=r9c8]—r7c9), r3c6—r3c9 (edges r6c6—r8c6 ↔ r7c9—r5c9).
+      Each bridge forces opposite edges to miss different colors,
+      but every 3-coloring of C₆ requires at least one matching pair. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -4961,18 +4962,17 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 335/832: PROVED cells=13 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=1 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
+pattern 335/832: PROVED cells=13 depth=1 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=1 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
 000000000000000000000001001000000000000000001000001110000000001001001010110000010
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Diamond {r5c9, r6c7, r6c8, r6c6} (spine r6c7—r6c8).
-      → color(r5c9) = color(r6c6). Identify.
-  2.  Diamond {r3c9, r3c6, [r5c9=r6c6], r8c6} (spine r3c6—[r5c9=r6c6]).
-      → color(r3c9) = color(r8c6). Identify.
-  3.  SET: {row 8, row 9} − {box 7, box 9}.
-      Remainder: {[r3c9=r8c6]} = {r7c9}.
-      → color([r3c9=r8c6]) = color(r7c9), but they share a house. Contradiction.
+  1.  Diamond {r8c3, r9c1, r9c2, r9c8} (spine r9c1—r9c2).
+      → color(r8c3) = color(r9c8). Identify.
+  2.  Bridged hexagon: ring {r5c9, r6c7, r6c6, r8c6, [r8c3=r9c8], r7c9}
+      Bridges: r6c8—r8c8 (edges r5c9—r6c7 ↔ r8c6—[r8c3=r9c8]), r6c8—r8c8 (edges r6c7—r6c6 ↔ [r8c3=r9c8]—r7c9), r3c6—r3c9 (edges r6c6—r8c6 ↔ r7c9—r5c9).
+      Each bridge forces opposite edges to miss different colors,
+      but every 3-coloring of C₆ requires at least one matching pair. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -6960,7 +6960,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 473/832: PROVED cells=13 depth=3 diamonds=3 odd_wheels=1 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
+pattern 473/832: PROVED cells=13 depth=3 diamonds=3 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=1 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=1
 000000000000000000000001011000000000000000000001000011000001000001001001010010010
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -6969,10 +6969,17 @@ Proof of non-3-colorability:
       → color(r3c6) = color(r9c5). Identify.
   2.  Diamond {r3c9, [r3c6=r9c5], r3c8, r9c8} (spine [r3c6=r9c5]—r3c8).
       → color(r3c9) = color(r9c8). Identify.
-  3.  Diamond {[r3c9=r9c8], r6c8, r6c9, r6c3} (spine r6c8—r6c9).
-      → color([r3c9=r9c8]) = color(r6c3). Identify.
-  4.  Odd wheel: hub [r3c9=r6c3=r9c8] forces rim to 2 colors.
-      Bivalue oddagon {[r3c6=r9c5], r3c8, r6c8, r6c9, r8c9, r8c3, r9c2} (length 7) cannot be 2-colored. Contradiction.
+  3.  Diamond {[r3c6=r9c5], r3c8, [r3c9=r9c8], r6c8} (spine r3c8—[r3c9=r9c8]).
+      → color([r3c6=r9c5]) = color(r6c8). Identify.
+  4.  Parity transport:
+      row 3 {[r3c6=r6c8=r9c5], r3c8, [r3c9=r9c8]}
+      row 6 {r6c3, [r3c6=r6c8=r9c5], r6c9}
+      row 8 {r8c3, r8c6, r8c9}
+      row 9 {r9c2, [r3c6=r6c8=r9c5], [r3c9=r9c8]}
+      Parallel links: row 3↔row 6 (box, col, col); row 6↔row 8 (col, box, col); row 8↔row 9 (box, box, box)
+      → same permutation parity.
+      Each pair shares a column → distinct permutations.
+      4 same-parity permutations from 3 available → pigeonhole contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -7025,19 +7032,20 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 477/832: PROVED cells=13 depth=3 diamonds=3 odd_wheels=1 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
+pattern 477/832: PROVED cells=13 depth=2 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=1 set_equivalences=1 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
 000000000000000000000001011000000000000000000001000011000001000001011000011000001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Diamond {r3c6, r7c6, r8c6, r8c5} (spine r7c6—r8c6).
-      → color(r3c6) = color(r8c5). Identify.
-  2.  Diamond {r6c3, r8c3, r9c3, r9c2} (spine r8c3—r9c3).
-      → color(r6c3) = color(r9c2). Identify.
-  3.  Diamond {r3c9, r6c9, r9c9, [r6c3=r9c2]} (spine r6c9—r9c9).
-      → color(r3c9) = color([r6c3=r9c2]). Identify.
-  4.  Odd wheel: hub [r3c9=r6c3=r9c2] forces rim to 2 colors.
-      Bivalue oddagon {[r3c6=r8c5], r3c8, r6c8, r6c9, r9c9, r9c3, r8c3} (length 7) cannot be 2-colored. Contradiction.
+  1.  SET: {row 8, row 9} − {box 7, box 8}.
+      Remainder: {r9c9} = {r7c6}.
+      → color(r9c9) = color(r7c6). Identify.
+  2.  Diamond {r3c8, r3c6, r3c9, [r7c6=r9c9]} (spine r3c6—r3c9).
+      → color(r3c8) = color([r7c6=r9c9]). Identify.
+  3.  Bridged hexagon: ring {r3c6, r3c9, r6c9, r6c3, r8c3, r8c6}
+      Bridges: [r3c8=r7c6=r9c9]—r9c3 (edges r3c6—r3c9 ↔ r6c3—r8c3), [r3c8=r7c6=r9c9]—r8c5 (edges r3c9—r6c9 ↔ r8c3—r8c6), r6c8—[r3c8=r7c6=r9c9] (edges r6c9—r6c3 ↔ r8c6—r3c6).
+      Each bridge forces opposite edges to miss different colors,
+      but every 3-coloring of C₆ requires at least one matching pair. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -7171,19 +7179,20 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 487/832: PROVED cells=13 depth=3 diamonds=3 odd_wheels=1 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
+pattern 487/832: PROVED cells=13 depth=2 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=1 set_equivalences=1 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
 000000000000000000000001011000000000000000000001001001000000010001000110011001000
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Diamond {r3c8, r7c8, r8c8, r8c7} (spine r7c8—r8c8).
-      → color(r3c8) = color(r8c7). Identify.
-  2.  Diamond {r6c3, r8c3, r9c3, r9c2} (spine r8c3—r9c3).
-      → color(r6c3) = color(r9c2). Identify.
-  3.  Diamond {r3c6, r6c6, r9c6, [r6c3=r9c2]} (spine r6c6—r9c6).
-      → color(r3c6) = color([r6c3=r9c2]). Identify.
-  4.  Odd wheel: hub [r3c6=r6c3=r9c2] forces rim to 2 colors.
-      Bivalue oddagon {[r3c8=r8c7], r3c9, r6c9, r6c6, r9c6, r9c3, r8c3} (length 7) cannot be 2-colored. Contradiction.
+  1.  SET: {row 8, row 9} − {box 7, box 9}.
+      Remainder: {r9c6} = {r7c8}.
+      → color(r9c6) = color(r7c8). Identify.
+  2.  Diamond {r3c9, r3c6, r3c8, [r7c8=r9c6]} (spine r3c6—r3c8).
+      → color(r3c9) = color([r7c8=r9c6]). Identify.
+  3.  Bridged hexagon: ring {r3c6, r3c8, r8c8, r8c3, r6c3, r6c6}
+      Bridges: [r3c9=r7c8=r9c6]—r9c3 (edges r3c6—r3c8 ↔ r8c3—r6c3), [r3c9=r7c8=r9c6]—r6c9 (edges r3c8—r8c8 ↔ r6c3—r6c6), r8c7—[r3c9=r7c8=r9c6] (edges r8c8—r8c3 ↔ r6c6—r3c6).
+      Each bridge forces opposite edges to miss different colors,
+      but every 3-coloring of C₆ requires at least one matching pair. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -7460,18 +7469,20 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 507/832: PROVED cells=13 depth=3 diamonds=3 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
+pattern 507/832: PROVED cells=13 depth=2 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=1 set_equivalences=1 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
 000000000000000000000001011000000000000000000001001001000001110001000000011000010
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Diamond {r7c6, r7c7, r7c8, r9c8} (spine r7c7—r7c8).
-      → color(r7c6) = color(r9c8). Identify.
-  2.  Diamond {r3c9, r3c6, r3c8, [r7c6=r9c8]} (spine r3c6—r3c8).
-      → color(r3c9) = color([r7c6=r9c8]). Identify.
-  3.  Diamond {[r3c9=r7c6=r9c8], r6c6, r6c9, r6c3} (spine r6c6—r6c9).
-      → color([r3c9=r7c6=r9c8]) = color(r6c3). Identify.
-  4.  K₄ on {[r3c9=r6c3=r7c6=r9c8], r8c3, r9c2, r9c3}. Contradiction.
+  1.  SET: {row 7, row 9} − {box 7, box 9}.
+      Remainder: {r7c6} = {r8c3}.
+      → color(r7c6) = color(r8c3). Identify.
+  2.  Diamond {r6c9, r6c3, r6c6, [r7c6=r8c3]} (spine r6c3—r6c6).
+      → color(r6c9) = color([r7c6=r8c3]). Identify.
+  3.  Bridged hexagon: ring {r3c6, r3c8, r9c8, r9c3, r6c3, r6c6}
+      Bridges: r3c9—[r6c9=r7c6=r8c3] (edges r3c6—r3c8 ↔ r9c3—r6c3), r7c8—[r6c9=r7c6=r8c3] (edges r3c8—r9c8 ↔ r6c3—r6c6), r9c2—[r6c9=r7c6=r8c3] (edges r9c8—r9c3 ↔ r6c6—r3c6).
+      Each bridge forces opposite edges to miss different colors,
+      but every 3-coloring of C₆ requires at least one matching pair. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -8270,18 +8281,21 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 561/832: PROVED cells=13 depth=3 diamonds=3 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
+pattern 561/832: PROVED cells=13 depth=3 diamonds=2 odd_wheels=0 circular_ladders=1 bridged_hexagons=1 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
 000000000000000000000001011000000000000000001001000010000001000001001001001010010
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
   1.  Diamond {r3c6, r7c6, r8c6, r9c5} (spine r7c6—r8c6).
       → color(r3c6) = color(r9c5). Identify.
-  2.  Diamond {[r3c6=r9c5], r3c8, r9c8, r6c8} (spine r3c8—r9c8).
-      → color([r3c6=r9c5]) = color(r6c8). Identify.
-  3.  Diamond {[r3c6=r6c8=r9c5], r3c9, r5c9, r8c9} (spine r3c9—r5c9).
-      → color([r3c6=r6c8=r9c5]) = color(r8c9). Identify.
-  4.  K₄ on {[r3c6=r6c8=r8c9=r9c5], r6c3, r8c3, r9c3}. Contradiction.
+  2.  Diamond {r3c9, [r3c6=r9c5], r3c8, r9c8} (spine [r3c6=r9c5]—r3c8).
+      → color(r3c9) = color(r9c8). Identify.
+  3.  Circular ladder {[r3c6=r9c5]—r8c6, [r3c9=r9c8]—r8c9, r9c3—r8c3}:
+      Satellites r7c6 (rung 1), r5c9 (rung 2), r6c3 (rung 3) forced to distinct colors. Add triangle.
+  4.  Bridged hexagon: ring {[r3c6=r9c5], r3c8, r6c8, r6c3, r8c3, r8c6}
+      Bridges: [r3c9=r9c8]—r9c3 (edges [r3c6=r9c5]—r3c8 ↔ r6c3—r8c3), [r3c9=r9c8]—r8c9 (edges r3c8—r6c8 ↔ r8c3—r8c6), r5c9—r7c6 (edges r6c8—r6c3 ↔ r8c6—[r3c6=r9c5]).
+      Each bridge forces opposite edges to miss different colors,
+      but every 3-coloring of C₆ requires at least one matching pair. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -8608,18 +8622,17 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 585/832: PROVED cells=13 depth=2 diamonds=1 odd_wheels=1 circular_ladders=0 bridged_hexagons=0 set_equivalences=1 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
+pattern 585/832: PROVED cells=13 depth=1 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=1 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
 000000000000000000000001011000000000000001000001010001000000000001000101001001010
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
   1.  Diamond {r8c3, r8c7, r8c9, r9c8} (spine r8c7—r8c9).
       → color(r8c3) = color(r9c8). Identify.
-  2.  SET: {row 3, row 6, row 9} − {col 3, col 6, col 9}.
-      Remainder: {r3c8, r6c5, [r8c3=r9c8]} = {r5c6, [r8c3=r9c8], r8c9}.
-      → Both sides forced all-distinct. Virtual edges added.
-  3.  Odd wheel: hub [r8c3=r9c8] forces rim to 2 colors.
-      Bivalue oddagon {r5c6, r6c5, r6c3, r9c3, r9c6} (length 5) cannot be 2-colored. Contradiction.
+  2.  Bridged hexagon: ring {r3c6, r3c9, r6c9, r6c3, r9c3, r9c6}
+      Bridges: r3c8—[r8c3=r9c8] (edges r3c6—r3c9 ↔ r6c3—r9c3), r8c9—[r8c3=r9c8] (edges r3c9—r6c9 ↔ r9c3—r9c6), r6c5—r5c6 (edges r6c9—r6c3 ↔ r9c6—r3c6).
+      Each bridge forces opposite edges to miss different colors,
+      but every 3-coloring of C₆ requires at least one matching pair. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -9684,20 +9697,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 658/832: PROVED cells=13 depth=4 diamonds=4 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
+pattern 658/832: PROVED cells=13 depth=2 diamonds=1 odd_wheels=0 circular_ladders=1 bridged_hexagons=1 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
 000000000000000000001001001000000000000000000001010010000001010000010001001001010
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
   1.  Diamond {r3c6, r7c6, r9c6, r8c5} (spine r7c6—r9c6).
       → color(r3c6) = color(r8c5). Identify.
-  2.  Diamond {r3c3, [r3c6=r8c5], r3c9, r8c9} (spine [r3c6=r8c5]—r3c9).
-      → color(r3c3) = color(r8c9). Identify.
-  3.  Diamond {r7c8, [r3c3=r8c9], r9c8, r9c3} (spine [r3c3=r8c9]—r9c8).
-      → color(r7c8) = color(r9c3). Identify.
-  4.  Diamond {r6c5, r6c3, r6c8, [r7c8=r9c3]} (spine r6c3—r6c8).
-      → color(r6c5) = color([r7c8=r9c3]). Identify.
-  5.  K₄ on {[r3c6=r8c5], [r6c5=r7c8=r9c3], r7c6, r9c6}. Contradiction.
+  2.  Circular ladder {[r3c6=r8c5]—r8c9, r7c6—r7c8, r9c6—r9c8}:
+      Satellites r3c9 (rung 1), r9c3 (rung 3) forced to distinct colors. Add edge.
+  3.  Bridged hexagon: ring {r3c3, r3c9, r8c9, r7c8, r6c8, r6c3}
+      Bridges: r9c3—r9c8 (edges r3c3—r3c9 ↔ r7c8—r6c8), [r3c6=r8c5]—r6c5 (edges r3c9—r8c9 ↔ r6c8—r6c3), r9c8—r9c3 (edges r8c9—r7c8 ↔ r6c3—r3c3).
+      Each bridge forces opposite edges to miss different colors,
+      but every 3-coloring of C₆ requires at least one matching pair. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -10076,31 +10088,35 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 682/832: PROVED cells=13 depth=2 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=1 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
+pattern 682/832: PROVED cells=13 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=1 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
 000000000000000000001001001000000000000000001000001110001000000001000001010001010
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Diamond {r3c3, r7c3, r8c3, r9c2} (spine r7c3—r8c3).
-      → color(r3c3) = color(r9c2). Identify.
-  2.  SET: {row 3, row 9} − {col 6, col 9}.
-      Remainder: {[r3c3=r9c2], r9c8} = {r5c9, r6c6, r8c9}.
-      → Both sides forced all-distinct. Virtual edges added.
-  3.  K₄ on {r5c9, r6c6, r6c7, r6c8}. Contradiction.
+  1.  Diamond {r5c9, r6c7, r6c8, r6c6} (spine r6c7—r6c8).
+      → color(r5c9) = color(r6c6). Identify.
+  2.  Diamond {r3c6, r3c9, [r5c9=r6c6], r8c9} (spine r3c9—[r5c9=r6c6]).
+      → color(r3c6) = color(r8c9). Identify.
+  3.  Bridged hexagon: ring {r3c3, r3c9, [r5c9=r6c6], r9c6, r9c2, r7c3}
+      Bridges: [r3c6=r8c9]—r9c8 (edges r3c3—r3c9 ↔ r9c6—r9c2), [r3c6=r8c9]—r8c3 (edges r3c9—[r5c9=r6c6] ↔ r9c2—r7c3), [r3c6=r8c9]—r8c3 (edges [r5c9=r6c6]—r9c6 ↔ r7c3—r3c3).
+      Each bridge forces opposite edges to miss different colors,
+      but every 3-coloring of C₆ requires at least one matching pair. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 683/832: PROVED cells=13 depth=2 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=1 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
+pattern 683/832: PROVED cells=13 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=1 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
 000000000000000000001001001000000000000000001000001110001000000001001000010010001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Diamond {r3c3, r7c3, r8c3, r9c2} (spine r7c3—r8c3).
-      → color(r3c3) = color(r9c2). Identify.
-  2.  SET: {row 3, row 9} − {col 6, col 9}.
-      Remainder: {[r3c3=r9c2], r9c5} = {r5c9, r6c6, r8c6}.
-      → Both sides forced all-distinct. Virtual edges added.
-  3.  K₄ on {r5c9, r6c6, r6c7, r6c8}. Contradiction.
+  1.  Diamond {r5c9, r6c7, r6c8, r6c6} (spine r6c7—r6c8).
+      → color(r5c9) = color(r6c6). Identify.
+  2.  Diamond {r3c9, r3c6, [r5c9=r6c6], r8c6} (spine r3c6—[r5c9=r6c6]).
+      → color(r3c9) = color(r8c6). Identify.
+  3.  Bridged hexagon: ring {r3c3, r3c6, [r5c9=r6c6], r9c9, r9c2, r7c3}
+      Bridges: [r3c9=r8c6]—r9c5 (edges r3c3—r3c6 ↔ r9c9—r9c2), [r3c9=r8c6]—r8c3 (edges r3c6—[r5c9=r6c6] ↔ r9c2—r7c3), [r3c9=r8c6]—r8c3 (edges [r5c9=r6c6]—r9c9 ↔ r7c3—r3c3).
+      Each bridge forces opposite edges to miss different colors,
+      but every 3-coloring of C₆ requires at least one matching pair. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -10502,17 +10518,18 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 710/832: PROVED cells=13 depth=2 diamonds=1 odd_wheels=1 circular_ladders=1 bridged_hexagons=0 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
+pattern 710/832: PROVED cells=13 depth=1 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=1 set_equivalences=1 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
 000000000000000000001001001000000000000000010000001011000000000001001010011000001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Diamond {r6c9, r5c8, r6c8, r8c8} (spine r5c8—r6c8).
-      → color(r6c9) = color(r8c8). Identify.
-  2.  Circular ladder {r3c3—r3c9, r8c3—[r6c9=r8c8], r9c3—r9c9}:
-      Satellites r3c6 (rung 1), r8c6 (rung 2), r9c2 (rung 3) forced to distinct colors. Add triangle.
-  3.  Odd wheel: hub r8c6 forces rim to 2 colors.
-      Bivalue oddagon {r3c6, r6c6, [r6c9=r8c8], r8c3, r9c2} (length 5) cannot be 2-colored. Contradiction.
+  1.  SET: {row 3, row 6, row 8, row 9} − {col 3, col 6, col 8, col 9}.
+      Remainder: {r9c2} = {r5c8}.
+      → color(r9c2) = color(r5c8). Identify.
+  2.  Bridged hexagon: ring {r3c6, r3c9, r6c9, [r5c8=r9c2], r8c3, r8c6}
+      Bridges: r3c3—r9c3 (edges r3c6—r3c9 ↔ [r5c8=r9c2]—r8c3), r9c9—r8c8 (edges r3c9—r6c9 ↔ r8c3—r8c6), r6c8—r6c6 (edges r6c9—[r5c8=r9c2] ↔ r8c6—r3c6).
+      Each bridge forces opposite edges to miss different colors,
+      but every 3-coloring of C₆ requires at least one matching pair. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -10560,19 +10577,20 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 714/832: PROVED cells=13 depth=3 diamonds=3 odd_wheels=1 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
+pattern 714/832: PROVED cells=13 depth=2 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=1 set_equivalences=1 parity_transports=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0
 000000000000000000001001001000000000000000010000001011001000000001001010010000001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Diamond {r6c9, r5c8, r6c8, r8c8} (spine r5c8—r6c8).
-      → color(r6c9) = color(r8c8). Identify.
-  2.  Diamond {r3c6, r6c6, r8c6, [r6c9=r8c8]} (spine r6c6—r8c6).
-      → color(r3c6) = color([r6c9=r8c8]). Identify.
-  3.  Diamond {r3c9, r3c3, [r3c6=r6c9=r8c8], r8c3} (spine r3c3—[r3c6=r6c9=r8c8]).
-      → color(r3c9) = color(r8c3). Identify.
-  4.  Odd wheel: hub [r3c9=r8c3] forces rim to 2 colors.
-      Bivalue oddagon {r3c3, [r3c6=r6c9=r8c8], r9c9, r9c2, r7c3} (length 5) cannot be 2-colored. Contradiction.
+  1.  Diamond {r3c3, r7c3, r8c3, r9c2} (spine r7c3—r8c3).
+      → color(r3c3) = color(r9c2). Identify.
+  2.  SET: {row 3, row 6, row 8} − {col 6, col 8, col 9}.
+      Remainder: {[r3c3=r9c2], r8c3} = {r5c8, r9c9}.
+      → Both sides forced all-distinct. Virtual edges added.
+  3.  Bridged hexagon: ring {[r3c3=r9c2], r3c6, r6c6, r6c8, r5c8, r9c9}
+      Bridges: r3c9—r6c9 (edges [r3c3=r9c2]—r3c6 ↔ r6c8—r5c8), r8c6—r8c8 (edges r3c6—r6c6 ↔ r5c8—r9c9), r6c9—r3c9 (edges r6c6—r6c8 ↔ r9c9—[r3c3=r9c2]).
+      Each bridge forces opposite edges to miss different colors,
+      but every 3-coloring of C₆ requires at least one matching pair. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 

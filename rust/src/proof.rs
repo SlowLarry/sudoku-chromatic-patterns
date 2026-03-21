@@ -1969,14 +1969,13 @@ fn find_best_proof(
         return pc;
     }
 
-    // Terminal: bridged hexagon — DISABLED for now (too rare, 21/6051 patterns)
-    // To re-enable, uncomment the block below:
-    // if let Some((ring, bridges)) = graph.find_bridged_hexagon() {
-    //     return ProofNode::BridgedHexagon {
-    //         ring: ring.map(|v| graph.vertex_name(v)),
-    //         bridges: bridges.map(|(s1, s2)| (graph.vertex_name(s1), graph.vertex_name(s2))),
-    //     };
-    // }
+    // Terminal: bridged hexagon
+    if let Some((ring, bridges)) = graph.find_bridged_hexagon() {
+        return ProofNode::BridgedHexagon {
+            ring: ring.map(|v| graph.vertex_name(v)),
+            bridges: bridges.map(|(s1, s2)| (graph.vertex_name(s1), graph.vertex_name(s2))),
+        };
+    }
 
     if depth_remaining == 0 {
         return ProofNode::Failed;
@@ -2303,14 +2302,13 @@ fn find_greedy_proof(
         };
     }
 
-    // Priority 4: bridged hexagon — DISABLED for now (too rare, 21/6051 patterns)
-    // To re-enable, uncomment the block below:
-    // if let Some((ring, bridges)) = graph.find_bridged_hexagon() {
-    //     return ProofNode::BridgedHexagon {
-    //         ring: ring.map(|v| graph.vertex_name(v)),
-    //         bridges: bridges.map(|(s1, s2)| (graph.vertex_name(s1), graph.vertex_name(s2))),
-    //     };
-    // }
+    // Priority 4: bridged hexagon
+    if let Some((ring, bridges)) = graph.find_bridged_hexagon() {
+        return ProofNode::BridgedHexagon {
+            ring: ring.map(|v| graph.vertex_name(v)),
+            bridges: bridges.map(|(s1, s2)| (graph.vertex_name(s1), graph.vertex_name(s2))),
+        };
+    }
 
     // Priority 4: odd wheel (after diamonds, SET, and ladders exhausted)
     if let Some((hub, rim)) = graph.find_odd_wheel() {

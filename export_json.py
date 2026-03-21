@@ -629,21 +629,12 @@ def main():
     for n in sizes:
         proof_file = base / f'proofs_n{n}.txt'
         minlex_file = base / f'results_n{n}_minlex_ordered.txt'
-        te_file = base / f'te_depth_n{n}.txt'
 
         if not proof_file.exists():
             print(f"Warning: {proof_file} not found, skipping N={n}")
             continue
 
         proofs = parse_proof_file(proof_file)
-
-        # Read T&E depth data if available
-        te_depths = []
-        if te_file.exists():
-            te_depths = [int(l.strip()) for l in te_file.read_text().splitlines() if l.strip()]
-        if te_depths and len(te_depths) != len(proofs):
-            print(f"Warning: N={n} T&E depth count ({len(te_depths)}) != proof count ({len(proofs)})")
-            te_depths = []
 
         # Read ordered minlex bitstrings (same order as results/proofs)
         minlex_strings = []
@@ -676,7 +667,6 @@ def main():
 
             # Determine which rows/bands are occupied (from minlex form)
             rows_used = sorted(set(c // 9 for c in minlex_cells))
-            bands_used = sorted(set(r // 3 for r in rows_used))
 
             pattern = {
                 'id': f'N{n}_{i+1:04d}',
@@ -690,9 +680,6 @@ def main():
                 'min_degree': min(deg_seq) if deg_seq else 0,
                 'max_degree': max(deg_seq) if deg_seq else 0,
                 'rows_used': rows_used,
-                'bands_used': bands_used,
-                'num_bands': len(bands_used),
-                'te_depth': te_depths[i] if te_depths else None,
                 'proof': {
                     'depth': proof_data['depth'],
                     'diamonds': proof_data['diamonds'],
