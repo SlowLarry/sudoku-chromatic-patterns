@@ -41,7 +41,7 @@ results_n10_final.txt
 results_n10_skipopt.txt
 
 # Copilot / IDE config (keep local)
-.github/
+.github/copilot-instructions.md
 
 # OS
 Thumbs.db
