@@ -22,19 +22,20 @@ These patterns characterize all the *structurally irreducible* reasons that a su
 
 The search is exhaustive: for a given pattern size N, the tool finds **all** such patterns up to the natural symmetries of the sudoku grid.
 
-## Results so far
+## Results
 
-| Size N | Patterns found | Time | Search nodes | Rate |
-|--------|---------------|------|-------------|------|
-| 10 | 32 | 9s | 9.3M | 1.0M/s |
-| 11 | 0 | — | — | — |
-| 12 | 60 | ~55 min | 290M | 88k/s |
-| 13 | 832 | ~4.1h | 1.38B | 93k/s |
-| 14 | 620 | ~2h | 5.9B | 891k/s |
+The search is exhaustive: for each pattern size N, **all** such patterns are found up to the 3,359,232 geometric symmetries of the sudoku grid.
 
-N=10 and N=14 times use custom orbit computation. N=12 and N=13 were run
-with nauty orbits (before the custom module existed); re-running them with
-custom orbits would be substantially faster.
+| Size N | Patterns found |
+|--------|---------------|
+| 10     | 32             |
+| 11     | 0              |
+| 12     | 60             |
+| 13     | 832            |
+| 14     | 620            |
+| 15     | 4,507          |
+| 16     | 19,750         |
+| **Total** | **25,801**  |
 
 No minimal 4-chromatic K₄-free patterns of size 11 exist.
 
@@ -87,6 +88,24 @@ Computes the **minlex** (lexicographically smallest under all sudoku symmetries)
 The output is sorted and deduplicated. If `--output` is omitted, results are printed to stdout.
 
 The minlex computation enumerates all 3,359,232 geometric sudoku symmetries via the group's product structure (transpose × band/stack permutations × row/column permutations), using early termination to skip unpromising permutations quickly.
+
+### Generate non-3-colorability proofs
+
+```bash
+cargo run --release -- prove --input results_minlex.txt --output proofs.txt
+```
+
+For each pattern in the input, generates a machine-verifiable proof that the induced subgraph is not 3-colorable. Proofs use a combination of structural deductions (diamonds, odd wheels, SET equivalence, parity transport, etc.) and case splits when no single-step deduction suffices.
+
+Pass `--summary-only` to print only proof statistics (branch count, technique usage) without the full proof text.
+
+### Compute Trial & Error depth
+
+```bash
+cargo run --release -- te-depth --input results_minlex.txt --output te_depths.txt
+```
+
+Computes the minimum Trial & Error depth required to prove non-3-colorability of each pattern. The depth measures how many nested case splits are needed. Pass `--max-depth <N>` to limit the search (default: 5).
 
 ### All search options
 
@@ -200,16 +219,33 @@ At the target size, we need to verify that the pattern is not 3-colorable but be
 
 The 3-colorability test uses **DSATUR backtracking**: a standard exact algorithm that always colors next the uncolored vertex with the most distinct colors on its neighbors (highest "saturation"). This heuristic finds failures quickly. For patterns of size 10–14, these checks are effectively instantaneous.
 
+### Proof techniques
+
+The proof engine (`proof.rs`) uses the following techniques to establish non-3-colorability:
+
+- **Diamond** — two cells forced to the same color via a shared neighborhood structure
+- **K₄ detection** — four mutually visible cells form a clique requiring 4 colors
+- **Odd wheel** — a hub connected to an odd cycle forces a contradiction
+- **Circular ladder** — paired rungs with satellite cells forced all-distinct
+- **Bridged hexagon** — a 6-cycle with bridge edges creating a parity contradiction
+- **SET equivalence** — multi-cell color constraints via set equations over houses
+- **Parity transport** — deductions from house parity (trivalue oddagon / pigeonhole chain)
+- **Branching** — case splits when no single-step deduction suffices
+
+All proofs for all 25,801 patterns complete with at most 1 branch (T&E depth ≤ 3).
+
 ### Module structure
 
 ```
 src/
   main.rs          CLI entry point (clap-based)
   search.rs        Recursive backtracking search engine
+  proof.rs         Proof generation (diamonds, SET, oddagons, branching, etc.)
   symmetry.rs      Custom orbit computation via precomputed permutation pool
   minlex.rs        Minlex canonicalization under the full sudoku symmetry group
   canonical.rs     nauty FFI: canonicalization and (optional) orbit computation
   coloring.rs      DSATUR 3-colorability solver
+  te_depth.rs      Trial & Error depth computation
   validation.rs    Full pattern validation (connected, K₄-free, critical)
   sudoku_graph.rs  81-vertex graph: neighbor bitmasks, induced subgraph
   bitset.rs        u128 bit manipulation utilities
@@ -253,4 +289,4 @@ progress: 10.25% nodes=108523520 leaves=87146786 solutions=826 k4=9283419 deg=0 
 
 ## License
 
-Research code. No license specified.
+This project is licensed under the [GNU General Public License v3.0](../LICENSE).
