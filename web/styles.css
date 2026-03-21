@@ -179,6 +179,13 @@ select:focus, input:focus {
 }
 .proof-badge.simple { background: #1b4332; color: #6fcf97; }
 .proof-badge.branching { background: #3d2200; color: #f0883e; }
+.proof-badge.diamond { background: #1b4332; color: #6fcf97; }
+.proof-badge.ladder { background: #2d2a4a; color: #b8a9e8; }
+.proof-badge.hexagon { background: #3a2a1a; color: #e8c8a8; }
+.proof-badge.oddagon { background: #1a3a5c; color: #79c0ff; }
+.proof-badge.set { background: #2a3a2a; color: #7ee787; }
+.proof-badge.parity { background: #2a2a3a; color: #89b4fa; }
+.proof-badge.branch { background: #3d2200; color: #f0883e; }
 
 /* ── Detail View ─────────────────────────────────────────────── */
 #detail-placeholder {
@@ -220,27 +227,28 @@ select:focus, input:focus {
 
 #detail-content {
   display: flex;
-  gap: 28px;
-  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-start;
 }
 
 /* ── Grid ────────────────────────────────────────────────────── */
 #grid-container {
-  flex: 0 0 380px;
+  flex: 1 1 0;
+  min-width: 320px;
+  max-width: 520px;
 }
 #grid-container h3 {
   font-size: 0.9rem;
   color: #c9d1d9;
-  margin-bottom: 8px;
+  margin: 0 0 10px 0;
 }
 #grid-controls {
   display: flex;
   gap: 16px;
-  margin-bottom: 8px;
+  margin-top: 8px;
   font-size: 0.78rem;
   color: #8b949e;
   align-items: center;
-  flex-wrap: wrap;
 }
 #grid-controls label {
   cursor: pointer;
@@ -261,8 +269,8 @@ select:focus, input:focus {
   font-size: 0.72rem;
 }
 #sudoku-grid {
-  width: 360px;
-  height: 360px;
+  width: 100%;
+  aspect-ratio: 1;
   background: #161b22;
   border-radius: 4px;
 }
@@ -273,19 +281,27 @@ select:focus, input:focus {
 .grid-border { stroke: #6e7681; stroke-width: 2.5; fill: none; }
 .cell-inactive { fill: #0d1117; }
 .cell-active {
-  fill: #1f6feb;
+  fill: #484f58;
   opacity: 0.7;
   transition: opacity 0.2s;
 }
 .cell-active:hover { opacity: 1; }
 .cell-active.highlighted {
-  fill: #f0883e;
-  opacity: 0.9;
+  fill: #8b949e;
+  opacity: 0.85;
 }
-.cell-active.merged-a { fill: #da3633; opacity: 0.85; }
-.cell-active.merged-b { fill: #da3633; opacity: 0.85; }
-.cell-active.spine { fill: #a371f7; opacity: 0.85; }
-.cell-active.k4 { fill: #f85149; opacity: 0.95; }
+/* Highlight classes matching proof text colors */
+.cell-active.hl-diamond { fill: #a371f7; opacity: 0.85; }   /* purple  — .step-diamond */
+.cell-active.hl-identify { fill: #79c0ff; opacity: 0.85; }  /* blue    — .step-identify */
+.cell-active.hl-k4 { fill: #f85149; opacity: 0.95; }        /* red     — .step-k4 */
+.cell-active.hl-set { fill: #7ee787; opacity: 0.85; }       /* green   — .step-set */
+.cell-active.hl-branch { fill: #f0883e; opacity: 0.85; }    /* orange  — .step-branch */
+.cell-active.hl-vertex { fill: #ffa657; opacity: 0.85; }    /* lt-orange — .step-vertex */
+/* Accumulated diamond merge colors (no red) */
+.cell-active.color-a { fill: #3fb950; opacity: 0.85; }
+.cell-active.color-b { fill: #d4a017; opacity: 0.85; }
+.cell-active.color-c { fill: #58a6ff; opacity: 0.85; }
+.cell-active.color-d { fill: #ffa657; opacity: 0.85; }
 .cell-label {
   font-size: 8px;
   fill: #e6edf3;
@@ -298,11 +314,28 @@ select:focus, input:focus {
   stroke: #484f58;
   stroke-width: 0.6;
   opacity: 0.4;
+  fill: none;
 }
 .edge-line.highlighted {
-  stroke: #f0883e;
+  stroke: #8b949e;
+  stroke-width: 1.2;
+  opacity: 0.7;
+}
+.edge-line.oddagon {
+  stroke: #39d353;
+  stroke-width: 2;
+  opacity: 0.9;
+}
+.edge-line.k4-edge {
+  stroke: #f85149;
+  stroke-width: 2.5;
+  opacity: 0.95;
+}
+.edge-line.virtual {
+  stroke: #8b949e;
   stroke-width: 1.5;
-  opacity: 0.8;
+  stroke-dasharray: 4 3;
+  opacity: 0.85;
 }
 
 #grid-legend {
@@ -374,14 +407,14 @@ select:focus, input:focus {
 
 /* ── Proof View ──────────────────────────────────────────────── */
 #proof-container {
-  flex: 1;
-  min-width: 340px;
+  flex: 0.7 1 0;
+  min-width: 300px;
 }
 .proof-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+  margin: 0 0 10px 0;
 }
 .proof-header h3 {
   font-size: 0.9rem;
@@ -391,7 +424,7 @@ select:focus, input:focus {
 #proof-container h3 {
   font-size: 0.9rem;
   color: #c9d1d9;
-  margin-bottom: 8px;
+  margin: 0 0 10px 0;
 }
 #proof-view {
   font-family: 'Cascadia Code', 'Fira Code', monospace;
@@ -401,7 +434,7 @@ select:focus, input:focus {
   border: 1px solid #30363d;
   border-radius: 6px;
   padding: 16px;
-  max-height: 600px;
+  max-height: 70vh;
   overflow-y: auto;
 }
 
@@ -434,6 +467,7 @@ select:focus, input:focus {
 .step-num { color: #6e7681; }
 .step-diamond { color: #a371f7; }
 .step-k4 { color: #f85149; font-weight: 600; }
+.step-set { color: #7ee787; font-weight: 600; }
 .step-branch { color: #f0883e; font-weight: 600; }
 .step-case-label { color: #f0883e; }
 .step-identify { color: #79c0ff; }

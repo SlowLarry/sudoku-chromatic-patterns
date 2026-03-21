@@ -1,72 +1,111 @@
-# Sudoku Graph Searches
+# Minimal 4-Chromatic Sudoku Patterns
 
-A small Python tool to parse Sudoku puzzles, build the constraint graph, and report graph metrics for benchmarking and visualization.
+Exhaustive search for **minimal 4-chromatic K₄-free patterns** in the 9×9 sudoku graph, with machine-verifiable proofs of non-3-colorability and an interactive web viewer.
 
-## Quick start
+## What this is
 
-- Run with a puzzle string:
+The standard sudoku grid defines a graph on 81 vertices where two cells are adjacent if they share a row, column, or 3×3 box. Each cell has exactly 20 neighbors.
 
-```
-python -m sudoku_graph_searches --puzzle 530070000600195000098000060800060003400803001700020006060000280000419005000080079
-```
+A *pattern* is a subset of cells. This project finds patterns whose induced subgraph:
 
-- Run with a file:
+1. **Requires exactly 4 colors** — not 3-colorable, but contains no K₄ so is 4-colorable
+2. **Is vertex-critical** — removing any single cell makes it 3-colorable
 
-```
-python -m sudoku_graph_searches --file puzzles.txt
-```
+These are the structurally irreducible reasons a subset of sudoku cells can require 4 colors instead of 3.
 
-- Run a search (requires pynauty):
+## Results
 
-```
-python -m sudoku_graph_searches search --size 10 --limit 5
-```
+The search is exhaustive: for each pattern size N, **all** such patterns are found up to the 3,359,232 geometric symmetries of the sudoku grid.
 
-Each line in the file should be a single 81-character puzzle using digits with 0 or . for blanks.
+| Size N | Patterns |
+|--------|----------|
+| 10     | 32       |
+| 11     | 0        |
+| 12     | 60       |
+| 13     | 832      |
+| 14     | 620      |
+| 15     | 4,507    |
+| 16     | 19,750   |
+| **Total** | **25,801** |
 
-## Output
+No patterns of size 11 exist.
 
-The tool prints:
-- Node and edge counts for the Sudoku constraint graph
-- Degree statistics and a small histogram
-- Per-puzzle metadata (filled cells, blanks, invalid characters)
-
-## Sudoku graph utilities
-
-This package now includes core helpers for the Sudoku graph used by the 4-chromatic pattern search:
-
-- `cell_to_rcb`, `neighbors_of`, and `is_adjacent`
-- bitmask-based induced subgraphs
-- exact 3-colorability solver for small graphs
-- validator for minimal 4-chromatic patterns
-- symmetry canonicalization via a colored auxiliary graph
-
-Example usage in Python:
-
-```python
-from sudoku_graph_searches.validation import is_valid_minimal_4chromatic_pattern
-
-pattern = [0, 1, 2, 9, 10, 11, 18, 19, 20, 27]
-print(is_valid_minimal_4chromatic_pattern(pattern))
-```
-
-## Symmetry canonicalization
-
-Symmetry pruning uses `pynauty` to canonicalize patterns under the Sudoku symmetry group.
-Install the dependency before running searches with symmetry enabled:
+## Repository structure
 
 ```
-pip install pynauty
+rust/                  Rust search engine (source of truth)
+  src/
+    main.rs            CLI entry point
+    search.rs          Recursive backtracking with symmetry pruning
+    proof.rs           Proof generation (diamonds, SET, oddagons, etc.)
+    canonical.rs       Canonicalization under sudoku symmetries
+    coloring.rs        Exact 3-colorability solver
+    ...
+web/                   Interactive web viewer
+  index.html
+  app.js
+  styles.css
+  data/                Generated data (gitignored, see below)
+export_json.py         Converts proof text files → JSON for the web viewer
+proofs_n{10..16}.txt   Machine-generated proofs of non-3-colorability
+4chromatics_*_minlex.txt  Canonical pattern lists (minlex form)
 ```
 
-### Windows build notes
+## Building the search engine
 
-On Windows, `pynauty` builds a native extension and requires a `make`-based toolchain.
-One common setup is MSYS2 with the MinGW toolchain installed and `make` available on PATH.
-After installing the tools, retry `pip install pynauty` from the same virtual environment.
+Requires Linux or WSL. The [nauty-Traces-sys](https://crates.io/crates/nauty-Traces-sys) crate vendors the nauty C library automatically.
 
-If you want to run without symmetry pruning, use the CLI flag:
-
+```bash
+# Prerequisites: Rust 1.82+, GCC, libclang-dev
+cd rust
+cargo build --release
 ```
-python -m sudoku_graph_searches search --size 10 --no-symmetry
+
+See [rust/README.md](rust/README.md) for full usage (search, validate, minlex, prove).
+
+## Web viewer
+
+The interactive viewer lets you browse all 25,801 patterns with their proofs, grid visualizations, and filters.
+
+To run locally:
+
+```bash
+cd web
+python -m http.server 8080
+# open http://localhost:8080
 ```
+
+All data is included in the repository — no build step needed.
+
+### Regenerating the data (optional)
+
+If you modify the Rust proof engine and want to re-export:
+
+```bash
+# 1. Generate proofs (from the Rust tool)
+cd rust
+cargo run --release -- prove --input ../proofs_n10.txt  # repeat for each N
+
+# 2. Export to JSON for the web viewer
+cd ..
+python export_json.py
+```
+
+## Proof techniques
+
+Every pattern has a machine-verifiable proof that it is not 3-colorable. The proof system uses:
+
+- **Diamond** — two cells forced to the same color via a shared neighborhood structure
+- **K₄ detection** — four mutually visible cells form a clique requiring 4 colors
+- **Odd wheel** — a hub connected to an odd cycle forces a contradiction
+- **Circular ladder** — paired rungs with satellite cells forced all-distinct
+- **Bridged hexagon** — a 6-cycle with bridge edges
+- **SET equivalence** — multi-cell color constraints via set equations
+- **Parity transport** — deductions from house parity (trivalue oddagon / pigeonhole chain)
+- **Branching** — case splits when no single-step deduction suffices
+
+All proofs for all 25,801 patterns complete with at most 1 branch (T&E depth ≤ 3).
+
+## License
+
+This project is licensed under the [GNU General Public License v3.0](LICENSE).

@@ -137,12 +137,18 @@ fn find_triangles(adj: &[u16]) -> Vec<[usize; 3]> {
             if adj[i] & (1 << j) == 0 {
                 continue;
             }
+            if j + 1 >= n {
+                continue;
+            }
             // k must be adjacent to both i and j
             let common = adj[i] & adj[j];
-            let mut mask = common >> (j + 1);
+            let shift = (j + 1) as u32;
+            let mask_full = if shift >= 16 { 0u16 } else { common >> shift };
+            let mut mask = mask_full;
             while mask != 0 {
                 let bit = mask.trailing_zeros() as usize;
-                tris.push([i, j, j + 1 + bit]);
+                let k = j + 1 + bit;
+                tris.push([i, j, k]);
                 mask &= mask - 1;
             }
         }

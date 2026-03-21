@@ -1,17 +1,47 @@
 # Python
-.venv/
-.venv-wsl/
-.venv39/
+.venv*/
 __pycache__/
 *.pyc
 *.pyo
+src/
 
-# Rust
+# Rust build artifacts
 rust/target/
 
 # Logs
 *.log
 run_log.txt
+
+# Debug / analysis scripts
+analyze_*.py
+bench_*.py
+check_*.py
+debug_*.py
+test_*.py
+te_depth.py
+debug_csp.rs
+
+# Shell orchestration scripts (WSL-specific)
+*.sh
+
+# Raw search output (regenerable, minlex versions are kept)
+results_n*_rust.txt
+
+# Reference list duplicates (originals in src/)
+ref_all*_minlex.txt
+
+# TE-depth analysis output
+te_depth_n*.txt
+
+# Intermediate proof variants
+proofs_n*_analysis.txt
+proofs_n*_set*.txt
+proofs_n*_new.txt
+results_n10_final.txt
+results_n10_skipopt.txt
+
+# Copilot / IDE config (keep local)
+.github/
 
 # OS
 Thumbs.db
@@ -19,4 +49,3 @@ Thumbs.db
 
 # Misc
 ersUserchromatic pattern search*
-results_n11_rust.txt

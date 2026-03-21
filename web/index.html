@@ -26,6 +26,7 @@
           <button class="btn" data-size="13">N=13 <span class="count"></span></button>
           <button class="btn" data-size="14">N=14 <span class="count"></span></button>
           <button class="btn" data-size="15">N=15 <span class="count"></span></button>
+          <button class="btn" data-size="16">N=16 <span class="count"></span></button>
         </div>
       </div>
       <div class="filter-group">
@@ -36,6 +37,19 @@
           <button class="btn" data-branches="1">1 branch</button>
           <button class="btn" data-branches="2">2 branches</button>
           <button class="btn" data-branches="3">3 branches</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Difficulty (greedy)</label>
+        <div id="diff-buttons" class="btn-group">
+          <button class="btn active" data-diff="all">All</button>
+          <button class="btn" data-diff="diamond">Diamond</button>
+          <button class="btn" data-diff="parity">Parity</button>
+          <button class="btn" data-diff="set">SET</button>
+          <button class="btn" data-diff="ladder">Ladder</button>
+          <button class="btn" data-diff="hexagon">Hexagon</button>
+          <button class="btn" data-diff="oddagon">Oddagon</button>
+          <button class="btn" data-diff="branch">Branch</button>
         </div>
       </div>
       <div class="filter-group">
@@ -94,11 +108,11 @@
       <div id="detail-content">
         <div id="grid-container">
           <h3>Sudoku Grid</h3>
+          <svg id="sudoku-grid" viewBox="0 0 360 360"></svg>
           <div id="grid-controls">
             <label><input type="checkbox" id="show-edges" checked> Show edges</label>
             <label><input type="checkbox" id="show-labels" checked> Show labels</label>
           </div>
-          <svg id="sudoku-grid" viewBox="0 0 360 360"></svg>
           <div id="bitstring-display">
             <code id="bitstring-text"></code>
             <button id="copy-bitstring" class="icon-btn" title="Copy bitstring">
