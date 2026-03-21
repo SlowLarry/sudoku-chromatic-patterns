@@ -669,7 +669,7 @@ def main():
             rows_used = sorted(set(c // 9 for c in minlex_cells))
 
             pattern = {
-                'id': f'N{n}_{i+1:04d}',
+                'id': f'Ch4_N{n}_{i+1:06d}',
                 'size': n,
                 'bitstring': minlex_bs,
                 'cells': minlex_cell_coords,

@@ -113,6 +113,11 @@ select:focus, input:focus {
   color: #8b949e;
   margin-top: 6px;
 }
+.export-btn {
+  margin-top: 6px;
+  font-size: 0.72rem;
+  padding: 3px 10px;
+}
 
 /* ── Pattern List ────────────────────────────────────────────── */
 #pattern-list {

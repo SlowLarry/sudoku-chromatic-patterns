@@ -1061,6 +1061,16 @@ function setupEventListeners() {
     copyGridToClipboard();
   });
 
+  // Copy ASCII grid
+  document.getElementById('copy-ascii').addEventListener('click', () => {
+    copyAsciiGrid();
+  });
+
+  // Export filtered patterns as text file
+  document.getElementById('export-filtered').addEventListener('click', () => {
+    exportFilteredPatterns();
+  });
+
   document.getElementById('copy-proof').addEventListener('click', () => {
     if (!selectedPattern) return;
     const text = proofToText(selectedPattern);
@@ -1262,6 +1272,46 @@ function showCopyToast(msg) {
   toast.classList.add('visible');
   clearTimeout(toast._timer);
   toast._timer = setTimeout(() => toast.classList.remove('visible'), 1500);
+}
+
+// ── Export filtered patterns ─────────────────────────────────────
+function exportFilteredPatterns() {
+  if (!filteredPatterns.length) {
+    showCopyToast('No patterns to export');
+    return;
+  }
+  const text = filteredPatterns.map(p => p.bitstring).join('\n') + '\n';
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `patterns_${filteredPatterns.length}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showCopyToast(`Exported ${filteredPatterns.length} patterns`);
+}
+
+// ── ASCII grid export ───────────────────────────────────────────
+function copyAsciiGrid() {
+  if (!selectedPattern) return;
+  const cellSet = new Set(selectedPattern.cell_indices);
+  const lines = [];
+  lines.push(`${selectedPattern.id}`);
+  lines.push('+-------+-------+-------+');
+  for (let r = 0; r < 9; r++) {
+    let row = '|';
+    for (let c = 0; c < 9; c++) {
+      const idx = r * 9 + c;
+      row += ' ' + (cellSet.has(idx) ? 'X' : '.');
+      if (c % 3 === 2) row += ' |';
+    }
+    lines.push(row);
+    if (r % 3 === 2) lines.push('+-------+-------+-------+');
+  }
+  const text = lines.join('\n');
+  navigator.clipboard.writeText(text)
+    .then(() => showCopyToast('ASCII grid copied'))
+    .catch(() => { fallbackCopy(text); showCopyToast('ASCII grid copied'); });
 }
 
 // ── Start ───────────────────────────────────────────────────────

@@ -64,9 +64,10 @@
       </div>
       <div class="filter-group">
         <label>Search by ID</label>
-        <input type="text" id="search-id" placeholder="e.g. N12_0042">
+        <input type="text" id="search-id" placeholder="e.g. Ch4_N12_000042">
       </div>
       <div id="filter-stats"></div>
+      <button id="export-filtered" class="btn export-btn" title="Download filtered patterns as bitstring text file">Export filtered</button>
     </div>
 
     <div id="pattern-list">
@@ -104,6 +105,9 @@
             </button>
             <button id="copy-grid" class="icon-btn" title="Copy grid image">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M16 13.25A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25V2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75ZM1.75 2.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25Zm10.03 2.22a.749.749 0 0 1 1.06 0l.97.97a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215l-.44-.44-3.81 3.81a.75.75 0 0 1-1.06 0L5.5 8.18l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75a.75.75 0 0 1 1.06 0L7.97 8.53l3.28-3.28-.44-.44a.749.749 0 0 1 0-1.06l.97-.03Z"/></svg>
+            </button>
+            <button id="copy-ascii" class="icon-btn" title="Copy ASCII grid">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M1.75 1h12.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25V2.75C0 1.784.784 1 1.75 1Zm.25 1.75v10.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25H2a.25.25 0 0 0-.25.25ZM3.5 5a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 3.5 5Zm.75 2.25a.75.75 0 0 0 0 1.5h7.5a.75.75 0 0 0 0-1.5h-7.5Zm0 3a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5h-4Z"/></svg>
             </button>
           </div>
         </div>
