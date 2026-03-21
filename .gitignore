@@ -26,6 +26,10 @@ debug_csp.rs
 
 # Raw search output (regenerable, minlex versions are kept)
 results_n*_rust.txt
+results_n16_minlex.txt
+
+# Duplicate canonical lists (ordered versions are kept)
+4chromatics_*_minlex.txt
 
 # Reference list duplicates (originals in src/)
 ref_all*_minlex.txt
