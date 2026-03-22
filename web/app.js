@@ -321,6 +321,7 @@ function renderDetail(p) {
     metaItem('Rows', p.rows_used.map(r => r + 1).join(', ')),
     metaItem('Difficulty', getDifficulty(p)),
     metaItem('Proof depth', p.proof?.depth ?? '?'),
+    metaItem('Proof length', p.proof?.proof_length ?? '?'),
     metaItem('Diamonds', p.proof?.diamonds ?? '?'),
     metaItem('Odd wheels', p.proof?.odd_wheels ?? 0),
     metaItem('Circ. ladders', p.proof?.circular_ladders ?? 0),
@@ -480,7 +481,23 @@ function renderProof(p) {
 
   // Add click handlers to proof steps
   for (const el of container.querySelectorAll('.proof-step')) {
-    el.addEventListener('click', () => highlightProofStep(p, el));
+    el.addEventListener('click', (e) => {
+      // Don't fire parent handler if a substep was clicked
+      if (e.target.closest('.xwing-substep')) return;
+      highlightProofStep(p, el);
+    });
+  }
+
+  // Add click handlers to X-wing trace substeps
+  for (const sub of container.querySelectorAll('.xwing-substep')) {
+    sub.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const parentStep = sub.closest('.proof-step');
+      const stepData = JSON.parse(parentStep.dataset.step);
+      const caseNum = parseInt(sub.dataset.case);
+      const tidx = parseInt(sub.dataset.tidx);
+      highlightXwingSubstep(p, parentStep, stepData, caseNum, tidx);
+    });
   }
 }
 
@@ -690,24 +707,39 @@ function renderPigeonholeXwingStep(step, depth) {
     diagonal_2: step.diagonal_2,
     clash_1: step.clash_1,
     clash_2: step.clash_2,
+    trace_1: step.trace_1 || [],
+    trace_2: step.trace_2 || [],
   }));
 
   const cycleStr = step.cycle.map(v => `<span class="step-vertex">${esc(v)}</span>`).join(', ');
   const d1Str = step.diagonal_1.map(v => `<span class="step-vertex">${esc(v)}</span>`).join(', ');
   const d2Str = step.diagonal_2.map(v => `<span class="step-vertex">${esc(v)}</span>`).join(', ');
-  const cl1Str = step.clash_1.map(v => `<span class="step-vertex">${esc(v)}</span>`).join(', ');
-  const cl2Str = step.clash_2.map(v => `<span class="step-vertex">${esc(v)}</span>`).join(', ');
 
-  return `<div class="proof-step" data-step='${data}'>` +
+  let html = `<div class="proof-step" data-step='${data}'>` +
     `<span class="step-num">${step.step}.</span> ` +
     `<span class="step-k4">Pigeonhole X-wing</span> on {${cycleStr}}:` +
     `<br>Diagonals: {${d1Str}} and {${d2Str}} (non-adjacent).` +
     `<br><span class="step-identify">By pigeonhole, one diagonal must share a color.</span>` +
-    `<br>Case 1: color(${esc(step.diagonal_1[0])}) = color(${esc(step.diagonal_1[1])})` +
-    ` \u2192 forces ${cl1Str} (adjacent). <span class="step-k4">Contradiction.</span>` +
-    `<br>Case 2: color(${esc(step.diagonal_2[0])}) = color(${esc(step.diagonal_2[1])})` +
-    ` \u2192 forces ${cl2Str} (adjacent). <span class="step-k4">Contradiction.</span>` +
-    `</div>`;
+    `<br>Case 1: color(${esc(step.diagonal_1[0])}) = color(${esc(step.diagonal_1[1])}) = X`;
+
+  if (step.trace_1 && step.trace_1.length > 0) {
+    for (let ti = 0; ti < step.trace_1.length; ti++) {
+      html += `<br><span class="step-trace xwing-substep" data-case="1" data-tidx="${ti}">\u00a0\u00a0${esc(step.trace_1[ti])}</span>`;
+    }
+  }
+  html += `<br><span class="step-k4">\u00a0\u00a0Contradiction.</span>`;
+
+  html += `<br>Case 2: color(${esc(step.diagonal_2[0])}) = color(${esc(step.diagonal_2[1])}) = X`;
+
+  if (step.trace_2 && step.trace_2.length > 0) {
+    for (let ti = 0; ti < step.trace_2.length; ti++) {
+      html += `<br><span class="step-trace xwing-substep" data-case="2" data-tidx="${ti}">\u00a0\u00a0${esc(step.trace_2[ti])}</span>`;
+    }
+  }
+  html += `<br><span class="step-k4">\u00a0\u00a0Contradiction.</span>`;
+
+  html += `</div>`;
+  return html;
 }
 
 function renderSetEquivalenceStep(step, depth) {
@@ -1024,6 +1056,132 @@ function highlightProofStep(pattern, el) {
   renderGrid(pattern, highlights, edgeHL, virtEdges);
 }
 
+// ── X-wing substep highlighting ─────────────────────────────────
+
+/**
+ * Parse a single X-wing trace line into a structured object.
+ * Formats:
+ *   House exclusion: "row 3 {r3c6, r3c8, r3c9}: r3c8=X → r3c6≠X"
+ *   House forced:    "box 6 {r4c9, r5c8, r6c7}: r4c9≠X, r5c8≠X → r6c7=X"
+ *   Clash:           "r8c6=X and r9c5=X are adjacent"  or  "...clash"
+ */
+function parseXwingTraceLine(line) {
+  // Clash line
+  const clashMatch = line.match(/^(.+?)=X and (.+?)=X (?:are adjacent|clash)/);
+  if (clashMatch) {
+    return {
+      type: 'clash',
+      clashCells: [clashMatch[1].trim(), clashMatch[2].trim()],
+    };
+  }
+  // House deduction: "house {cells}: premises → conclusions"
+  const houseMatch = line.match(/^(.+?)\s*\{([^}]+)\}:\s*(.+?)\s*→\s*(.+)$/);
+  if (houseMatch) {
+    const houseCells = houseMatch[2].split(',').map(s => s.trim());
+    const conclusionStr = houseMatch[4].trim();
+    const concluded = [];
+    // Conclusion format: "cell1, cell2≠X" or "cell1=X" — suffix applies to all cells
+    if (conclusionStr.endsWith('=X')) {
+      const cellsPart = conclusionStr.slice(0, -2);
+      for (const c of cellsPart.split(',').map(s => s.trim())) {
+        if (c) concluded.push({ cell: c, isX: true });
+      }
+    } else if (conclusionStr.endsWith('≠X')) {
+      const cellsPart = conclusionStr.slice(0, -2);
+      for (const c of cellsPart.split(',').map(s => s.trim())) {
+        if (c) concluded.push({ cell: c, isX: false });
+      }
+    }
+    return { type: 'deduction', houseCells, concluded };
+  }
+  return null;
+}
+
+/**
+ * Highlight a single X-wing trace substep on the grid.
+ * Accumulates forced =X / ≠X state through trace lines 0..tidx,
+ * then highlights the grid accordingly.
+ */
+function highlightXwingSubstep(pattern, parentStepEl, stepData, caseNum, tidx) {
+  // Clear any active step highlighting
+  for (const s of document.querySelectorAll('.proof-step.active'))
+    s.classList.remove('active');
+  for (const s of document.querySelectorAll('.xwing-substep.active'))
+    s.classList.remove('active');
+
+  // Mark parent step and this substep as active
+  parentStepEl.classList.add('active');
+  const allSubs = parentStepEl.querySelectorAll(`.xwing-substep[data-case="${caseNum}"]`);
+  if (allSubs[tidx]) allSubs[tidx].classList.add('active');
+
+  const traceLines = caseNum === 1 ? (stepData.trace_1 || []) : (stepData.trace_2 || []);
+  const seedDiag = caseNum === 1 ? stepData.diagonal_1 : stepData.diagonal_2;
+
+  // Accumulate forced state through trace lines 0..tidx
+  const forcedX = new Set();  // cell indices known to be =X
+  const forcedNotX = new Set();  // cell indices known to be ≠X
+
+  // Seeds: the diagonal cells start as =X
+  for (const name of seedDiag) {
+    for (const cell of parseCellsFromLabel(name)) forcedX.add(cell);
+  }
+
+  for (let i = 0; i <= tidx && i < traceLines.length; i++) {
+    const parsed = parseXwingTraceLine(traceLines[i]);
+    if (!parsed || parsed.type === 'clash') continue;
+    for (const { cell, isX } of parsed.concluded) {
+      for (const ci of parseCellsFromLabel(cell)) {
+        if (isX) forcedX.add(ci);
+        else forcedNotX.add(ci);
+      }
+    }
+  }
+
+  // Parse the current line for house / clash highlighting
+  const currentParsed = tidx < traceLines.length ? parseXwingTraceLine(traceLines[tidx]) : null;
+
+  // Build highlights map
+  const highlights = {};
+
+  // All cycle cells: purple background (structural context)
+  for (const name of stepData.cycle) {
+    for (const cell of parseCellsFromLabel(name)) {
+      highlights[cell] = 'hl-diamond';
+    }
+  }
+
+  // Cells forced =X: green (same color as diagonal seeds)
+  for (const cell of forcedX) {
+    highlights[cell] = 'hl-set';
+  }
+
+  // Cells forced ≠X: blue (different color)
+  for (const cell of forcedNotX) {
+    highlights[cell] = 'hl-identify';
+  }
+
+  // Current house cells: highlight those not already colored
+  if (currentParsed && currentParsed.type === 'deduction') {
+    for (const name of currentParsed.houseCells) {
+      for (const cell of parseCellsFromLabel(name)) {
+        if (!highlights[cell]) highlights[cell] = 'highlighted';
+      }
+    }
+  }
+
+  // Clash cells: red
+  if (currentParsed && currentParsed.type === 'clash') {
+    for (const name of currentParsed.clashCells) {
+      for (const cell of parseCellsFromLabel(name)) {
+        highlights[cell] = 'hl-k4';
+      }
+    }
+  }
+
+  activeProofStep = stepData;
+  renderGrid(pattern, highlights);
+}
+
 // Parse "r3c5" or "[r1c2=r3c5=r4c1]" into cell indices
 function parseCellsFromLabel(label) {
   const cells = [];
@@ -1208,8 +1366,20 @@ function proofToText(p) {
         lines.push(`${indent}${s.step}. Pigeonhole X-wing on {${s.cycle.join(', ')}}:`);
         lines.push(`${indent}   Diagonals: {${s.diagonal_1.join(', ')}} and {${s.diagonal_2.join(', ')}} (non-adjacent).`);
         lines.push(`${indent}   By pigeonhole, one diagonal must share a color.`);
-        lines.push(`${indent}   Case 1: color(${s.diagonal_1[0]}) = color(${s.diagonal_1[1]}) \u2192 forces ${s.clash_1.join(' = ')} (adjacent). Contradiction.`);
-        lines.push(`${indent}   Case 2: color(${s.diagonal_2[0]}) = color(${s.diagonal_2[1]}) \u2192 forces ${s.clash_2.join(' = ')} (adjacent). Contradiction.`);
+        lines.push(`${indent}   Case 1: color(${s.diagonal_1[0]}) = color(${s.diagonal_1[1]}) = X`);
+        if (s.trace_1 && s.trace_1.length > 0) {
+          for (const line of s.trace_1) {
+            lines.push(`${indent}     ${line}`);
+          }
+        }
+        lines.push(`${indent}     Contradiction.`);
+        lines.push(`${indent}   Case 2: color(${s.diagonal_2[0]}) = color(${s.diagonal_2[1]}) = X`);
+        if (s.trace_2 && s.trace_2.length > 0) {
+          for (const line of s.trace_2) {
+            lines.push(`${indent}     ${line}`);
+          }
+        }
+        lines.push(`${indent}     Contradiction.`);
       } else if (s.type === 'set_equivalence') {
         lines.push(`${indent}${s.step}. SET: ${s.equation}`);
         lines.push(`${indent}   Remainder: {${s.lhs.join(', ')}} = {${s.rhs.join(', ')}}.`);

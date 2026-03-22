@@ -54,6 +54,44 @@ def translate_cell_name(name, iso):
     return re.sub(r'r(\d+)c(\d+)', repl, name)
 
 
+def translate_trace_line(line, iso):
+    """Translate cell references AND house labels in a trace line."""
+    translated = translate_cell_name(line, iso)
+    # Fix house labels: "row 3 {r5c2, r5c4, r5c5}" → "row 5 {r5c2, r5c4, r5c5}"
+    def fix_house(m):
+        cells_str = m.group(2)
+        cells = re.findall(r'r(\d+)c(\d+)', cells_str)
+        if not cells:
+            return m.group(0)
+        rows = set(int(r) for r, c in cells)
+        cols = set(int(c) for r, c in cells)
+        if len(rows) == 1:
+            return f'row {rows.pop()} {{{cells_str}}}'
+        if len(cols) == 1:
+            return f'col {cols.pop()} {{{cells_str}}}'
+        boxes = set(3 * ((int(r) - 1) // 3) + (int(c) - 1) // 3 + 1 for r, c in cells)
+        if len(boxes) == 1:
+            return f'box {boxes.pop()} {{{cells_str}}}'
+        return m.group(0)
+    translated = re.sub(r'(?:row|col|box) (\d+) \{([^}]+)\}', fix_house, translated)
+    return translated
+
+
+def compute_proof_length(tree):
+    """Count total proof steps including X-wing trace substeps.
+    Each step counts as 1, plus each trace line in X-wing steps."""
+    total = 0
+    for step in tree:
+        total += 1  # the step itself
+        if step['type'] == 'pigeonhole_xwing':
+            total += len(step.get('trace_1', []))
+            total += len(step.get('trace_2', []))
+        elif step['type'] == 'branch':
+            total += compute_proof_length(step.get('case_a', []))
+            total += compute_proof_length(step.get('case_b', []))
+    return total
+
+
 def translate_proof_tree(tree, iso):
     """Recursively translate all cell references in a proof tree to minlex form."""
     result = []
@@ -92,6 +130,14 @@ def translate_proof_tree(tree, iso):
                 {**row, 'cells': [translate_cell_name(c, iso) for c in row['cells']]}
                 for row in s['rows']
             ]
+        elif s['type'] == 'pigeonhole_xwing':
+            s['cycle'] = [translate_cell_name(v, iso) for v in s['cycle']]
+            s['diagonal_1'] = [translate_cell_name(v, iso) for v in s['diagonal_1']]
+            s['diagonal_2'] = [translate_cell_name(v, iso) for v in s['diagonal_2']]
+            s['clash_1'] = [translate_cell_name(v, iso) for v in s['clash_1']]
+            s['clash_2'] = [translate_cell_name(v, iso) for v in s['clash_2']]
+            s['trace_1'] = [translate_trace_line(t, iso) for t in s.get('trace_1', [])]
+            s['trace_2'] = [translate_trace_line(t, iso) for t in s.get('trace_2', [])]
         elif s['type'] == 'branch':
             s['vertex_a'] = translate_cell_name(s['vertex_a'], iso)
             s['vertex_b'] = translate_cell_name(s['vertex_b'], iso)
@@ -309,6 +355,14 @@ def parse_proof_file(path):
     return results
 
 
+def _extract_clash(trace_line):
+    """Extract the two clashing cell names from a trace line like 'r6c3=X and r9c3=X are adjacent'."""
+    m = re.match(r'(.+?)=X and (.+?)=X (?:are adjacent|clash)', trace_line)
+    if m:
+        return [m.group(1).strip(), m.group(2).strip()]
+    return []
+
+
 def parse_proof_steps(lines):
     """Parse proof text lines into a structured tree."""
     steps = []
@@ -442,19 +496,48 @@ def parse_proof_steps(lines):
             # Skip "By pigeonhole..." line
             i += 1
             i += 1
-            # Case 1 line
+            # Case 1 — new format has trace lines + standalone Contradiction;
+            # old format has everything on one line ending with Contradiction.
             c1_line = lines[i].strip() if i < len(lines) else ''
-            clash_1 = []
-            c1_m = re.search(r'forces (.+?) = (.+?) \(adjacent\)', c1_line)
-            if c1_m:
-                clash_1 = [c1_m.group(1), c1_m.group(2)]
             i += 1
-            # Case 2 line
+            trace_1 = []
+            clash_1_old = []
+            if 'Contradiction' in c1_line:
+                # Old format: "Case 1: ... forces A and B (adjacent). Contradiction."
+                c1_m = re.search(r'same color forced onto (.+?) and (.+?) \(adjacent\)', c1_line)
+                if c1_m:
+                    clash_1_old = [c1_m.group(1).strip(), c1_m.group(2).strip()]
+            else:
+                # New format: trace lines follow until standalone "Contradiction."
+                while i < len(lines):
+                    tl = lines[i].strip()
+                    if tl == 'Contradiction.':
+                        i += 1
+                        break
+                    if tl:
+                        trace_1.append(tl)
+                    i += 1
+            # Case 2
             c2_line = lines[i].strip() if i < len(lines) else ''
-            clash_2 = []
-            c2_m = re.search(r'forces (.+?) = (.+?) \(adjacent\)', c2_line)
-            if c2_m:
-                clash_2 = [c2_m.group(1), c2_m.group(2)]
+            i += 1
+            trace_2 = []
+            clash_2_old = []
+            if 'Contradiction' in c2_line:
+                c2_m = re.search(r'same color forced onto (.+?) and (.+?) \(adjacent\)', c2_line)
+                if c2_m:
+                    clash_2_old = [c2_m.group(1).strip(), c2_m.group(2).strip()]
+            else:
+                while i < len(lines):
+                    tl = lines[i].strip()
+                    if tl == 'Contradiction.':
+                        i += 1
+                        break
+                    if tl:
+                        trace_2.append(tl)
+                    i += 1
+            # Extract clash cells from last trace entry (new format) or from case line (old format)
+            clash_1 = _extract_clash(trace_1[-1]) if trace_1 else clash_1_old
+            clash_2 = _extract_clash(trace_2[-1]) if trace_2 else clash_2_old
             steps.append({
                 'type': 'pigeonhole_xwing',
                 'step': step_num,
@@ -463,6 +546,8 @@ def parse_proof_steps(lines):
                 'diagonal_2': diag_2,
                 'clash_1': clash_1,
                 'clash_2': clash_2,
+                'trace_1': trace_1,
+                'trace_2': trace_2,
             })
             i += 1
             continue
@@ -734,6 +819,9 @@ def main():
             # Translate proof tree cell references to minlex form
             translated_tree = translate_proof_tree(proof_data['proof_tree'], iso)
 
+            # Compute proof length (steps + X-wing substeps)
+            proof_length = compute_proof_length(translated_tree)
+
             # Determine which rows/bands are occupied (from minlex form)
             rows_used = sorted(set(c // 9 for c in minlex_cells))
 
@@ -767,6 +855,7 @@ def main():
                     'greedy_set_equivalences': proof_data['greedy_set_equivalences'],
                     'greedy_parity_transports': proof_data['greedy_parity_transports'],
                     'greedy_pigeonhole_xwings': proof_data['greedy_pigeonhole_xwings'],
+                    'proof_length': proof_length,
                     'tree': translated_tree,
                 },
             }
