@@ -412,6 +412,17 @@ fn main() {
                 } else {
                     out += &format!("{}\n{}\n", summary, bitstr);
                     out += &result.text;
+                    // Output alternative proofs
+                    for (j, (label, alt, alt_text)) in result.alt_proofs.iter().enumerate() {
+                        out += &format!(
+                            "\n=== Alt proof {}/{} [{}] ({}) ===\n",
+                            j + 1,
+                            result.alt_proofs.len(),
+                            label,
+                            alt.technique_label(),
+                        );
+                        out += alt_text;
+                    }
                     out += "\n";
                 }
 

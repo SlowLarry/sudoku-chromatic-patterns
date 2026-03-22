@@ -221,7 +221,8 @@ def parse_proof_file(path):
         header_match = re.match(
             r'pattern (\d+)/(\d+): (PROVED|FAILED) cells=(\d+) '
             r'depth=(\d+) diamonds=(\d+) odd_wheels=(\d+) circular_ladders=(\d+) bridged_hexagons=(\d+) set_equivalences=(\d+) parity_transports=(\d+) pigeonhole_xwings=(\d+) branches=(\d+) complete=(\w+)'
-            r'(?: greedy_branches=(\d+) greedy_odd_wheels=(\d+) greedy_circular_ladders=(\d+) greedy_bridged_hexagons=(\d+) greedy_set_equivalences=(\d+) greedy_parity_transports=(\d+) greedy_pigeonhole_xwings=(\d+))?',
+            r'(?: greedy_branches=(\d+) greedy_odd_wheels=(\d+) greedy_circular_ladders=(\d+) greedy_bridged_hexagons=(\d+) greedy_set_equivalences=(\d+) greedy_parity_transports=(\d+) greedy_pigeonhole_xwings=(\d+))?'
+            r'(?: proofs=(\d+))?',
             block
         )
         if header_match:
@@ -321,11 +322,43 @@ def parse_proof_file(path):
         lines = block.split('\n')
         bitstring = lines[1].strip() if len(lines) > 1 else ''
 
-        # Extract proof text (everything after the bitstring)
-        proof_text = '\n'.join(lines[2:]).strip() if len(lines) > 2 else ''
+        # Split proof text into primary proof and alt proofs
+        body_lines = lines[2:]
+        primary_lines = []
+        alt_proof_sections = []
+        current_alt = None
+        for bl in body_lines:
+            alt_header = re.match(r'=== Alt proof (\d+)/(\d+) \[(.+?)\] \((.+?)\) ===', bl.strip())
+            if alt_header:
+                if current_alt is not None:
+                    alt_proof_sections.append(current_alt)
+                current_alt = {
+                    'label': alt_header.group(3),
+                    'techniques': alt_header.group(4),
+                    'lines': [],
+                }
+            elif current_alt is not None:
+                current_alt['lines'].append(bl)
+            else:
+                primary_lines.append(bl)
+        if current_alt is not None:
+            alt_proof_sections.append(current_alt)
 
-        # Parse structured proof steps
-        proof_steps = parse_proof_steps(lines[2:])
+        # Extract primary proof text
+        proof_text = '\n'.join(primary_lines).strip()
+
+        # Parse structured proof steps for primary proof
+        proof_steps = parse_proof_steps(primary_lines)
+
+        # Parse alt proof steps
+        alt_proofs = []
+        for alt in alt_proof_sections:
+            alt_steps = parse_proof_steps(alt['lines'])
+            alt_proofs.append({
+                'label': alt['label'],
+                'techniques': alt['techniques'],
+                'tree': alt_steps,
+            })
 
         results.append({
             'index': idx,
@@ -351,6 +384,7 @@ def parse_proof_file(path):
             'greedy_pigeonhole_xwings': greedy_pigeonhole_xwings,
             'proof_text': proof_text,
             'proof_tree': proof_steps,
+            'alt_proofs': alt_proofs,
         })
     return results
 
@@ -819,6 +853,17 @@ def main():
             # Translate proof tree cell references to minlex form
             translated_tree = translate_proof_tree(proof_data['proof_tree'], iso)
 
+            # Translate alt proof trees
+            translated_alt_proofs = []
+            for alt in proof_data.get('alt_proofs', []):
+                translated_alt_tree = translate_proof_tree(alt['tree'], iso)
+                translated_alt_proofs.append({
+                    'label': alt['label'],
+                    'techniques': alt['techniques'],
+                    'tree': translated_alt_tree,
+                    'proof_length': compute_proof_length(translated_alt_tree),
+                })
+
             # Compute proof length (steps + X-wing substeps)
             proof_length = compute_proof_length(translated_tree)
 
@@ -859,6 +904,9 @@ def main():
                     'tree': translated_tree,
                 },
             }
+
+            if translated_alt_proofs:
+                pattern['alt_proofs'] = translated_alt_proofs
 
             all_patterns.append(pattern)
 

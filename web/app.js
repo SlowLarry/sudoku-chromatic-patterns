@@ -3,6 +3,7 @@ let DATA = null;
 let filteredPatterns = [];
 let selectedPattern = null;
 let activeProofStep = null;
+let activeProofTree = null; // currently displayed proof tree (for copy)
 
 // ── Auxiliary color palette for accumulated diamond merges ──────
 const AUX_COLORS = ['color-a', 'color-b', 'color-c', 'color-d'];
@@ -465,16 +466,56 @@ function renderGrid(p, highlights, edgeHighlights, virtualEdges) {
 }
 
 // ── Proof Renderer ──────────────────────────────────────────────
-function renderProof(p) {
+function renderProof(p, activeIdx) {
+  const tabsContainer = document.getElementById('proof-tabs');
   const container = document.getElementById('proof-view');
-  if (!p.proof || !p.proof.tree || p.proof.tree.length === 0) {
+
+  // Build proof variants list
+  const variants = [];
+  if (p.proof && p.proof.tree && p.proof.tree.length > 0) {
+    variants.push({ label: 'Optimal', tree: p.proof.tree, complete: p.proof.complete, proof_length: p.proof.proof_length });
+  }
+  if (p.alt_proofs) {
+    for (const alt of p.alt_proofs) {
+      variants.push({ label: alt.techniques || alt.label, tree: alt.tree, complete: true, proof_length: alt.proof_length });
+    }
+  }
+
+  if (activeIdx == null) activeIdx = 0;
+
+  // Render tabs if multiple variants
+  if (variants.length > 1) {
+    tabsContainer.innerHTML = variants.map((v, i) => {
+      const cls = i === activeIdx ? 'proof-tab active' : 'proof-tab';
+      const lenStr = v.proof_length ? ` (${v.proof_length})` : '';
+      return `<button class="${cls}" data-proof-idx="${i}">${esc(v.label)}${lenStr}</button>`;
+    }).join('');
+    tabsContainer.style.display = '';
+    for (const btn of tabsContainer.querySelectorAll('.proof-tab')) {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.proofIdx);
+        activeProofStep = null;
+        renderGrid(p);
+        renderProof(p, idx);
+      });
+    }
+  } else {
+    tabsContainer.innerHTML = '';
+    tabsContainer.style.display = 'none';
+  }
+
+  const active = variants[activeIdx] || variants[0];
+  if (!active) {
     container.innerHTML = '<div class="proof-preamble">No proof data available.</div>';
+    activeProofTree = null;
     return;
   }
 
+  activeProofTree = active.tree;
+
   let html = '<div class="proof-preamble">Assume for contradiction it is 3-colorable.</div>';
-  html += renderProofSteps(p.proof.tree, 0);
-  if (p.proof.complete) {
+  html += renderProofSteps(active.tree, 0);
+  if (active.complete) {
     html += '<div class="proof-conclusion">Therefore the pattern is not 3-colorable. □</div>';
   }
   container.innerHTML = html;
@@ -1338,7 +1379,8 @@ function escapeAttr(str) {
 
 // ── Copy grid to clipboard ──────────────────────────────────────
 function proofToText(p) {
-  if (!p.proof || !p.proof.tree || p.proof.tree.length === 0) return 'No proof data.';
+  const tree = activeProofTree || (p.proof && p.proof.tree);
+  if (!tree || tree.length === 0) return 'No proof data.';
   const lines = ['Assume for contradiction it is 3-colorable.'];
   function walk(steps, depth) {
     const indent = '\t'.repeat(depth);
@@ -1407,8 +1449,8 @@ function proofToText(p) {
       }
     }
   }
-  walk(p.proof.tree, 0);
-  if (p.proof.complete) lines.push('Therefore the pattern is not 3-colorable. \u25a1');
+  walk(tree, 0);
+  lines.push('Therefore the pattern is not 3-colorable. \u25a1');
   return lines.join('\n');
 }
 

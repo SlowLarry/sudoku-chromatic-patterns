@@ -1586,15 +1586,37 @@ impl ProofGraph {
     /// - In a full house, if one cell is X → others are not-X
     /// - In a full house, if two cells are not-X → third is X
     ///
-    /// Returns the first pair of adjacent forced-X cells (contradiction),
+    /// Returns the contradicting pair plus a trace of deduction steps,
     /// or None if propagation reaches a fixed point without contradiction.
     fn propagate_forced_color(
         seeds: u32,
         houses: &[&FullHouse],
         adj: &[u32],
-    ) -> Option<(usize, usize)> {
+        labels: &[Vec<u8>],
+    ) -> Option<(usize, usize, Vec<String>)> {
         let mut forced_x = seeds;
         let mut forced_not_x: u32 = 0;
+        let mut trace: Vec<String> = Vec::new();
+
+        // helper to name a vertex
+        let vname = |v: usize| -> String {
+            let cells = &labels[v];
+            if cells.len() == 1 {
+                cell_name(cells[0])
+            } else {
+                let mut names: Vec<String> = cells.iter().map(|&c| cell_name(c)).collect();
+                names.sort();
+                format!("[{}]", names.join("="))
+            }
+        };
+
+        let house_label = |h: &FullHouse| -> String {
+            match h.htype {
+                HouseType::Row => format!("row {}", h.index + 1),
+                HouseType::Col => format!("col {}", h.index + 1),
+                HouseType::Box => format!("box {}", h.index + 1),
+            }
+        };
 
         loop {
             let old_x = forced_x;
@@ -1613,11 +1635,31 @@ impl ProofGraph {
                     let a = bits.trailing_zeros() as usize;
                     bits &= bits - 1;
                     let b = bits.trailing_zeros() as usize;
-                    return Some((a, b));
+                    trace.push(format!(
+                        "{} {{{}, {}, {}}}: {}=X and {}=X clash",
+                        house_label(h), vname(c[0]), vname(c[1]), vname(c[2]),
+                        vname(a), vname(b),
+                    ));
+                    return Some((a, b, trace));
                 }
 
                 // One X cell → others are not-X
                 if x_in_h == 1 {
+                    let new_not = h_mask & !forced_x & !forced_not_x;
+                    if new_not != 0 {
+                        let mut excluded = Vec::new();
+                        let mut bits = new_not;
+                        while bits != 0 {
+                            excluded.push(vname(bits.trailing_zeros() as usize));
+                            bits &= bits - 1;
+                        }
+                        let x_cell = (forced_x & h_mask).trailing_zeros() as usize;
+                        trace.push(format!(
+                            "{} {{{}, {}, {}}}: {}=X \u{2192} {}≠X",
+                            house_label(h), vname(c[0]), vname(c[1]), vname(c[2]),
+                            vname(x_cell), excluded.join(", "),
+                        ));
+                    }
                     forced_not_x |= h_mask & !forced_x;
                 }
 
@@ -1625,6 +1667,18 @@ impl ProofGraph {
                 if nx_in_h >= 2 && x_in_h == 0 {
                     let unknown = h_mask & !forced_x & !forced_not_x;
                     if unknown.count_ones() == 1 {
+                        let forced_cell = unknown.trailing_zeros() as usize;
+                        let mut notx_cells = Vec::new();
+                        let mut bits = forced_not_x & h_mask;
+                        while bits != 0 {
+                            notx_cells.push(vname(bits.trailing_zeros() as usize));
+                            bits &= bits - 1;
+                        }
+                        trace.push(format!(
+                            "{} {{{}, {}, {}}}: {}≠X \u{2192} {}=X",
+                            house_label(h), vname(c[0]), vname(c[1]), vname(c[2]),
+                            notx_cells.join(", "), vname(forced_cell),
+                        ));
                         forced_x |= unknown;
                     }
                 }
@@ -1635,10 +1689,14 @@ impl ProofGraph {
             while bits != 0 {
                 let a = bits.trailing_zeros() as usize;
                 bits &= bits - 1;
-                let clash = adj[a] & forced_x;
+                let clash = adj[a] & forced_x & !((1 << (a + 1)) - 1);
                 if clash != 0 {
                     let b = clash.trailing_zeros() as usize;
-                    return Some((a, b));
+                    trace.push(format!(
+                        "{}=X and {}=X are adjacent",
+                        vname(a), vname(b),
+                    ));
+                    return Some((a, b, trace));
                 }
             }
 
@@ -1700,13 +1758,13 @@ impl ProofGraph {
                         // Chordless 4-cycle a-b-c-d-a
                         // Diagonal 1: (a,c), Diagonal 2: (b,d)
                         let clash1 = Self::propagate_forced_color(
-                            (1 << a) | (1 << c), &houses, &self.adj,
+                            (1 << a) | (1 << c), &houses, &self.adj, &self.labels,
                         );
                         let clash2 = Self::propagate_forced_color(
-                            (1 << b) | (1 << d), &houses, &self.adj,
+                            (1 << b) | (1 << d), &houses, &self.adj, &self.labels,
                         );
 
-                        if let (Some((c1a, c1b)), Some((c2a, c2b))) = (clash1, clash2) {
+                        if let (Some((c1a, c1b, trace1)), Some((c2a, c2b, trace2))) = (clash1, clash2) {
                             return Some(ProofNode::PigeonholeXwing {
                                 cycle: [
                                     self.vertex_name(a),
@@ -1716,6 +1774,8 @@ impl ProofGraph {
                                 ],
                                 clash_1: (self.vertex_name(c1a), self.vertex_name(c1b)),
                                 clash_2: (self.vertex_name(c2a), self.vertex_name(c2b)),
+                                trace_1: trace1,
+                                trace_2: trace2,
                             });
                         }
                     }
@@ -1743,6 +1803,45 @@ fn combinations<T: Clone>(items: &[T], k: usize) -> Vec<Vec<T>> {
     }
     result
 }
+
+// ── Technique flags ─────────────────────────────────────────────────
+
+/// Bitmask flags for characterizing which proof techniques appear in a proof.
+/// Used to determine whether two proofs are "different enough" to keep as alternatives.
+pub const TECH_DIAMOND: u32       = 1 << 0;
+pub const TECH_SET: u32           = 1 << 1;
+pub const TECH_CIRCULAR_LADDER: u32 = 1 << 2;
+pub const TECH_BRIDGED_HEXAGON: u32 = 1 << 3;
+pub const TECH_PIGEONHOLE_XWING: u32 = 1 << 4;
+pub const TECH_ODD_WHEEL: u32    = 1 << 5;
+pub const TECH_PARITY: u32       = 1 << 6;
+pub const TECH_BRANCH: u32       = 1 << 7;
+
+/// Human-readable label for a technique flag.
+fn tech_label(flag: u32) -> &'static str {
+    match flag {
+        1 => "diamond",
+        2 => "set",
+        4 => "ladder",
+        8 => "hexagon",
+        16 => "xwing",
+        32 => "oddwheel",
+        64 => "parity",
+        128 => "branch",
+        _ => "unknown",
+    }
+}
+
+/// All disableable technique flags (K₄ and parity-chain are never disabled).
+const DISABLEABLE_TECHNIQUES: &[(u32, &str)] = &[
+    (TECH_DIAMOND, "no_diamond"),
+    (TECH_SET, "no_set"),
+    (TECH_CIRCULAR_LADDER, "no_ladder"),
+    (TECH_BRIDGED_HEXAGON, "no_hexagon"),
+    (TECH_PIGEONHOLE_XWING, "no_xwing"),
+    (TECH_ODD_WHEEL, "no_oddwheel"),
+    (TECH_PARITY, "no_parity"),
+];
 
 // ── Proof tree ──────────────────────────────────────────────────────
 
@@ -1847,6 +1946,8 @@ pub enum ProofNode {
         cycle: [String; 4],           // a-b-c-d in cycle order
         clash_1: (String, String),     // contradicting pair for diagonal (a,c)
         clash_2: (String, String),     // contradicting pair for diagonal (b,d)
+        trace_1: Vec<String>,          // deduction chain for diagonal (a,c)
+        trace_2: Vec<String>,          // deduction chain for diagonal (b,d)
     },
     /// Proof search exhausted depth limit.
     Failed,
@@ -2061,6 +2162,44 @@ impl ProofNode {
             }
         }
     }
+
+    /// Compute the technique signature: a bitmask of which proof technique types
+    /// appear anywhere in the proof tree.
+    pub fn technique_signature(&self) -> u32 {
+        match self {
+            ProofNode::K4Contradiction { .. } => 0,
+            ProofNode::OddWheel { .. } => TECH_ODD_WHEEL,
+            ProofNode::BridgedHexagon { .. } => TECH_BRIDGED_HEXAGON,
+            ProofNode::PigeonholeXwing { .. } => TECH_PIGEONHOLE_XWING,
+            ProofNode::ParityTransport { .. } | ProofNode::ParityChain { .. }
+            | ProofNode::HouseColoringContradiction { .. } => TECH_PARITY,
+            ProofNode::Failed => 0,
+            ProofNode::DiamondMerge { next, .. } => TECH_DIAMOND | next.technique_signature(),
+            ProofNode::CircularLadder { next, .. } => TECH_CIRCULAR_LADDER | next.technique_signature(),
+            ProofNode::SetEquivalence { is_contradiction, next, .. } => {
+                TECH_SET | if *is_contradiction { 0 } else { next.as_ref().unwrap().technique_signature() }
+            }
+            ProofNode::ParityTransportDeduction { next, .. } => TECH_PARITY | next.technique_signature(),
+            ProofNode::Branch { same_color, diff_color, .. } => {
+                TECH_BRANCH | same_color.technique_signature() | diff_color.technique_signature()
+            }
+        }
+    }
+
+    /// Human-readable label for the technique signature, e.g. "set+diamond".
+    pub fn technique_label(&self) -> String {
+        let sig = self.technique_signature();
+        if sig == 0 {
+            return "k4".to_string();
+        }
+        let mut parts = Vec::new();
+        for bit in 0..8 {
+            if sig & (1 << bit) != 0 {
+                parts.push(tech_label(1 << bit));
+            }
+        }
+        parts.join("+")
+    }
 }
 
 // ── SET helpers ─────────────────────────────────────────────────────
@@ -2123,12 +2262,13 @@ fn find_best_proof(
     branches_left: usize,
     depth_remaining: usize,
     size_budget: usize,
+    disabled: u32,
 ) -> ProofNode {
     if size_budget == 0 {
         return ProofNode::Failed;
     }
 
-    // Terminal: K₄ found — contradiction, size 1, can't be beaten
+    // Terminal: K₄ found — contradiction, size 1, can't be beaten (never disabled)
     if let Some(k4) = graph.find_k4() {
         return ProofNode::K4Contradiction {
             vertices: k4.map(|v| graph.vertex_name(v)),
@@ -2136,34 +2276,44 @@ fn find_best_proof(
     }
 
     // Terminal: odd wheel found — contradiction, size 1, can't be beaten
-    if let Some((hub, rim)) = graph.find_odd_wheel() {
-        return ProofNode::OddWheel {
-            hub: graph.vertex_name(hub),
-            rim: rim.iter().map(|&v| graph.vertex_name(v)).collect(),
-        };
+    if disabled & TECH_ODD_WHEEL == 0 {
+        if let Some((hub, rim)) = graph.find_odd_wheel() {
+            return ProofNode::OddWheel {
+                hub: graph.vertex_name(hub),
+                rim: rim.iter().map(|&v| graph.vertex_name(v)).collect(),
+            };
+        }
     }
 
     // Terminal: parity transport (trivalue oddagon)
-    if let Some(pt) = graph.find_parity_transport() {
-        return pt;
+    if disabled & TECH_PARITY == 0 {
+        if let Some(pt) = graph.find_parity_transport() {
+            return pt;
+        }
     }
 
     // Terminal: parity transport (pigeonhole chain)
-    if let Some(pc) = graph.find_parity_chain() {
-        return pc;
+    if disabled & TECH_PARITY == 0 {
+        if let Some(pc) = graph.find_parity_chain() {
+            return pc;
+        }
     }
 
     // Terminal: bridged hexagon
-    if let Some((ring, bridges)) = graph.find_bridged_hexagon() {
-        return ProofNode::BridgedHexagon {
-            ring: ring.map(|v| graph.vertex_name(v)),
-            bridges: bridges.map(|(s1, s2)| (graph.vertex_name(s1), graph.vertex_name(s2))),
-        };
+    if disabled & TECH_BRIDGED_HEXAGON == 0 {
+        if let Some((ring, bridges)) = graph.find_bridged_hexagon() {
+            return ProofNode::BridgedHexagon {
+                ring: ring.map(|v| graph.vertex_name(v)),
+                bridges: bridges.map(|(s1, s2)| (graph.vertex_name(s1), graph.vertex_name(s2))),
+            };
+        }
     }
 
     // Terminal: pigeonhole X-wing
-    if let Some(xw) = graph.find_pigeonhole_xwing() {
-        return xw;
+    if disabled & TECH_PIGEONHOLE_XWING == 0 {
+        if let Some(xw) = graph.find_pigeonhole_xwing() {
+            return xw;
+        }
     }
 
     if depth_remaining == 0 {
@@ -2174,6 +2324,7 @@ fn find_best_proof(
     let mut best_size = size_budget;
 
     // Try all diamond reductions
+    if disabled & TECH_DIAMOND == 0 {
     let diamonds = graph.find_all_diamonds();
     for (a, b, u, v) in &diamonds {
         let tip_a_name = graph.vertex_name(*a);
@@ -2185,7 +2336,7 @@ fn find_best_proof(
         let (keep, remove) = ((*a).min(*b), (*a).max(*b));
         g.merge(keep, remove);
 
-        let next = find_best_proof(&g, branches_left, depth_remaining - 1, best_size - 1);
+        let next = find_best_proof(&g, branches_left, depth_remaining - 1, best_size - 1, disabled);
         if next.is_complete() {
             let total = 1 + next.size();
             if total < best_size {
@@ -2200,8 +2351,10 @@ fn find_best_proof(
             }
         }
     }
+    }
 
     // Try all circular ladder reductions
+    if disabled & TECH_CIRCULAR_LADDER == 0 {
     let ladders = graph.find_all_circular_ladders();
     for (rungs, satellites) in &ladders {
         let rung_names: [(String, String); 3] = [
@@ -2220,7 +2373,7 @@ fn find_best_proof(
             }
         }
 
-        let next = find_best_proof(&g, branches_left, depth_remaining - 1, best_size - 1);
+        let next = find_best_proof(&g, branches_left, depth_remaining - 1, best_size - 1, disabled);
         if next.is_complete() {
             let total = 1 + next.size();
             if total < best_size {
@@ -2233,8 +2386,10 @@ fn find_best_proof(
             }
         }
     }
+    }
 
     // Try all SET equivalence deductions
+    if disabled & TECH_SET == 0 {
     let set_deds = graph.find_set_deductions();
     for (eq, ded) in &set_deds {
         let (equation, lhs_names, rhs_names, ded_text) = format_set_equation(eq, graph);
@@ -2259,7 +2414,7 @@ fn find_best_proof(
                 let (keep, remove) = ((*lhs_v).min(*rhs_v), (*lhs_v).max(*rhs_v));
                 g.merge(keep, remove);
 
-                let sub = find_best_proof(&g, branches_left, depth_remaining - 1, best_size - 1);
+                let sub = find_best_proof(&g, branches_left, depth_remaining - 1, best_size - 1, disabled);
                 if sub.is_complete() {
                     let total = 1 + sub.size();
                     if total < best_size {
@@ -2281,7 +2436,7 @@ fn find_best_proof(
                     g.add_edge(a, b);
                 }
 
-                let sub = find_best_proof(&g, branches_left, depth_remaining - 1, best_size - 1);
+                let sub = find_best_proof(&g, branches_left, depth_remaining - 1, best_size - 1, disabled);
                 if sub.is_complete() {
                     let total = 1 + sub.size();
                     if total < best_size {
@@ -2299,9 +2454,10 @@ fn find_best_proof(
             }
         }
     }
+    }
 
     // Try branches (only if allowed)
-    if branches_left > 0 {
+    if disabled & TECH_BRANCH == 0 && branches_left > 0 {
         let pairs = graph.branch_candidates();
 
         for (u, v) in pairs {
@@ -2317,6 +2473,7 @@ fn find_best_proof(
                 branches_left - 1,
                 depth_remaining - 1,
                 sub_budget,
+                disabled,
             );
 
             if !same_proof.is_complete() {
@@ -2337,6 +2494,7 @@ fn find_best_proof(
                 branches_left - 1,
                 depth_remaining - 1,
                 diff_budget,
+                disabled,
             );
 
             if !diff_proof.is_complete() {
@@ -2754,7 +2912,7 @@ fn format_node(node: &ProofNode, step: &mut usize, indent: usize) -> String {
             );
             s
         }
-        ProofNode::PigeonholeXwing { cycle, clash_1, clash_2 } => {
+        ProofNode::PigeonholeXwing { cycle, clash_1: _, clash_2: _, trace_1, trace_2 } => {
             *step += 1;
             let mut s = format!(
                 "{}{}.  Pigeonhole X-wing on {{{}, {}, {}, {}}}:\n",
@@ -2769,12 +2927,26 @@ fn format_node(node: &ProofNode, step: &mut usize, indent: usize) -> String {
                 pad,
             );
             s += &format!(
-                "{}    Case 1: color({}) = color({}) \u{2192} forces {} = {} (adjacent). Contradiction.\n",
-                pad, cycle[0], cycle[2], clash_1.0, clash_1.1,
+                "{}    Case 1: color({}) = color({}) = X\n",
+                pad, cycle[0], cycle[2],
+            );
+            for line in trace_1 {
+                s += &format!("{}      {}\n", pad, line);
+            }
+            s += &format!(
+                "{}      Contradiction.\n",
+                pad,
             );
             s += &format!(
-                "{}    Case 2: color({}) = color({}) \u{2192} forces {} = {} (adjacent). Contradiction.\n",
-                pad, cycle[1], cycle[3], clash_2.0, clash_2.1,
+                "{}    Case 2: color({}) = color({}) = X\n",
+                pad, cycle[1], cycle[3],
+            );
+            for line in trace_2 {
+                s += &format!("{}      {}\n", pad, line);
+            }
+            s += &format!(
+                "{}      Contradiction.\n",
+                pad,
             );
             s
         }
@@ -2800,6 +2972,9 @@ pub fn format_proof(proof: &ProofNode) -> String {
 pub struct ProofResult {
     pub proof: ProofNode,
     pub text: String,
+    /// Alternative proofs with different technique signatures.
+    /// Each entry is (label, proof_node, formatted_text).
+    pub alt_proofs: Vec<(String, ProofNode, String)>,
     /// Difficulty metrics from the greedy/hierarchical proof.
     pub greedy_branches: usize,
     pub greedy_odd_wheels: usize,
@@ -2813,7 +2988,7 @@ pub struct ProofResult {
 impl ProofResult {
     pub fn summary(&self) -> String {
         format!(
-            "depth={} diamonds={} odd_wheels={} circular_ladders={} bridged_hexagons={} set_equivalences={} parity_transports={} pigeonhole_xwings={} branches={} complete={} greedy_branches={} greedy_odd_wheels={} greedy_circular_ladders={} greedy_bridged_hexagons={} greedy_set_equivalences={} greedy_parity_transports={} greedy_pigeonhole_xwings={}",
+            "depth={} diamonds={} odd_wheels={} circular_ladders={} bridged_hexagons={} set_equivalences={} parity_transports={} pigeonhole_xwings={} branches={} complete={} greedy_branches={} greedy_odd_wheels={} greedy_circular_ladders={} greedy_bridged_hexagons={} greedy_set_equivalences={} greedy_parity_transports={} greedy_pigeonhole_xwings={} proofs={}",
             self.proof.depth(),
             self.proof.diamond_count(),
             self.proof.odd_wheel_count(),
@@ -2831,6 +3006,7 @@ impl ProofResult {
             self.greedy_set_equivalences,
             self.greedy_parity_transports,
             self.greedy_pigeonhole_xwings,
+            1 + self.alt_proofs.len(),
         )
     }
 }
@@ -2841,26 +3017,77 @@ pub fn prove_pattern(cells: &[u8]) -> ProofResult {
     // Optimal proof: iterative deepening on branch count, trying all choices
     let mut proof = ProofNode::Failed;
     for max_br in 0..=10 {
-        proof = find_best_proof(&graph, max_br, 50, usize::MAX);
+        proof = find_best_proof(&graph, max_br, 50, usize::MAX, 0);
         if proof.is_complete() { break; }
     }
 
-    // Greedy proof: strict priority order
+    // Greedy proof: strict priority order (for difficulty classification)
     let mut greedy = ProofNode::Failed;
     for max_br in 0..=10 {
         greedy = find_greedy_proof(&graph, max_br, 50);
         if greedy.is_complete() { break; }
     }
 
+    // Extract greedy metrics before potentially moving greedy into alt_proofs
+    let g_branches = greedy.branch_count();
+    let g_odd_wheels = greedy.odd_wheel_count();
+    let g_circular_ladders = greedy.circular_ladder_count();
+    let g_bridged_hexagons = greedy.bridged_hexagon_count();
+    let g_set_equivalences = greedy.set_equivalence_count();
+    let g_parity_transports = greedy.parity_transport_count();
+    let g_pigeonhole_xwings = greedy.pigeonhole_xwing_count();
+
+    // Collect alternative proofs with different technique signatures.
+    let optimal_sig = proof.technique_signature();
+    let optimal_size = proof.size();
+    // Keep alternatives within 2× optimal size or optimal + 3 steps
+    let max_alt_size = optimal_size.saturating_mul(2).max(optimal_size.saturating_add(3));
+    let mut seen_sigs: Vec<u32> = vec![optimal_sig];
+    let mut alt_proofs: Vec<(String, ProofNode, String)> = Vec::new();
+
+    // If greedy proof uses different techniques, keep it
+    if greedy.is_complete() {
+        let greedy_sig = greedy.technique_signature();
+        if greedy_sig != optimal_sig && greedy.size() <= max_alt_size {
+            seen_sigs.push(greedy_sig);
+            let greedy_text = format_proof(&greedy);
+            alt_proofs.push(("greedy".to_string(), greedy, greedy_text));
+        }
+    }
+
+    // For each technique in the optimal proof, try disabling it
+    if proof.is_complete() {
+        for &(flag, label) in DISABLEABLE_TECHNIQUES {
+            if optimal_sig & flag == 0 { continue; } // not used in optimal, skip
+            let mut alt = ProofNode::Failed;
+            for max_br in 0..=10 {
+                alt = find_best_proof(&graph, max_br, 50, max_alt_size, flag);
+                if alt.is_complete() { break; }
+            }
+            if alt.is_complete() {
+                let alt_sig = alt.technique_signature();
+                if !seen_sigs.contains(&alt_sig) && alt.size() <= max_alt_size {
+                    seen_sigs.push(alt_sig);
+                    let alt_text = format_proof(&alt);
+                    alt_proofs.push((label.to_string(), alt, alt_text));
+                }
+            }
+        }
+    }
+
+    // Sort alternatives by size (shortest first)
+    alt_proofs.sort_by_key(|(_, p, _)| p.size());
+
     let text = format_proof(&proof);
     ProofResult {
-        greedy_branches: greedy.branch_count(),
-        greedy_odd_wheels: greedy.odd_wheel_count(),
-        greedy_circular_ladders: greedy.circular_ladder_count(),
-        greedy_bridged_hexagons: greedy.bridged_hexagon_count(),
-        greedy_set_equivalences: greedy.set_equivalence_count(),
-        greedy_parity_transports: greedy.parity_transport_count(),
-        greedy_pigeonhole_xwings: greedy.pigeonhole_xwing_count(),
+        greedy_branches: g_branches,
+        greedy_odd_wheels: g_odd_wheels,
+        greedy_circular_ladders: g_circular_ladders,
+        greedy_bridged_hexagons: g_bridged_hexagons,
+        greedy_set_equivalences: g_set_equivalences,
+        greedy_parity_transports: g_parity_transports,
+        greedy_pigeonhole_xwings: g_pigeonhole_xwings,
+        alt_proofs,
         proof,
         text,
     }

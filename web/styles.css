@@ -453,6 +453,34 @@ select:focus, input:focus {
   overflow-y: auto;
 }
 
+#proof-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+#proof-tabs:empty { display: none; }
+.proof-tab {
+  background: #21262d;
+  color: #8b949e;
+  border: 1px solid #30363d;
+  border-radius: 4px 4px 0 0;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.proof-tab:hover {
+  background: #30363d;
+  color: #c9d1d9;
+}
+.proof-tab.active {
+  background: #161b22;
+  color: #c9d1d9;
+  border-bottom-color: #161b22;
+}
+
 .proof-step {
   padding: 3px 6px;
   margin: 1px 0;
