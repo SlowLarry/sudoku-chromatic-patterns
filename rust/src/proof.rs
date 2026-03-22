@@ -1577,6 +1577,154 @@ impl ProofGraph {
 
         None
     }
+
+    // ── Pigeonhole X-wing ───────────────────────────────────────────
+
+    /// Propagate forced-color constraints through full houses.
+    ///
+    /// Given cells forced to share a color X (seeds), propagates:
+    /// - In a full house, if one cell is X → others are not-X
+    /// - In a full house, if two cells are not-X → third is X
+    ///
+    /// Returns the first pair of adjacent forced-X cells (contradiction),
+    /// or None if propagation reaches a fixed point without contradiction.
+    fn propagate_forced_color(
+        seeds: u32,
+        houses: &[&FullHouse],
+        adj: &[u32],
+    ) -> Option<(usize, usize)> {
+        let mut forced_x = seeds;
+        let mut forced_not_x: u32 = 0;
+
+        loop {
+            let old_x = forced_x;
+            let old_not = forced_not_x;
+
+            for h in houses {
+                let c = [h.cells[0], h.cells[1], h.cells[2]];
+                let h_mask = (1u32 << c[0]) | (1u32 << c[1]) | (1u32 << c[2]);
+
+                let x_in_h = (forced_x & h_mask).count_ones();
+                let nx_in_h = (forced_not_x & h_mask).count_ones();
+
+                // Two X cells in same house → contradiction
+                if x_in_h >= 2 {
+                    let mut bits = forced_x & h_mask;
+                    let a = bits.trailing_zeros() as usize;
+                    bits &= bits - 1;
+                    let b = bits.trailing_zeros() as usize;
+                    return Some((a, b));
+                }
+
+                // One X cell → others are not-X
+                if x_in_h == 1 {
+                    forced_not_x |= h_mask & !forced_x;
+                }
+
+                // Two not-X cells, no X cell yet → third is X
+                if nx_in_h >= 2 && x_in_h == 0 {
+                    let unknown = h_mask & !forced_x & !forced_not_x;
+                    if unknown.count_ones() == 1 {
+                        forced_x |= unknown;
+                    }
+                }
+            }
+
+            // Check: any two forced-X cells adjacent?
+            let mut bits = forced_x;
+            while bits != 0 {
+                let a = bits.trailing_zeros() as usize;
+                bits &= bits - 1;
+                let clash = adj[a] & forced_x;
+                if clash != 0 {
+                    let b = clash.trailing_zeros() as usize;
+                    return Some((a, b));
+                }
+            }
+
+            if forced_x == old_x && forced_not_x == old_not {
+                break;
+            }
+        }
+
+        None
+    }
+
+    /// Detect a pigeonhole X-wing contradiction.
+    ///
+    /// Finds a chordless 4-cycle (induced C₄). By pigeonhole, any
+    /// 3-coloring forces at least one diagonal to share a color.
+    /// Propagates forced-X / forced-not-X through full houses for each
+    /// diagonal. If both diagonals independently lead to a contradiction
+    /// (two forced-X cells in the same house), the graph is not
+    /// 3-colorable.
+    fn find_pigeonhole_xwing(&self) -> Option<ProofNode> {
+        let all_houses = self.find_full_houses();
+        let houses: Vec<&FullHouse> = all_houses.iter()
+            .filter(|h| {
+                h.cells[0] != h.cells[1] &&
+                h.cells[0] != h.cells[2] &&
+                h.cells[1] != h.cells[2]
+            })
+            .collect();
+
+        if houses.len() < 2 { return None; }
+
+        let active = self.active_verts();
+        let n = active.len();
+
+        // For each pair of non-adjacent vertices (potential diagonal)
+        for i in 0..n {
+            let a = active[i];
+            for j in (i + 1)..n {
+                let c = active[j];
+                if self.adj[a] & (1 << c) != 0 { continue; }
+
+                // Common neighbors of a and c in the active graph
+                let common = self.adj[a] & self.adj[c] & self.active;
+                if common.count_ones() < 2 { continue; }
+
+                let mut common_verts = Vec::new();
+                let mut cbits = common;
+                while cbits != 0 {
+                    common_verts.push(cbits.trailing_zeros() as usize);
+                    cbits &= cbits - 1;
+                }
+
+                for bi in 0..common_verts.len() {
+                    let b = common_verts[bi];
+                    for di in (bi + 1)..common_verts.len() {
+                        let d = common_verts[di];
+                        if self.adj[b] & (1 << d) != 0 { continue; }
+
+                        // Chordless 4-cycle a-b-c-d-a
+                        // Diagonal 1: (a,c), Diagonal 2: (b,d)
+                        let clash1 = Self::propagate_forced_color(
+                            (1 << a) | (1 << c), &houses, &self.adj,
+                        );
+                        let clash2 = Self::propagate_forced_color(
+                            (1 << b) | (1 << d), &houses, &self.adj,
+                        );
+
+                        if let (Some((c1a, c1b)), Some((c2a, c2b))) = (clash1, clash2) {
+                            return Some(ProofNode::PigeonholeXwing {
+                                cycle: [
+                                    self.vertex_name(a),
+                                    self.vertex_name(b),
+                                    self.vertex_name(c),
+                                    self.vertex_name(d),
+                                ],
+                                clash_1: (self.vertex_name(c1a), self.vertex_name(c1b)),
+                                clash_2: (self.vertex_name(c2a), self.vertex_name(c2b)),
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        None
+    }
 }
 
 /// Generate all k-element combinations from a slice.
@@ -1692,6 +1840,14 @@ pub enum ProofNode {
     HouseColoringContradiction {
         houses: Vec<String>,
     },
+    /// Pigeonhole X-wing: chordless 4-cycle (induced C₄) where by
+    /// pigeonhole both diag­onals sharing a color lead to contradiction
+    /// via forced-color propagation through full houses.
+    PigeonholeXwing {
+        cycle: [String; 4],           // a-b-c-d in cycle order
+        clash_1: (String, String),     // contradicting pair for diagonal (a,c)
+        clash_2: (String, String),     // contradicting pair for diagonal (b,d)
+    },
     /// Proof search exhausted depth limit.
     Failed,
 }
@@ -1705,6 +1861,7 @@ impl ProofNode {
             ProofNode::ParityTransport { .. } => true,
             ProofNode::ParityChain { .. } => true,
             ProofNode::HouseColoringContradiction { .. } => true,
+            ProofNode::PigeonholeXwing { .. } => true,
             ProofNode::SetEquivalence { is_contradiction, next, .. } => {
                 if *is_contradiction { true } else { next.as_ref().unwrap().is_complete() }
             }
@@ -1723,6 +1880,7 @@ impl ProofNode {
             | ProofNode::BridgedHexagon { .. } | ProofNode::ParityTransport { .. }
             | ProofNode::ParityChain { .. }
             | ProofNode::HouseColoringContradiction { .. }
+            | ProofNode::PigeonholeXwing { .. }
             | ProofNode::Failed => 0,
             ProofNode::SetEquivalence { is_contradiction, next, .. } => {
                 if *is_contradiction { 0 } else { 1 + next.as_ref().unwrap().depth() }
@@ -1741,6 +1899,7 @@ impl ProofNode {
             | ProofNode::BridgedHexagon { .. } | ProofNode::ParityTransport { .. }
             | ProofNode::ParityChain { .. }
             | ProofNode::HouseColoringContradiction { .. }
+            | ProofNode::PigeonholeXwing { .. }
             | ProofNode::Failed => 0,
             ProofNode::SetEquivalence { is_contradiction, next, .. } => {
                 if *is_contradiction { 0 } else { next.as_ref().unwrap().branch_count() }
@@ -1759,6 +1918,7 @@ impl ProofNode {
             | ProofNode::BridgedHexagon { .. } | ProofNode::ParityTransport { .. }
             | ProofNode::ParityChain { .. }
             | ProofNode::HouseColoringContradiction { .. }
+            | ProofNode::PigeonholeXwing { .. }
             | ProofNode::Failed => 0,
             ProofNode::SetEquivalence { is_contradiction, next, .. } => {
                 if *is_contradiction { 0 } else { next.as_ref().unwrap().diamond_count() }
@@ -1776,6 +1936,7 @@ impl ProofNode {
             ProofNode::K4Contradiction { .. } | ProofNode::BridgedHexagon { .. }
             | ProofNode::ParityTransport { .. } | ProofNode::ParityChain { .. }
             | ProofNode::HouseColoringContradiction { .. }
+            | ProofNode::PigeonholeXwing { .. }
             | ProofNode::Failed => 0,
             ProofNode::OddWheel { .. } => 1,
             ProofNode::SetEquivalence { is_contradiction, next, .. } => {
@@ -1794,6 +1955,7 @@ impl ProofNode {
             | ProofNode::BridgedHexagon { .. } | ProofNode::ParityTransport { .. }
             | ProofNode::ParityChain { .. }
             | ProofNode::HouseColoringContradiction { .. }
+            | ProofNode::PigeonholeXwing { .. }
             | ProofNode::Failed => 0,
             ProofNode::SetEquivalence { is_contradiction, next, .. } => {
                 if *is_contradiction { 0 } else { next.as_ref().unwrap().circular_ladder_count() }
@@ -1811,6 +1973,7 @@ impl ProofNode {
             ProofNode::K4Contradiction { .. } | ProofNode::OddWheel { .. }
             | ProofNode::ParityTransport { .. } | ProofNode::ParityChain { .. }
             | ProofNode::HouseColoringContradiction { .. }
+            | ProofNode::PigeonholeXwing { .. }
             | ProofNode::Failed => 0,
             ProofNode::BridgedHexagon { .. } => 1,
             ProofNode::SetEquivalence { is_contradiction, next, .. } => {
@@ -1829,6 +1992,7 @@ impl ProofNode {
             | ProofNode::BridgedHexagon { .. } | ProofNode::ParityTransport { .. }
             | ProofNode::ParityChain { .. }
             | ProofNode::HouseColoringContradiction { .. }
+            | ProofNode::PigeonholeXwing { .. }
             | ProofNode::Failed => 0,
             ProofNode::SetEquivalence { is_contradiction, next, .. } => {
                 1 + if *is_contradiction { 0 } else { next.as_ref().unwrap().set_equivalence_count() }
@@ -1845,6 +2009,7 @@ impl ProofNode {
             ProofNode::K4Contradiction { .. } | ProofNode::OddWheel { .. }
             | ProofNode::BridgedHexagon { .. }
             | ProofNode::HouseColoringContradiction { .. }
+            | ProofNode::PigeonholeXwing { .. }
             | ProofNode::Failed => 0,
             ProofNode::ParityTransport { .. } => 1,
             ProofNode::ParityChain { .. } => 1,
@@ -1858,6 +2023,24 @@ impl ProofNode {
             }
         }
     }
+    pub fn pigeonhole_xwing_count(&self) -> usize {
+        match self {
+            ProofNode::K4Contradiction { .. } | ProofNode::OddWheel { .. }
+            | ProofNode::BridgedHexagon { .. } | ProofNode::ParityTransport { .. }
+            | ProofNode::ParityChain { .. }
+            | ProofNode::HouseColoringContradiction { .. }
+            | ProofNode::Failed => 0,
+            ProofNode::PigeonholeXwing { .. } => 1,
+            ProofNode::SetEquivalence { is_contradiction, next, .. } => {
+                if *is_contradiction { 0 } else { next.as_ref().unwrap().pigeonhole_xwing_count() }
+            }
+            ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
+            | ProofNode::ParityTransportDeduction { next, .. } => next.pigeonhole_xwing_count(),
+            ProofNode::Branch { same_color, diff_color, .. } => {
+                same_color.pigeonhole_xwing_count() + diff_color.pigeonhole_xwing_count()
+            }
+        }
+    }
     pub fn size(&self) -> usize {
         match self {
             ProofNode::K4Contradiction { .. } => 1,
@@ -1866,6 +2049,7 @@ impl ProofNode {
             ProofNode::ParityTransport { .. } => 1,
             ProofNode::ParityChain { .. } => 1,
             ProofNode::HouseColoringContradiction { .. } => 1,
+            ProofNode::PigeonholeXwing { .. } => 1,
             ProofNode::Failed => usize::MAX / 2,
             ProofNode::SetEquivalence { is_contradiction, next, .. } => {
                 if *is_contradiction { 1 } else { 1 + next.as_ref().unwrap().size() }
@@ -1975,6 +2159,11 @@ fn find_best_proof(
             ring: ring.map(|v| graph.vertex_name(v)),
             bridges: bridges.map(|(s1, s2)| (graph.vertex_name(s1), graph.vertex_name(s2))),
         };
+    }
+
+    // Terminal: pigeonhole X-wing
+    if let Some(xw) = graph.find_pigeonhole_xwing() {
+        return xw;
     }
 
     if depth_remaining == 0 {
@@ -2310,7 +2499,12 @@ fn find_greedy_proof(
         };
     }
 
-    // Priority 4: odd wheel (after diamonds, SET, and ladders exhausted)
+    // Priority 5: pigeonhole X-wing
+    if let Some(xw) = graph.find_pigeonhole_xwing() {
+        return xw;
+    }
+
+    // Priority 6: odd wheel (after diamonds, SET, and ladders exhausted)
     if let Some((hub, rim)) = graph.find_odd_wheel() {
         return ProofNode::OddWheel {
             hub: graph.vertex_name(hub),
@@ -2560,6 +2754,30 @@ fn format_node(node: &ProofNode, step: &mut usize, indent: usize) -> String {
             );
             s
         }
+        ProofNode::PigeonholeXwing { cycle, clash_1, clash_2 } => {
+            *step += 1;
+            let mut s = format!(
+                "{}{}.  Pigeonhole X-wing on {{{}, {}, {}, {}}}:\n",
+                pad, step, cycle[0], cycle[1], cycle[2], cycle[3],
+            );
+            s += &format!(
+                "{}    Diagonals: {{{}, {}}} and {{{}, {}}} (non-adjacent).\n",
+                pad, cycle[0], cycle[2], cycle[1], cycle[3],
+            );
+            s += &format!(
+                "{}    By pigeonhole, one diagonal must share a color.\n",
+                pad,
+            );
+            s += &format!(
+                "{}    Case 1: color({}) = color({}) \u{2192} forces {} = {} (adjacent). Contradiction.\n",
+                pad, cycle[0], cycle[2], clash_1.0, clash_1.1,
+            );
+            s += &format!(
+                "{}    Case 2: color({}) = color({}) \u{2192} forces {} = {} (adjacent). Contradiction.\n",
+                pad, cycle[1], cycle[3], clash_2.0, clash_2.1,
+            );
+            s
+        }
         ProofNode::Failed => {
             format!("{}    (proof search failed — depth limit reached)\n", pad)
         }
@@ -2589,12 +2807,13 @@ pub struct ProofResult {
     pub greedy_bridged_hexagons: usize,
     pub greedy_set_equivalences: usize,
     pub greedy_parity_transports: usize,
+    pub greedy_pigeonhole_xwings: usize,
 }
 
 impl ProofResult {
     pub fn summary(&self) -> String {
         format!(
-            "depth={} diamonds={} odd_wheels={} circular_ladders={} bridged_hexagons={} set_equivalences={} parity_transports={} branches={} complete={} greedy_branches={} greedy_odd_wheels={} greedy_circular_ladders={} greedy_bridged_hexagons={} greedy_set_equivalences={} greedy_parity_transports={}",
+            "depth={} diamonds={} odd_wheels={} circular_ladders={} bridged_hexagons={} set_equivalences={} parity_transports={} pigeonhole_xwings={} branches={} complete={} greedy_branches={} greedy_odd_wheels={} greedy_circular_ladders={} greedy_bridged_hexagons={} greedy_set_equivalences={} greedy_parity_transports={} greedy_pigeonhole_xwings={}",
             self.proof.depth(),
             self.proof.diamond_count(),
             self.proof.odd_wheel_count(),
@@ -2602,6 +2821,7 @@ impl ProofResult {
             self.proof.bridged_hexagon_count(),
             self.proof.set_equivalence_count(),
             self.proof.parity_transport_count(),
+            self.proof.pigeonhole_xwing_count(),
             self.proof.branch_count(),
             self.proof.is_complete(),
             self.greedy_branches,
@@ -2610,6 +2830,7 @@ impl ProofResult {
             self.greedy_bridged_hexagons,
             self.greedy_set_equivalences,
             self.greedy_parity_transports,
+            self.greedy_pigeonhole_xwings,
         )
     }
 }
@@ -2639,6 +2860,7 @@ pub fn prove_pattern(cells: &[u8]) -> ProofResult {
         greedy_bridged_hexagons: greedy.bridged_hexagon_count(),
         greedy_set_equivalences: greedy.set_equivalence_count(),
         greedy_parity_transports: greedy.parity_transport_count(),
+        greedy_pigeonhole_xwings: greedy.pigeonhole_xwing_count(),
         proof,
         text,
     }

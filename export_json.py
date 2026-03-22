@@ -174,12 +174,21 @@ def parse_proof_file(path):
         fmt = None
         header_match = re.match(
             r'pattern (\d+)/(\d+): (PROVED|FAILED) cells=(\d+) '
-            r'depth=(\d+) diamonds=(\d+) odd_wheels=(\d+) circular_ladders=(\d+) bridged_hexagons=(\d+) set_equivalences=(\d+) parity_transports=(\d+) branches=(\d+) complete=(\w+)'
-            r'(?: greedy_branches=(\d+) greedy_odd_wheels=(\d+) greedy_circular_ladders=(\d+) greedy_bridged_hexagons=(\d+) greedy_set_equivalences=(\d+) greedy_parity_transports=(\d+))?',
+            r'depth=(\d+) diamonds=(\d+) odd_wheels=(\d+) circular_ladders=(\d+) bridged_hexagons=(\d+) set_equivalences=(\d+) parity_transports=(\d+) pigeonhole_xwings=(\d+) branches=(\d+) complete=(\w+)'
+            r'(?: greedy_branches=(\d+) greedy_odd_wheels=(\d+) greedy_circular_ladders=(\d+) greedy_bridged_hexagons=(\d+) greedy_set_equivalences=(\d+) greedy_parity_transports=(\d+) greedy_pigeonhole_xwings=(\d+))?',
             block
         )
         if header_match:
-            fmt = 'new'
+            fmt = 'newest'
+        if not header_match:
+            header_match = re.match(
+                r'pattern (\d+)/(\d+): (PROVED|FAILED) cells=(\d+) '
+                r'depth=(\d+) diamonds=(\d+) odd_wheels=(\d+) circular_ladders=(\d+) bridged_hexagons=(\d+) set_equivalences=(\d+) parity_transports=(\d+) branches=(\d+) complete=(\w+)'
+                r'(?: greedy_branches=(\d+) greedy_odd_wheels=(\d+) greedy_circular_ladders=(\d+) greedy_bridged_hexagons=(\d+) greedy_set_equivalences=(\d+) greedy_parity_transports=(\d+))?',
+                block
+            )
+            if header_match:
+                fmt = 'new'
         if not header_match:
             header_match = re.match(
                 r'pattern (\d+)/(\d+): (PROVED|FAILED) cells=(\d+) '
@@ -210,7 +219,20 @@ def parse_proof_file(path):
         circular_ladders = int(header_match.group(8))
         bridged_hexagons = int(header_match.group(9))
 
-        if fmt == 'new':
+        if fmt == 'newest':
+            set_equivalences = int(header_match.group(10))
+            parity_transports = int(header_match.group(11))
+            pigeonhole_xwings = int(header_match.group(12))
+            branches = int(header_match.group(13))
+            complete = header_match.group(14) == 'true'
+            greedy_branches = int(header_match.group(15)) if header_match.group(15) else branches
+            greedy_odd_wheels = int(header_match.group(16)) if header_match.group(16) else odd_wheels
+            greedy_circular_ladders = int(header_match.group(17)) if header_match.group(17) else circular_ladders
+            greedy_bridged_hexagons = int(header_match.group(18)) if header_match.group(18) else bridged_hexagons
+            greedy_set_equivalences = int(header_match.group(19)) if header_match.group(19) else set_equivalences
+            greedy_parity_transports = int(header_match.group(20)) if header_match.group(20) else parity_transports
+            greedy_pigeonhole_xwings = int(header_match.group(21)) if header_match.group(21) else pigeonhole_xwings
+        elif fmt == 'new':
             set_equivalences = int(header_match.group(10))
             parity_transports = int(header_match.group(11))
             branches = int(header_match.group(12))
@@ -221,6 +243,8 @@ def parse_proof_file(path):
             greedy_bridged_hexagons = int(header_match.group(17)) if header_match.group(17) else bridged_hexagons
             greedy_set_equivalences = int(header_match.group(18)) if header_match.group(18) else set_equivalences
             greedy_parity_transports = int(header_match.group(19)) if header_match.group(19) else parity_transports
+            pigeonhole_xwings = 0
+            greedy_pigeonhole_xwings = 0
         elif fmt == 'mid':
             set_equivalences = int(header_match.group(10))
             parity_transports = 0
@@ -232,6 +256,8 @@ def parse_proof_file(path):
             greedy_bridged_hexagons = int(header_match.group(16)) if header_match.group(16) else bridged_hexagons
             greedy_set_equivalences = int(header_match.group(17)) if header_match.group(17) else set_equivalences
             greedy_parity_transports = 0
+            pigeonhole_xwings = 0
+            greedy_pigeonhole_xwings = 0
         else:  # old
             set_equivalences = 0
             parity_transports = 0
@@ -243,6 +269,8 @@ def parse_proof_file(path):
             greedy_bridged_hexagons = int(header_match.group(15)) if header_match.group(15) else bridged_hexagons
             greedy_set_equivalences = 0
             greedy_parity_transports = 0
+            pigeonhole_xwings = 0
+            greedy_pigeonhole_xwings = 0
 
         lines = block.split('\n')
         bitstring = lines[1].strip() if len(lines) > 1 else ''
@@ -265,6 +293,7 @@ def parse_proof_file(path):
             'bridged_hexagons': bridged_hexagons,
             'set_equivalences': set_equivalences,
             'parity_transports': parity_transports,
+            'pigeonhole_xwings': pigeonhole_xwings,
             'branches': branches,
             'complete': complete,
             'greedy_branches': greedy_branches,
@@ -273,6 +302,7 @@ def parse_proof_file(path):
             'greedy_bridged_hexagons': greedy_bridged_hexagons,
             'greedy_set_equivalences': greedy_set_equivalences,
             'greedy_parity_transports': greedy_parity_transports,
+            'greedy_pigeonhole_xwings': greedy_pigeonhole_xwings,
             'proof_text': proof_text,
             'proof_tree': proof_steps,
         })
@@ -394,6 +424,45 @@ def parse_proof_steps(lines):
                 'step': step_num,
                 'ring': ring,
                 'bridges': bridges,
+            })
+            i += 1
+            continue
+
+        # Pigeonhole X-wing contradiction
+        xwm = re.match(r'(\d+)\.\s+Pigeonhole X-wing on \{(.+?)\}:', stripped)
+        if xwm:
+            step_num = int(xwm.group(1))
+            cycle = [v.strip() for v in xwm.group(2).split(',')]
+            # Next line: Diagonals: {A, C} and {B, D} (non-adjacent).
+            i += 1
+            diag_line = lines[i].strip() if i < len(lines) else ''
+            diag_m = re.match(r'Diagonals: \{(.+?)\} and \{(.+?)\}', diag_line)
+            diag_1 = [v.strip() for v in diag_m.group(1).split(',')] if diag_m else []
+            diag_2 = [v.strip() for v in diag_m.group(2).split(',')] if diag_m else []
+            # Skip "By pigeonhole..." line
+            i += 1
+            i += 1
+            # Case 1 line
+            c1_line = lines[i].strip() if i < len(lines) else ''
+            clash_1 = []
+            c1_m = re.search(r'forces (.+?) = (.+?) \(adjacent\)', c1_line)
+            if c1_m:
+                clash_1 = [c1_m.group(1), c1_m.group(2)]
+            i += 1
+            # Case 2 line
+            c2_line = lines[i].strip() if i < len(lines) else ''
+            clash_2 = []
+            c2_m = re.search(r'forces (.+?) = (.+?) \(adjacent\)', c2_line)
+            if c2_m:
+                clash_2 = [c2_m.group(1), c2_m.group(2)]
+            steps.append({
+                'type': 'pigeonhole_xwing',
+                'step': step_num,
+                'cycle': cycle,
+                'diagonal_1': diag_1,
+                'diagonal_2': diag_2,
+                'clash_1': clash_1,
+                'clash_2': clash_2,
             })
             i += 1
             continue
@@ -688,6 +757,7 @@ def main():
                     'bridged_hexagons': proof_data['bridged_hexagons'],
                     'set_equivalences': proof_data['set_equivalences'],
                     'parity_transports': proof_data['parity_transports'],
+                    'pigeonhole_xwings': proof_data['pigeonhole_xwings'],
                     'branches': proof_data['branches'],
                     'complete': proof_data['complete'],
                     'greedy_branches': proof_data['greedy_branches'],
@@ -696,6 +766,7 @@ def main():
                     'greedy_bridged_hexagons': proof_data['greedy_bridged_hexagons'],
                     'greedy_set_equivalences': proof_data['greedy_set_equivalences'],
                     'greedy_parity_transports': proof_data['greedy_parity_transports'],
+                    'greedy_pigeonhole_xwings': proof_data['greedy_pigeonhole_xwings'],
                     'tree': translated_tree,
                 },
             }

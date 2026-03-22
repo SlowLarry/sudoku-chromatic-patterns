@@ -37,10 +37,14 @@ rust/                  Rust search engine (source of truth)
   src/
     main.rs            CLI entry point
     search.rs          Recursive backtracking with symmetry pruning
-    proof.rs           Proof generation (diamonds, SET, oddagons, etc.)
+    proof.rs           Proof generation (diamonds, X-wings, SET, parity, etc.)
     canonical.rs       Canonicalization under sudoku symmetries
     coloring.rs        Exact 3-colorability solver
-    ...
+    sudoku_graph.rs    Graph construction and adjacency
+    symmetry.rs        Sudoku symmetry group
+    minlex.rs          Minimal lexicographic form
+    validation.rs      Pattern validation
+    bitset.rs          Bitset utilities
 web/                   Interactive web viewer
   index.html
   app.js
@@ -48,7 +52,7 @@ web/                   Interactive web viewer
   data/                Generated data (gitignored, see below)
 export_json.py         Converts proof text files → JSON for the web viewer
 proofs_n{10..16}.txt   Machine-generated proofs of non-3-colorability
-4chromatics_*_minlex.txt  Canonical pattern lists (minlex form)
+results_n*_minlex_ordered.txt  Canonical pattern lists (minlex form)
 ```
 
 ## Building the search engine
@@ -102,9 +106,10 @@ Every pattern has a machine-verifiable proof that it is not 3-colorable. The pro
 - **Bridged hexagon** — a 6-cycle with bridge edges
 - **SET equivalence** — multi-cell color constraints via set equations
 - **Parity transport** — deductions from house parity (trivalue oddagon / pigeonhole chain)
+- **Pigeonhole X-wing** — a chordless 4-cycle where both diagonal color assignments propagate to a contradiction
 - **Branching** — case splits when no single-step deduction suffices
 
-All proofs for all 25,801 patterns complete with at most 1 branch (T&E depth ≤ 3).
+All proofs for all 25,801 patterns complete with at most 1 branch.
 
 ## License
 

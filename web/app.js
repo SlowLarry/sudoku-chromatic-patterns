@@ -255,10 +255,12 @@ function getDifficulty(p) {
   const gcl = p.proof?.greedy_circular_ladders ?? 0;
   const gse = p.proof?.greedy_set_equivalences ?? 0;
   const gpt = p.proof?.greedy_parity_transports ?? 0;
+  const gxw = p.proof?.greedy_pigeonhole_xwings ?? 0;
   if (gb > 0) return 'branch';
   if (gow > 0) return 'oddagon';
   if (gbh > 0) return 'hexagon';
   if (gcl > 0) return 'ladder';
+  if (gxw > 0) return 'xwing';
   if (gse > 0) return 'set';
   if (gpt > 0) return 'parity';
   return 'diamond';
@@ -325,6 +327,7 @@ function renderDetail(p) {
     metaItem('Bridged hex.', p.proof?.bridged_hexagons ?? 0),
     metaItem('SET equiv.', p.proof?.set_equivalences ?? 0),
     metaItem('Parity', p.proof?.parity_transports ?? 0),
+    metaItem('X-wings', p.proof?.pigeonhole_xwings ?? 0),
     metaItem('Branches', p.proof?.branches ?? 0),
   ].join('');
 
@@ -494,6 +497,8 @@ function renderProofSteps(steps, depth) {
       html += renderCircularLadderStep(step, depth);
     } else if (step.type === 'bridged_hexagon') {
       html += renderBridgedHexagonStep(step, depth);
+    } else if (step.type === 'pigeonhole_xwing') {
+      html += renderPigeonholeXwingStep(step, depth);
     } else if (step.type === 'set_equivalence') {
       html += renderSetEquivalenceStep(step, depth);
     } else if (step.type === 'house_coloring_contradiction') {
@@ -674,6 +679,34 @@ function renderBridgedHexagonStep(step, depth) {
     `{${ringStr}}` +
     `<br>Bridges: ${bridgeStr}` +
     `<br><span class="step-identify">Each bridge forces opposite edges to miss different colors. Contradiction.</span>` +
+    `</div>`;
+}
+
+function renderPigeonholeXwingStep(step, depth) {
+  const data = escapeAttr(JSON.stringify({
+    type: 'pigeonhole_xwing',
+    cycle: step.cycle,
+    diagonal_1: step.diagonal_1,
+    diagonal_2: step.diagonal_2,
+    clash_1: step.clash_1,
+    clash_2: step.clash_2,
+  }));
+
+  const cycleStr = step.cycle.map(v => `<span class="step-vertex">${esc(v)}</span>`).join(', ');
+  const d1Str = step.diagonal_1.map(v => `<span class="step-vertex">${esc(v)}</span>`).join(', ');
+  const d2Str = step.diagonal_2.map(v => `<span class="step-vertex">${esc(v)}</span>`).join(', ');
+  const cl1Str = step.clash_1.map(v => `<span class="step-vertex">${esc(v)}</span>`).join(', ');
+  const cl2Str = step.clash_2.map(v => `<span class="step-vertex">${esc(v)}</span>`).join(', ');
+
+  return `<div class="proof-step" data-step='${data}'>` +
+    `<span class="step-num">${step.step}.</span> ` +
+    `<span class="step-k4">Pigeonhole X-wing</span> on {${cycleStr}}:` +
+    `<br>Diagonals: {${d1Str}} and {${d2Str}} (non-adjacent).` +
+    `<br><span class="step-identify">By pigeonhole, one diagonal must share a color.</span>` +
+    `<br>Case 1: color(${esc(step.diagonal_1[0])}) = color(${esc(step.diagonal_1[1])})` +
+    ` \u2192 forces ${cl1Str} (adjacent). <span class="step-k4">Contradiction.</span>` +
+    `<br>Case 2: color(${esc(step.diagonal_2[0])}) = color(${esc(step.diagonal_2[1])})` +
+    ` \u2192 forces ${cl2Str} (adjacent). <span class="step-k4">Contradiction.</span>` +
     `</div>`;
 }
 
@@ -862,6 +895,18 @@ function highlightProofStep(pattern, el) {
     for (const [s1, s2] of stepData.bridges) {
       for (const cell of parseCellsFromLabel(s1)) highlights[cell] = 'hl-diamond';
       for (const cell of parseCellsFromLabel(s2)) highlights[cell] = 'hl-identify';
+    }
+  } else if (stepData.type === 'pigeonhole_xwing') {
+    // Cycle cells: purple (structural)
+    for (const vName of stepData.cycle) {
+      for (const cell of parseCellsFromLabel(vName)) highlights[cell] = 'hl-diamond';
+    }
+    // Clash cells: red (contradiction)
+    for (const vName of stepData.clash_1) {
+      for (const cell of parseCellsFromLabel(vName)) highlights[cell] = 'hl-k4';
+    }
+    for (const vName of stepData.clash_2) {
+      for (const cell of parseCellsFromLabel(vName)) highlights[cell] = 'hl-k4';
     }
   } else if (stepData.type === 'set_equivalence') {
     // LHS: green (matches .step-set text)
@@ -1159,6 +1204,12 @@ function proofToText(p) {
         const bridgeStr = s.bridges.map(([s1, s2]) => `${s1}\u2014${s2}`).join(', ');
         lines.push(`${indent}   Bridges: ${bridgeStr}`);
         lines.push(`${indent}   Each bridge forces opposite edges to miss different colors. Contradiction.`);
+      } else if (s.type === 'pigeonhole_xwing') {
+        lines.push(`${indent}${s.step}. Pigeonhole X-wing on {${s.cycle.join(', ')}}:`);
+        lines.push(`${indent}   Diagonals: {${s.diagonal_1.join(', ')}} and {${s.diagonal_2.join(', ')}} (non-adjacent).`);
+        lines.push(`${indent}   By pigeonhole, one diagonal must share a color.`);
+        lines.push(`${indent}   Case 1: color(${s.diagonal_1[0]}) = color(${s.diagonal_1[1]}) \u2192 forces ${s.clash_1.join(' = ')} (adjacent). Contradiction.`);
+        lines.push(`${indent}   Case 2: color(${s.diagonal_2[0]}) = color(${s.diagonal_2[1]}) \u2192 forces ${s.clash_2.join(' = ')} (adjacent). Contradiction.`);
       } else if (s.type === 'set_equivalence') {
         lines.push(`${indent}${s.step}. SET: ${s.equation}`);
         lines.push(`${indent}   Remainder: {${s.lhs.join(', ')}} = {${s.rhs.join(', ')}}.`);
