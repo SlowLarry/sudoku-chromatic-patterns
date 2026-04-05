@@ -268,13 +268,13 @@ function getDifficulty(p) {
   const gxw = p.proof?.greedy_pigeonhole_xwings ?? 0;
   const gg = p.proof?.greedy_guardians ?? 0;
   if (gb > 0) return 'branch';
-  if (gow > 0) return 'oddagon';
   if (gbh > 0) return 'hexagon';
-  if (gcl > 0) return 'ladder';
   if (gxw > 0) return 'xwing';
-  if (gse > 0) return 'set';
   if (gpt > 0) return 'parity';
+  if (gse > 0) return 'set';
+  if (gcl > 0) return 'ladder';
   if (gg > 0) return 'guardian';
+  if (gow > 0) return 'oddagon';
   return 'diamond';
 }
 
@@ -485,6 +485,9 @@ function renderProof(p, activeIdx) {
   const variants = [];
   if (p.proof && p.proof.tree && p.proof.tree.length > 0) {
     variants.push({ label: 'Optimal', tree: p.proof.tree, complete: p.proof.complete, proof_length: p.proof.proof_length });
+  }
+  if (p.greedy_proof && p.greedy_proof.tree && p.greedy_proof.tree.length > 0) {
+    variants.push({ label: 'Greedy', tree: p.greedy_proof.tree, complete: true, proof_length: p.greedy_proof.proof_length });
   }
   if (p.alt_proofs) {
     for (const alt of p.alt_proofs) {

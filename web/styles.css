@@ -195,11 +195,13 @@ select:focus, input:focus {
 .proof-badge.simple { background: #1b4332; color: #6fcf97; }
 .proof-badge.branching { background: #3d2200; color: #f0883e; }
 .proof-badge.diamond { background: #1b4332; color: #6fcf97; }
-.proof-badge.ladder { background: #2d2a4a; color: #b8a9e8; }
-.proof-badge.hexagon { background: #3a2a1a; color: #e8c8a8; }
 .proof-badge.oddagon { background: #1a3a5c; color: #79c0ff; }
+.proof-badge.guardian { background: #2a3a3a; color: #7ec8e3; }
+.proof-badge.ladder { background: #2d2a4a; color: #b8a9e8; }
 .proof-badge.set { background: #2a3a2a; color: #7ee787; }
 .proof-badge.parity { background: #2a2a3a; color: #89b4fa; }
+.proof-badge.xwing { background: #3a2a2a; color: #e8a8a8; }
+.proof-badge.hexagon { background: #3a2a1a; color: #e8c8a8; }
 .proof-badge.branch { background: #3d2200; color: #f0883e; }
 
 /* ── Detail View ─────────────────────────────────────────────── */

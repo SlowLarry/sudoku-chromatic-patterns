@@ -3181,6 +3181,9 @@ pub fn format_proof(proof: &ProofNode) -> String {
 pub struct ProofResult {
     pub proof: ProofNode,
     pub text: String,
+    /// Greedy proof tree (for difficulty classification).
+    pub greedy_text: String,
+    pub greedy_technique_label: String,
     /// Alternative proofs with different technique signatures.
     /// Each entry is (label, proof_node, formatted_text).
     pub alt_proofs: Vec<(String, ProofNode, String)>,
@@ -3218,7 +3221,7 @@ impl ProofResult {
             self.greedy_parity_transports,
             self.greedy_pigeonhole_xwings,
             self.greedy_guardians,
-            1 + self.alt_proofs.len(),
+            2 + self.alt_proofs.len(),
         )
     }
 }
@@ -3250,23 +3253,18 @@ pub fn prove_pattern(cells: &[u8]) -> ProofResult {
     let g_pigeonhole_xwings = greedy.pigeonhole_xwing_count();
     let g_guardians = greedy.guardian_count();
 
+    // Always format the greedy proof
+    let greedy_text = format_proof(&greedy);
+    let greedy_technique_label = greedy.technique_label();
+
     // Collect alternative proofs with different technique signatures.
     let optimal_sig = proof.technique_signature();
+    let greedy_sig = greedy.technique_signature();
     let optimal_size = proof.size();
     // Keep alternatives within 2× optimal size or optimal + 3 steps
     let max_alt_size = optimal_size.saturating_mul(2).max(optimal_size.saturating_add(3));
-    let mut seen_sigs: Vec<u32> = vec![optimal_sig];
+    let mut seen_sigs: Vec<u32> = vec![optimal_sig, greedy_sig];
     let mut alt_proofs: Vec<(String, ProofNode, String)> = Vec::new();
-
-    // If greedy proof uses different techniques, keep it
-    if greedy.is_complete() {
-        let greedy_sig = greedy.technique_signature();
-        if greedy_sig != optimal_sig && greedy.size() <= max_alt_size {
-            seen_sigs.push(greedy_sig);
-            let greedy_text = format_proof(&greedy);
-            alt_proofs.push(("greedy".to_string(), greedy, greedy_text));
-        }
-    }
 
     // For each technique in the optimal proof, try disabling it
     if proof.is_complete() {
@@ -3304,6 +3302,8 @@ pub fn prove_pattern(cells: &[u8]) -> ProofResult {
         greedy_parity_transports: g_parity_transports,
         greedy_pigeonhole_xwings: g_pigeonhole_xwings,
         greedy_guardians: g_guardians,
+        greedy_text,
+        greedy_technique_label,
         alt_proofs,
         proof,
         text,

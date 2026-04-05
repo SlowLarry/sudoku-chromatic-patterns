@@ -360,14 +360,28 @@ def parse_proof_file(path):
         lines = block.split('\n')
         bitstring = lines[1].strip() if len(lines) > 1 else ''
 
-        # Split proof text into primary proof and alt proofs
+        # Split proof text into primary proof, greedy proof, and alt proofs
         body_lines = lines[2:]
         primary_lines = []
         alt_proof_sections = []
+        greedy_proof_section = None
         current_alt = None
+        current_greedy = None
         for bl in body_lines:
+            greedy_header = re.match(r'=== Greedy proof \((.*?)\) ===', bl.strip())
             alt_header = re.match(r'=== Alt proof (\d+)/(\d+) \[(.+?)\] \((.*?)\) ===', bl.strip())
-            if alt_header:
+            if greedy_header:
+                if current_alt is not None:
+                    alt_proof_sections.append(current_alt)
+                    current_alt = None
+                current_greedy = {
+                    'techniques': greedy_header.group(1),
+                    'lines': [],
+                }
+            elif alt_header:
+                if current_greedy is not None:
+                    greedy_proof_section = current_greedy
+                    current_greedy = None
                 if current_alt is not None:
                     alt_proof_sections.append(current_alt)
                 current_alt = {
@@ -377,8 +391,12 @@ def parse_proof_file(path):
                 }
             elif current_alt is not None:
                 current_alt['lines'].append(bl)
+            elif current_greedy is not None:
+                current_greedy['lines'].append(bl)
             else:
                 primary_lines.append(bl)
+        if current_greedy is not None:
+            greedy_proof_section = current_greedy
         if current_alt is not None:
             alt_proof_sections.append(current_alt)
 
@@ -397,6 +415,15 @@ def parse_proof_file(path):
                 'techniques': alt['techniques'],
                 'tree': alt_steps,
             })
+
+        # Parse greedy proof steps
+        greedy_proof = None
+        if greedy_proof_section is not None:
+            greedy_steps = parse_proof_steps(greedy_proof_section['lines'])
+            greedy_proof = {
+                'techniques': greedy_proof_section['techniques'],
+                'tree': greedy_steps,
+            }
 
         results.append({
             'index': idx,
@@ -425,6 +452,7 @@ def parse_proof_file(path):
             'proof_text': proof_text,
             'proof_tree': proof_steps,
             'alt_proofs': alt_proofs,
+            'greedy_proof': greedy_proof,
         })
     return results
 
@@ -924,6 +952,17 @@ def main():
                     'proof_length': compute_proof_length(translated_alt_tree),
                 })
 
+            # Translate greedy proof tree
+            translated_greedy_proof = None
+            greedy_data = proof_data.get('greedy_proof')
+            if greedy_data is not None and greedy_data.get('tree'):
+                translated_greedy_tree = translate_proof_tree(greedy_data['tree'], iso)
+                translated_greedy_proof = {
+                    'techniques': greedy_data['techniques'],
+                    'tree': translated_greedy_tree,
+                    'proof_length': compute_proof_length(translated_greedy_tree),
+                }
+
             # Compute proof length (steps + X-wing substeps)
             proof_length = compute_proof_length(translated_tree)
 
@@ -969,6 +1008,9 @@ def main():
 
             if translated_alt_proofs:
                 pattern['alt_proofs'] = translated_alt_proofs
+
+            if translated_greedy_proof:
+                pattern['greedy_proof'] = translated_greedy_proof
 
             all_patterns.append(pattern)
 

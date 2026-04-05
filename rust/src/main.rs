@@ -412,6 +412,12 @@ fn main() {
                 } else {
                     out += &format!("{}\n{}\n", summary, bitstr);
                     out += &result.text;
+                    // Output greedy proof
+                    out += &format!(
+                        "\n=== Greedy proof ({}) ===\n",
+                        result.greedy_technique_label,
+                    );
+                    out += &result.greedy_text;
                     // Output alternative proofs
                     for (j, (label, alt, alt_text)) in result.alt_proofs.iter().enumerate() {
                         out += &format!(
