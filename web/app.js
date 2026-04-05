@@ -113,6 +113,17 @@ function computeAccumulatedColors(proofContainer, targetEl) {
           uf.union(allCells[0], allCells[j]);
         }
       }
+    } else if (stepData.type === 'parity_chain_deduction') {
+      for (const m of (stepData.merges || [])) {
+        const cellsA = parseCellsFromLabel(m[0]);
+        const cellsB = parseCellsFromLabel(m[1]);
+        if (cellsA.length > 0 && cellsB.length > 0) {
+          const allCells = [...cellsA, ...cellsB];
+          for (let j = 1; j < allCells.length; j++) {
+            uf.union(allCells[0], allCells[j]);
+          }
+        }
+      }
     }
 
     // Accumulate virtual edges from prior steps (not the target itself)
@@ -648,6 +659,8 @@ function renderProofSteps(steps, depth) {
       html += renderTrivalueOddagonStep(step, depth);
     } else if (step.type === 'parity_chain') {
       html += renderParityChainStep(step, depth);
+    } else if (step.type === 'parity_chain_deduction') {
+      html += renderParityChainDeductionStep(step, depth);
     } else if (step.type === 'branch') {
       html += renderBranchStep(step, depth);
     }
@@ -768,6 +781,35 @@ function renderParityChainStep(step, depth) {
   html += `<br><span class="step-identify">${step.num_rows} same-parity permutations from 3 available \u2192 pigeonhole.</span>`;
   html += `<br><span class="step-k4">Contradiction.</span>` +
     `</div>`;
+  return html;
+}
+
+function renderParityChainDeductionStep(step, depth) {
+  const allCells = step.rows.flatMap(row => row.cells);
+  const data = escapeAttr(JSON.stringify({
+    type: 'parity_chain_deduction',
+    cells: allCells,
+    rows: step.rows,
+    merge_pair: step.merge_pair,
+    merges: step.merges,
+  }));
+
+  let html = `<div class="proof-step" data-step='${data}'>` +
+    `<span class="step-num">${step.step}.</span> ` +
+    `<span class="step-diamond">Parity chain deduction</span>:`;
+
+  for (const row of step.rows) {
+    const cellStr = row.cells.map(v => `<span class="step-vertex">${esc(v)}</span>`).join(', ');
+    html += `<br>&nbsp;&nbsp;row ${row.row_id} {${cellStr}}`;
+  }
+
+  if (step.merge_pair) {
+    html += `<br><span class="step-identify">Only non-colliding pair: ${esc(step.merge_pair)} \u2192 same permutation.</span>`;
+  }
+  for (const m of (step.merges || [])) {
+    html += `<br><span class="step-identify">\u2192 color(${esc(m[0])}) = color(${esc(m[1])}). Identify.</span>`;
+  }
+  html += `</div>`;
   return html;
 }
 
@@ -1205,6 +1247,26 @@ function highlightProofStep(pattern, el) {
       for (const vName of stepData.cells) {
         for (const cell of parseCellsFromLabel(vName)) {
           highlights[cell] = 'hl-diamond';
+        }
+      }
+    }
+  } else if (stepData.type === 'parity_chain_deduction') {
+    // Alternating colors per row, merged cells highlighted
+    const rowColors = ['hl-diamond', 'hl-identify', 'hl-set', 'hl-branch'];
+    if (stepData.rows) {
+      stepData.rows.forEach((row, ri) => {
+        for (const vName of row.cells) {
+          for (const cell of parseCellsFromLabel(vName)) {
+            highlights[cell] = rowColors[ri % rowColors.length];
+          }
+        }
+      });
+    }
+    // Highlight merged cell pairs
+    for (const m of (stepData.merges || [])) {
+      for (const vName of m) {
+        for (const cell of parseCellsFromLabel(vName)) {
+          highlights[cell] = 'hl-identify';
         }
       }
     }

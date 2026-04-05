@@ -753,6 +753,62 @@ def parse_proof_steps(lines):
             })
             continue
 
+        # Parity chain deduction (non-terminal → triple merge)
+        pcdm = re.match(r'(\d+)\.\s+Parity chain deduction:', stripped)
+        if pcdm:
+            step_num = int(pcdm.group(1))
+            rows = []
+            links_text = ''
+            merge_pair = ''
+            merges = []
+            i += 1
+            while i < len(lines):
+                sl = lines[i].strip()
+                if not sl:
+                    i += 1
+                    continue
+                # Row/col: "row 5 {r5c3, r5c6, r5c9}"
+                row_m = re.match(r'(?:row|col)\s+(\d+)\s+\{(.+?)\}', sl)
+                if row_m:
+                    row_id = int(row_m.group(1))
+                    row_cells = [v.strip() for v in row_m.group(2).split(',')]
+                    rows.append({
+                        'row_id': row_id,
+                        'cells': row_cells,
+                    })
+                    i += 1
+                    continue
+                if sl.startswith('Parallel links:'):
+                    links_text = sl
+                    i += 1
+                    continue
+                if 'same permutation parity' in sl or 'distinct permutations' in sl:
+                    i += 1
+                    continue
+                # "Only non-colliding pair: row 6 and row 9 → same permutation."
+                ncp_m = re.match(r'Only non-colliding pair:\s*(.+?)\s+and\s+(.+?)\s*→', sl)
+                if ncp_m:
+                    merge_pair = f'{ncp_m.group(1)} and {ncp_m.group(2)}'
+                    i += 1
+                    continue
+                # "→ color(r6c3) = color(r9c2). Identify."
+                merge_m = re.match(r'→\s*color\((.+?)\)\s*=\s*color\((.+?)\)\.\s*Identify\.', sl)
+                if merge_m:
+                    merges.append((merge_m.group(1), merge_m.group(2)))
+                    i += 1
+                    continue
+                break  # next proof step
+            steps.append({
+                'type': 'parity_chain_deduction',
+                'step': step_num,
+                'rows': rows,
+                'links': links_text,
+                'num_rows': len(rows),
+                'merge_pair': merge_pair,
+                'merges': merges,
+            })
+            continue
+
         # Parity chain (parity transport) contradiction
         pcm = re.match(r'(\d+)\.\s+Parity transport:', stripped)
         if pcm:

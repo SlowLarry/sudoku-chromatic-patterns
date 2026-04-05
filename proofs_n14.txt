@@ -4991,7 +4991,53 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/3 [no_parity] (diamond+xwing+branch) ===
+=== Alt proof 1/3 [no_diamond] (xwing+parity+branch) ===
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Branch on r6c8, r8c4:
+      Case A: color(r6c8) = color(r8c4). Identify.
+        2.  Parity chain deduction:
+            row 5 {r5c3, r5c6, r5c9}
+            row 6 {r6c3, r6c5, [r6c8=r8c4]}
+            row 8 {r8c3, [r6c8=r8c4], r8c7}
+            row 9 {r9c2, r9c6, r9c7}
+            Parallel links: row 5↔row 6 (col, box, box); row 6↔row 8 (col, box, box); row 8↔row 9 (box, box, col)
+            → same permutation parity.
+            Each pair shares a column → distinct permutations.
+            Only non-colliding pair: row 6 and row 9 → same permutation.
+            → color(r6c3) = color(r9c2). Identify.
+            → color(r6c5) = color(r9c6). Identify.
+            → color([r6c8=r8c4]) = color(r9c7). Identify.
+        3.  K₄ on {r4c9, r5c9, [r6c8=r8c4=r9c7], r7c9}. Contradiction.
+      Case B: color(r6c8) ≠ color(r8c4). Add edge.
+        4.  Pigeonhole X-wing on {r8c3, r8c4, r9c6, r9c2}:
+            Diagonals: {r8c3, r9c6} and {r8c4, r9c2} (non-adjacent).
+            By pigeonhole, one diagonal must share a color.
+            Case 1: color(r8c3) = color(r9c6) = X
+              row 8 {r8c3, r8c4, r8c7}: r8c3=X → r8c4, r8c7≠X
+              row 9 {r9c2, r9c6, r9c7}: r9c6=X → r9c2, r9c7≠X
+              col 3 {r5c3, r6c3, r8c3}: r8c3=X → r5c3, r6c3≠X
+              box 9 {r7c9, r8c7, r9c7}: r8c7, r9c7≠X → r7c9=X
+              col 9 {r4c9, r5c9, r7c9}: r7c9=X → r4c9, r5c9≠X
+              box 6 {r4c9, r5c9, r6c8}: r4c9, r5c9≠X → r6c8=X
+              row 5 {r5c3, r5c6, r5c9}: r5c3, r5c9≠X → r5c6=X
+              row 6 {r6c3, r6c5, r6c8}: r6c8=X → r6c5≠X
+              r5c6=X and r9c6=X are adjacent
+              Contradiction.
+            Case 2: color(r8c4) = color(r9c2) = X
+              row 8 {r8c3, r8c4, r8c7}: r8c4=X → r8c3, r8c7≠X
+              row 9 {r9c2, r9c6, r9c7}: r9c2=X → r9c6, r9c7≠X
+              box 9 {r7c9, r8c7, r9c7}: r8c7, r9c7≠X → r7c9=X
+              col 9 {r4c9, r5c9, r7c9}: r7c9=X → r4c9, r5c9≠X
+              box 6 {r4c9, r5c9, r6c8}: r4c9, r5c9≠X → r6c8=X
+              r6c8=X and r8c4=X are adjacent
+              Contradiction.
+      Both cases contradict 3-colorability.
+
+  Therefore the pattern is not 3-colorable. □
+
+=== Alt proof 2/3 [no_parity] (diamond+xwing+branch) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
@@ -5024,46 +5070,6 @@ Proof of non-3-colorability:
               Contradiction.
       Case B: color(r5c3) ≠ color(r7c9). Add edge.
         4.  Pigeonhole X-wing on {r8c3, r8c4, r9c6, r9c2}:
-            Diagonals: {r8c3, r9c6} and {r8c4, r9c2} (non-adjacent).
-            By pigeonhole, one diagonal must share a color.
-            Case 1: color(r8c3) = color(r9c6) = X
-              row 8 {r8c3, r8c4, r8c7}: r8c3=X → r8c4, r8c7≠X
-              row 9 {r9c2, r9c6, r9c7}: r9c6=X → r9c2, r9c7≠X
-              col 3 {r5c3, r6c3, r8c3}: r8c3=X → r5c3, r6c3≠X
-              box 9 {r7c9, r8c7, r9c7}: r8c7, r9c7≠X → r7c9=X
-              col 9 {r4c9, r5c9, r7c9}: r7c9=X → r4c9, r5c9≠X
-              box 6 {r4c9, r5c9, r6c8}: r4c9, r5c9≠X → r6c8=X
-              row 5 {r5c3, r5c6, r5c9}: r5c3, r5c9≠X → r5c6=X
-              row 6 {r6c3, r6c5, r6c8}: r6c8=X → r6c5≠X
-              r5c6=X and r9c6=X are adjacent
-              Contradiction.
-            Case 2: color(r8c4) = color(r9c2) = X
-              row 8 {r8c3, r8c4, r8c7}: r8c4=X → r8c3, r8c7≠X
-              row 9 {r9c2, r9c6, r9c7}: r9c2=X → r9c6, r9c7≠X
-              box 9 {r7c9, r8c7, r9c7}: r8c7, r9c7≠X → r7c9=X
-              col 9 {r4c9, r5c9, r7c9}: r7c9=X → r4c9, r5c9≠X
-              box 6 {r4c9, r5c9, r6c8}: r4c9, r5c9≠X → r6c8=X
-              row 6 {r6c3, r6c5, r6c8}: r6c8=X → r6c3, r6c5≠X
-              col 3 {r5c3, r6c3, r8c3}: r6c3, r8c3≠X → r5c3=X
-              r5c3=X and r7c9=X are adjacent
-              Contradiction.
-      Both cases contradict 3-colorability.
-
-  Therefore the pattern is not 3-colorable. □
-
-=== Alt proof 2/3 [no_diamond] (ladder+xwing+branch+guardian) ===
-Proof of non-3-colorability:
-  Assume for contradiction it is 3-colorable.
-
-  1.  Circular ladder {r5c3—r6c3, r5c6—r6c5, r5c9—r6c8}:
-      Satellites r8c3 (rung 1), r4c9 (rung 3) forced to distinct colors. Add edge.
-  2.  Branch on r5c3, r7c9:
-      Case A: color(r5c3) = color(r7c9). Identify.
-        3.  Guardian: r9c6 guards oddagon {r9c6, r5c6, r5c9, r4c9, r8c3, r8c7, r9c7} (source [r5c3=r7c9]).
-            → color(r9c6) = color([r5c3=r7c9]). Identify.
-        4.  K₄ on {[r5c3=r7c9=r9c6], r8c3, r8c4, r8c7}. Contradiction.
-      Case B: color(r5c3) ≠ color(r7c9). Add edge.
-        5.  Pigeonhole X-wing on {r8c3, r8c4, r9c6, r9c2}:
             Diagonals: {r8c3, r9c6} and {r8c4, r9c2} (non-adjacent).
             By pigeonhole, one diagonal must share a color.
             Case 1: color(r8c3) = color(r9c6) = X
