@@ -1,4 +1,4 @@
-pattern 1/32: PROVED cells=10 depth=1 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=1 parity_transports=0 pigeonhole_xwings=1 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 1/32: PROVED cells=10 depth=1 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=1 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000000001001001000000001000001011001011000
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -39,7 +39,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 2/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 2/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000000001001001000000001000001011001110000
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -52,21 +52,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (set) ===
+=== Alt proof 1/1 [no_diamond] (guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  SET: {row 8} − {box 9}.
-      Remainder: {r8c6} = {r7c9}.
-      → color(r8c6) = color(r7c9). Identify.
-  2.  SET: {row 9} − {box 8}.
-      Remainder: {r9c3} = {[r7c9=r8c6]}.
-      → color(r9c3) = color([r7c9=r8c6]). Identify.
-  3.  K₄ on {r6c3, r6c6, r6c9, [r7c9=r8c6=r9c3]}. Contradiction.
+  1.  Guardian: r8c8 guards oddagon {r8c8, r7c9, r8c9} (source r6c9).
+      → color(r8c8) = color(r6c9). Identify.
+  2.  Guardian: r6c3 guards oddagon {r6c3, r6c6, [r6c9=r8c8]} (source r8c6).
+      → color(r6c3) = color(r8c6). Identify.
+  3.  K₄ on {[r6c3=r8c6], r9c3, r9c4, r9c5}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 3/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=1 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=4
+pattern 3/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=1 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=4
 000000000000000000000000000000000000000000000001001001000000001000001110001011000
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -81,17 +79,16 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/3 [no_diamond] (set) ===
+=== Alt proof 1/3 [no_diamond] (oddwheel+guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  SET: {row 8} − {box 9}.
-      Remainder: {r8c6} = {r7c9}.
-      → color(r8c6) = color(r7c9). Identify.
-  2.  SET: {row 9} − {box 8}.
-      Remainder: {r9c3} = {[r7c9=r8c6]}.
-      → color(r9c3) = color([r7c9=r8c6]). Identify.
-  3.  K₄ on {r6c3, r6c6, r6c9, [r7c9=r8c6=r9c3]}. Contradiction.
+  1.  Guardian: r9c5 guards oddagon {r9c5, r8c6, r9c6} (source r6c6).
+      → color(r9c5) = color(r6c6). Identify.
+  2.  Guardian: r7c9 guards oddagon {r7c9, r8c7, r8c8} (source r8c6).
+      → color(r7c9) = color(r8c6). Identify.
+  3.  Odd wheel: hub [r6c6=r9c5] forces rim to 2 colors.
+      Bivalue oddagon {r6c3, r6c9, [r7c9=r8c6], r9c6, r9c3} (length 5) cannot be 2-colored. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -124,7 +121,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 4/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 4/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000000001001001000000001000001110001110000
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -137,21 +134,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (set) ===
+=== Alt proof 1/1 [no_diamond] (guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  SET: {row 8} − {box 9}.
-      Remainder: {r8c6} = {r7c9}.
-      → color(r8c6) = color(r7c9). Identify.
-  2.  SET: {row 9} − {box 8}.
-      Remainder: {r9c3} = {[r7c9=r8c6]}.
-      → color(r9c3) = color([r7c9=r8c6]). Identify.
-  3.  K₄ on {r6c3, r6c6, r6c9, [r7c9=r8c6=r9c3]}. Contradiction.
+  1.  Guardian: r7c9 guards oddagon {r7c9, r8c7, r8c8} (source r8c6).
+      → color(r7c9) = color(r8c6). Identify.
+  2.  Guardian: r6c3 guards oddagon {r6c3, r6c6, r6c9} (source [r7c9=r8c6]).
+      → color(r6c3) = color([r7c9=r8c6]). Identify.
+  3.  K₄ on {[r6c3=r7c9=r8c6], r9c3, r9c4, r9c5}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 5/32: PROVED cells=10 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=3
+pattern 5/32: PROVED cells=10 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=3
 000000000000000000000000000000000000000000000001001001000000001001001001001001010
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -204,7 +199,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 6/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=1 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=4
+pattern 6/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=1 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=4
 000000000000000000000000000000000000000000000001001001000000001001001001001010010
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -218,45 +213,27 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/3 [no_diamond] (ladder+oddwheel) ===
+=== Alt proof 1/3 [no_diamond] (guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Circular ladder {r6c3—r8c3, r6c6—r8c6, r6c9—r8c9}:
-      Satellites r9c3 (rung 1), r7c9 (rung 3) forced to distinct colors. Add edge.
-  2.  Circular ladder {r6c3—r6c9, r8c3—r8c9, r9c3—r7c9}:
-      Satellites r6c6 (rung 1), r8c6 (rung 2), r9c8 (rung 3) forced to distinct colors. Add triangle.
-  3.  Odd wheel: hub r9c8 forces rim to 2 colors.
-      Bivalue oddagon {r7c9, r8c9, r8c6, r9c5, r9c3} (length 5) cannot be 2-colored. Contradiction.
+  1.  Guardian: r9c8 guards oddagon {r9c8, r7c9, r8c9} (source r6c9).
+      → color(r9c8) = color(r6c9). Identify.
+  2.  Guardian: r8c6 guards oddagon {r8c6, r6c6, [r6c9=r9c8], r9c3, r8c3} (source r6c3).
+      → color(r8c6) = color(r6c3). Identify.
+  3.  K₄ on {[r6c3=r8c6], [r6c9=r9c8], r9c3, r9c5}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 2/3 [no_oddwheel] (diamond+ladder+xwing) ===
+=== Alt proof 2/3 [no_oddwheel] (diamond+guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Circular ladder {r8c3—r9c3, r8c6—r9c5, r8c9—r9c8}:
-      Satellites r6c3 (rung 1), r7c9 (rung 3) forced to distinct colors. Add edge.
-  2.  Diamond {r6c6, r6c3, r6c9, r7c9} (spine r6c3—r6c9).
-      → color(r6c6) = color(r7c9). Identify.
-  3.  Pigeonhole X-wing on {r6c3, [r6c6=r7c9], r9c8, r9c3}:
-      Diagonals: {r6c3, r9c8} and {[r6c6=r7c9], r9c3} (non-adjacent).
-      By pigeonhole, one diagonal must share a color.
-      Case 1: color(r6c3) = color(r9c8) = X
-        row 6 {r6c3, [r6c6=r7c9], r6c9}: r6c3=X → [r6c6=r7c9], r6c9≠X
-        row 9 {r9c3, r9c5, r9c8}: r9c8=X → r9c3, r9c5≠X
-        col 3 {r6c3, r8c3, r9c3}: r6c3=X → r8c3≠X
-        col 9 {[r6c6=r7c9], r6c9, r8c9}: [r6c6=r7c9], r6c9≠X → r8c9=X
-        box 9 {[r6c6=r7c9], r8c9, r9c8}: r8c9=X and r9c8=X clash
-        Contradiction.
-      Case 2: color([r6c6=r7c9]) = color(r9c3) = X
-        row 6 {r6c3, [r6c6=r7c9], r6c9}: [r6c6=r7c9]=X → r6c3, r6c9≠X
-        row 9 {r9c3, r9c5, r9c8}: r9c3=X → r9c5, r9c8≠X
-        col 3 {r6c3, r8c3, r9c3}: r9c3=X → r8c3≠X
-        col 9 {[r6c6=r7c9], r6c9, r8c9}: [r6c6=r7c9]=X → r8c9≠X
-        row 8 {r8c3, r8c6, r8c9}: r8c3, r8c9≠X → r8c6=X
-        [r6c6=r7c9]=X and r8c6=X are adjacent
-        Contradiction.
+  1.  Diamond {r6c9, r7c9, r8c9, r9c8} (spine r7c9—r8c9).
+      → color(r6c9) = color(r9c8). Identify.
+  2.  Guardian: r8c6 guards oddagon {r8c6, r6c6, [r6c9=r9c8], r9c3, r8c3} (source r6c3).
+      → color(r8c6) = color(r6c3). Identify.
+  3.  K₄ on {[r6c3=r8c6], [r6c9=r9c8], r9c3, r9c5}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -274,7 +251,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 7/32: PROVED cells=10 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=1 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 7/32: PROVED cells=10 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=1 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000000001001001000000001001001010001001010
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -313,7 +290,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 8/32: PROVED cells=10 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=1 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 8/32: PROVED cells=10 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=1 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000000001001001000000001001001010001001100
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -352,7 +329,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 9/32: PROVED cells=10 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 9/32: PROVED cells=10 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000000001001001000001001000001001001010010
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -393,7 +370,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 10/32: PROVED cells=10 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 10/32: PROVED cells=10 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000000001001001000001010000010001001001001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -434,7 +411,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 11/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 11/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000001000001011000000000001001001011001000
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -447,21 +424,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (set) ===
+=== Alt proof 1/1 [no_diamond] (guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  SET: {row 6} − {box 6}.
-      Remainder: {r6c6} = {r5c9}.
-      → color(r6c6) = color(r5c9). Identify.
-  2.  SET: {row 9} − {box 7}.
-      Remainder: {r9c6} = {r8c3}.
-      → color(r9c6) = color(r8c3). Identify.
-  3.  K₄ on {[r5c9=r6c6], [r8c3=r9c6], r8c6, r8c9}. Contradiction.
+  1.  Guardian: r5c9 guards oddagon {r5c9, r6c8, r6c9} (source r6c6).
+      → color(r5c9) = color(r6c6). Identify.
+  2.  Guardian: r8c3 guards oddagon {r8c3, r8c6, r8c9} (source [r5c9=r6c6]).
+      → color(r8c3) = color([r5c9=r6c6]). Identify.
+  3.  K₄ on {[r5c9=r6c6=r8c3], r9c2, r9c3, r9c6}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 12/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 12/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000001000001011000000000001001001110001000
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -474,21 +449,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (set) ===
+=== Alt proof 1/1 [no_diamond] (guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  SET: {row 6} − {box 6}.
-      Remainder: {r6c6} = {r5c9}.
-      → color(r6c6) = color(r5c9). Identify.
-  2.  SET: {row 9} − {box 7}.
-      Remainder: {r9c6} = {r8c3}.
-      → color(r9c6) = color(r8c3). Identify.
-  3.  K₄ on {[r5c9=r6c6], [r8c3=r9c6], r8c6, r8c9}. Contradiction.
+  1.  Guardian: r5c9 guards oddagon {r5c9, r6c8, r6c9} (source r6c6).
+      → color(r5c9) = color(r6c6). Identify.
+  2.  Guardian: r8c3 guards oddagon {r8c3, r8c6, r8c9} (source [r5c9=r6c6]).
+      → color(r8c3) = color([r5c9=r6c6]). Identify.
+  3.  K₄ on {[r5c9=r6c6=r8c3], r9c1, r9c2, r9c6}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 13/32: PROVED cells=10 depth=1 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=1 parity_transports=0 pigeonhole_xwings=1 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 13/32: PROVED cells=10 depth=1 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=1 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000001000001011000001000000001001000010110
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -533,7 +506,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 14/32: PROVED cells=10 depth=1 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=3
+pattern 14/32: PROVED cells=10 depth=1 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=4
 000000000000000000000000000000000000000000001000001110000000000001001001001001001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -558,7 +531,31 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/2 [no_diamond] (ladder) ===
+=== Alt proof 1/3 [no_diamond] (xwing+guardian) ===
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Guardian: r6c6 guards oddagon {r6c6, r6c7, r6c8} (source r5c9).
+      → color(r6c6) = color(r5c9). Identify.
+  2.  Pigeonhole X-wing on {r8c3, r8c9, r9c9, r9c3}:
+      Diagonals: {r8c3, r9c9} and {r8c9, r9c3} (non-adjacent).
+      By pigeonhole, one diagonal must share a color.
+      Case 1: color(r8c3) = color(r9c9) = X
+        row 8 {r8c3, r8c6, r8c9}: r8c3=X → r8c6, r8c9≠X
+        row 9 {r9c3, r9c6, r9c9}: r9c9=X → r9c3, r9c6≠X
+        col 6 {[r5c9=r6c6], r8c6, r9c6}: r8c6, r9c6≠X → [r5c9=r6c6]=X
+        col 9 {[r5c9=r6c6], r8c9, r9c9}: [r5c9=r6c6]=X and r9c9=X clash
+        Contradiction.
+      Case 2: color(r8c9) = color(r9c3) = X
+        row 8 {r8c3, r8c6, r8c9}: r8c9=X → r8c3, r8c6≠X
+        row 9 {r9c3, r9c6, r9c9}: r9c3=X → r9c6, r9c9≠X
+        col 6 {[r5c9=r6c6], r8c6, r9c6}: r8c6, r9c6≠X → [r5c9=r6c6]=X
+        col 9 {[r5c9=r6c6], r8c9, r9c9}: [r5c9=r6c6]=X and r8c9=X clash
+        Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+=== Alt proof 2/3 [no_xwing] (ladder) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
@@ -568,7 +565,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 2/2 [greedy] (diamond) ===
+=== Alt proof 3/3 [greedy] (diamond) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
@@ -582,7 +579,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 15/32: PROVED cells=10 depth=1 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=3
+pattern 15/32: PROVED cells=10 depth=1 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=4
 000000000000000000000000000000000000000000001000001110000000000001001001010001001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -607,7 +604,31 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/2 [no_diamond] (ladder) ===
+=== Alt proof 1/3 [no_diamond] (xwing+guardian) ===
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Guardian: r6c6 guards oddagon {r6c6, r6c7, r6c8} (source r5c9).
+      → color(r6c6) = color(r5c9). Identify.
+  2.  Pigeonhole X-wing on {r8c3, r8c9, r9c9, r9c2}:
+      Diagonals: {r8c3, r9c9} and {r8c9, r9c2} (non-adjacent).
+      By pigeonhole, one diagonal must share a color.
+      Case 1: color(r8c3) = color(r9c9) = X
+        row 8 {r8c3, r8c6, r8c9}: r8c3=X → r8c6, r8c9≠X
+        row 9 {r9c2, r9c6, r9c9}: r9c9=X → r9c2, r9c6≠X
+        col 6 {[r5c9=r6c6], r8c6, r9c6}: r8c6, r9c6≠X → [r5c9=r6c6]=X
+        col 9 {[r5c9=r6c6], r8c9, r9c9}: [r5c9=r6c6]=X and r9c9=X clash
+        Contradiction.
+      Case 2: color(r8c9) = color(r9c2) = X
+        row 8 {r8c3, r8c6, r8c9}: r8c9=X → r8c3, r8c6≠X
+        row 9 {r9c2, r9c6, r9c9}: r9c2=X → r9c6, r9c9≠X
+        col 6 {[r5c9=r6c6], r8c6, r9c6}: r8c6, r9c6≠X → [r5c9=r6c6]=X
+        col 9 {[r5c9=r6c6], r8c9, r9c9}: [r5c9=r6c6]=X and r8c9=X clash
+        Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+=== Alt proof 2/3 [no_xwing] (ladder) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
@@ -617,7 +638,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 2/2 [greedy] (diamond) ===
+=== Alt proof 3/3 [greedy] (diamond) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
@@ -631,7 +652,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 16/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 16/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000001000001110000000000001001001011000001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -644,21 +665,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (set) ===
+=== Alt proof 1/1 [no_diamond] (guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  SET: {row 6} − {box 6}.
-      Remainder: {r6c6} = {r5c9}.
+  1.  Guardian: r6c6 guards oddagon {r6c6, r6c7, r6c8} (source r5c9).
       → color(r6c6) = color(r5c9). Identify.
-  2.  SET: {row 9} − {box 7}.
-      Remainder: {r9c9} = {r8c3}.
-      → color(r9c9) = color(r8c3). Identify.
-  3.  K₄ on {[r5c9=r6c6], [r8c3=r9c9], r8c6, r8c9}. Contradiction.
+  2.  Guardian: r8c3 guards oddagon {r8c3, r8c6, r8c9} (source [r5c9=r6c6]).
+      → color(r8c3) = color([r5c9=r6c6]). Identify.
+  3.  K₄ on {[r5c9=r6c6=r8c3], r9c2, r9c3, r9c9}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 17/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 17/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000001000001110000000000001001001011001000
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -671,21 +690,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (set) ===
+=== Alt proof 1/1 [no_diamond] (guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  SET: {row 6} − {box 6}.
-      Remainder: {r6c6} = {r5c9}.
-      → color(r6c6) = color(r5c9). Identify.
-  2.  SET: {row 9} − {box 7}.
-      Remainder: {r9c6} = {r8c3}.
-      → color(r9c6) = color(r8c3). Identify.
-  3.  K₄ on {[r5c9=r6c6], [r8c3=r9c6], r8c6, r8c9}. Contradiction.
+  1.  Guardian: r5c9 guards oddagon {r5c9, r6c7, r6c8} (source r6c6).
+      → color(r5c9) = color(r6c6). Identify.
+  2.  Guardian: r8c3 guards oddagon {r8c3, r8c6, r8c9} (source [r5c9=r6c6]).
+      → color(r8c3) = color([r5c9=r6c6]). Identify.
+  3.  K₄ on {[r5c9=r6c6=r8c3], r9c2, r9c3, r9c6}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 18/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 18/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000001000001110000000000001001001110000001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -698,21 +715,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (set) ===
+=== Alt proof 1/1 [no_diamond] (guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  SET: {row 6} − {box 6}.
-      Remainder: {r6c6} = {r5c9}.
+  1.  Guardian: r6c6 guards oddagon {r6c6, r6c7, r6c8} (source r5c9).
       → color(r6c6) = color(r5c9). Identify.
-  2.  SET: {row 9} − {box 7}.
-      Remainder: {r9c9} = {r8c3}.
-      → color(r9c9) = color(r8c3). Identify.
-  3.  K₄ on {[r5c9=r6c6], [r8c3=r9c9], r8c6, r8c9}. Contradiction.
+  2.  Guardian: r8c3 guards oddagon {r8c3, r8c6, r8c9} (source [r5c9=r6c6]).
+      → color(r8c3) = color([r5c9=r6c6]). Identify.
+  3.  K₄ on {[r5c9=r6c6=r8c3], r9c1, r9c2, r9c9}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 19/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 19/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000001000001110000000000001001001110001000
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -725,21 +740,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (set) ===
+=== Alt proof 1/1 [no_diamond] (guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  SET: {row 6} − {box 6}.
-      Remainder: {r6c6} = {r5c9}.
-      → color(r6c6) = color(r5c9). Identify.
-  2.  SET: {row 9} − {box 7}.
-      Remainder: {r9c6} = {r8c3}.
-      → color(r9c6) = color(r8c3). Identify.
-  3.  K₄ on {[r5c9=r6c6], [r8c3=r9c6], r8c6, r8c9}. Contradiction.
+  1.  Guardian: r5c9 guards oddagon {r5c9, r6c7, r6c8} (source r6c6).
+      → color(r5c9) = color(r6c6). Identify.
+  2.  Guardian: r8c3 guards oddagon {r8c3, r8c6, r8c9} (source [r5c9=r6c6]).
+      → color(r8c3) = color([r5c9=r6c6]). Identify.
+  3.  K₄ on {[r5c9=r6c6=r8c3], r9c1, r9c2, r9c6}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 20/32: PROVED cells=10 depth=1 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=1 parity_transports=0 pigeonhole_xwings=1 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 20/32: PROVED cells=10 depth=1 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=1 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000001000001110000000001000001001000110010
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -779,7 +792,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 21/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 21/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000001000001110000001000000001001000010011
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -792,21 +805,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (set) ===
+=== Alt proof 1/1 [no_diamond] (guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  SET: {row 6} − {box 6}.
-      Remainder: {r6c6} = {r5c9}.
+  1.  Guardian: r6c6 guards oddagon {r6c6, r6c7, r6c8} (source r5c9).
       → color(r6c6) = color(r5c9). Identify.
-  2.  SET: {row 9} − {box 9}.
-      Remainder: {r9c5} = {r8c9}.
-      → color(r9c5) = color(r8c9). Identify.
-  3.  K₄ on {[r5c9=r6c6], r7c6, r8c6, [r8c9=r9c5]}. Contradiction.
+  2.  Guardian: r9c5 guards oddagon {r9c5, r7c6, r8c6} (source [r5c9=r6c6]).
+      → color(r9c5) = color([r5c9=r6c6]). Identify.
+  3.  K₄ on {[r5c9=r6c6=r9c5], r8c9, r9c8, r9c9}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 22/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 22/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000001000001110000001000000001001000010110
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -819,21 +830,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (set) ===
+=== Alt proof 1/1 [no_diamond] (guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  SET: {row 6} − {box 6}.
-      Remainder: {r6c6} = {r5c9}.
-      → color(r6c6) = color(r5c9). Identify.
-  2.  SET: {row 9} − {box 9}.
-      Remainder: {r9c5} = {r8c9}.
-      → color(r9c5) = color(r8c9). Identify.
-  3.  K₄ on {[r5c9=r6c6], r7c6, r8c6, [r8c9=r9c5]}. Contradiction.
+  1.  Guardian: r5c9 guards oddagon {r5c9, r6c7, r6c8} (source r6c6).
+      → color(r5c9) = color(r6c6). Identify.
+  2.  Guardian: r9c5 guards oddagon {r9c5, r7c6, r8c6} (source [r5c9=r6c6]).
+      → color(r9c5) = color([r5c9=r6c6]). Identify.
+  3.  K₄ on {[r5c9=r6c6=r9c5], r8c9, r9c7, r9c8}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 23/32: PROVED cells=10 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=1 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 23/32: PROVED cells=10 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=1 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000000001001001010000000000001001001001001001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -872,7 +881,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 24/32: PROVED cells=10 depth=1 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=1 parity_transports=0 pigeonhole_xwings=1 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=3
+pattern 24/32: PROVED cells=10 depth=1 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=1 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=3
 000000000000000000000000000000000000000001001001000011000001000000001000001010001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -929,7 +938,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 25/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 25/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000001001001000110000001000000001000001010001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -942,21 +951,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (set) ===
+=== Alt proof 1/1 [no_diamond] (guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  SET: {row 6} − {box 6}.
-      Remainder: {r6c3} = {r5c9}.
+  1.  Guardian: r6c3 guards oddagon {r6c3, r6c7, r6c8} (source r5c9).
       → color(r6c3) = color(r5c9). Identify.
-  2.  SET: {col 6} − {box 8}.
-      Remainder: {r5c6} = {r9c5}.
-      → color(r5c6) = color(r9c5). Identify.
-  3.  K₄ on {[r5c6=r9c5], [r5c9=r6c3], r9c3, r9c9}. Contradiction.
+  2.  Guardian: r9c5 guards oddagon {r9c5, r9c3, r9c9} (source [r5c9=r6c3]).
+      → color(r9c5) = color([r5c9=r6c3]). Identify.
+  3.  K₄ on {r5c6, [r5c9=r6c3=r9c5], r7c6, r8c6}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 26/32: PROVED cells=10 depth=1 diamonds=0 odd_wheels=0 circular_ladders=1 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=3
+pattern 26/32: PROVED cells=10 depth=1 diamonds=0 odd_wheels=0 circular_ladders=1 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=3
 000000000000000000000000000000000000000001001001001001001000000001000000010001001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -994,7 +1001,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 27/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=1 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=3
+pattern 27/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=1 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=4
 000000000000000000000000000000000000000001001001001010001000000001000000010001001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -1008,7 +1015,32 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/2 [greedy] (diamond) ===
+=== Alt proof 1/3 [no_diamond] (oddwheel+guardian) ===
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Guardian: r9c2 guards oddagon {r9c2, r7c3, r8c3} (source r6c3).
+      → color(r9c2) = color(r6c3). Identify.
+  2.  Guardian: r5c6 guards oddagon {r5c6, r6c6, r9c6} (source [r6c3=r9c2]).
+      → color(r5c6) = color([r6c3=r9c2]). Identify.
+  3.  Odd wheel: hub [r5c6=r6c3=r9c2] forces rim to 2 colors.
+      Bivalue oddagon {r5c9, r6c8, r6c6, r9c6, r9c9} (length 5) cannot be 2-colored. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+=== Alt proof 2/3 [no_oddwheel] (diamond+guardian) ===
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Diamond {r6c3, r7c3, r8c3, r9c2} (spine r7c3—r8c3).
+      → color(r6c3) = color(r9c2). Identify.
+  2.  Guardian: r5c9 guards oddagon {r5c9, r6c8, r6c6, r9c6, r9c9} (source [r6c3=r9c2]).
+      → color(r5c9) = color([r6c3=r9c2]). Identify.
+  3.  K₄ on {r5c6, [r5c9=r6c3=r9c2], r6c6, r9c6}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+=== Alt proof 3/3 [greedy] (diamond) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
@@ -1022,24 +1054,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 2/2 [no_diamond] (set+oddwheel+branch) ===
-Proof of non-3-colorability:
-  Assume for contradiction it is 3-colorable.
-
-  1.  SET: {col 3} − {box 7}.
-      Remainder: {r6c3} = {r9c2}.
-      → color(r6c3) = color(r9c2). Identify.
-  2.  Branch on r5c6, [r6c3=r9c2]:
-      Case A: color(r5c6) = color([r6c3=r9c2]). Identify.
-        3.  Odd wheel: hub [r5c6=r6c3=r9c2] forces rim to 2 colors.
-            Bivalue oddagon {r5c9, r6c8, r6c6, r9c6, r9c9} (length 5) cannot be 2-colored. Contradiction.
-      Case B: color(r5c6) ≠ color([r6c3=r9c2]). Add edge.
-        4.  K₄ on {r5c6, [r6c3=r9c2], r6c6, r9c6}. Contradiction.
-      Both cases contradict 3-colorability.
-
-  Therefore the pattern is not 3-colorable. □
-
-pattern 28/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 28/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000001011001001001001000000001000000010001000
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -1052,21 +1067,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (set) ===
+=== Alt proof 1/1 [no_diamond] (guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  SET: {row 5} − {box 6}.
-      Remainder: {r5c6} = {r6c9}.
-      → color(r5c6) = color(r6c9). Identify.
-  2.  SET: {col 3} − {box 7}.
-      Remainder: {r6c3} = {r9c2}.
-      → color(r6c3) = color(r9c2). Identify.
+  1.  Guardian: r6c9 guards oddagon {r6c9, r5c8, r5c9} (source r5c6).
+      → color(r6c9) = color(r5c6). Identify.
+  2.  Guardian: r9c2 guards oddagon {r9c2, r7c3, r8c3} (source r6c3).
+      → color(r9c2) = color(r6c3). Identify.
   3.  K₄ on {[r5c6=r6c9], [r6c3=r9c2], r6c6, r9c6}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 29/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 29/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000000001011001001100001000000001000000010001000
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -1079,21 +1092,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (set) ===
+=== Alt proof 1/1 [no_diamond] (guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  SET: {row 5} − {box 6}.
-      Remainder: {r5c6} = {r6c7}.
-      → color(r5c6) = color(r6c7). Identify.
-  2.  SET: {col 3} − {box 7}.
-      Remainder: {r6c3} = {r9c2}.
-      → color(r6c3) = color(r9c2). Identify.
+  1.  Guardian: r6c7 guards oddagon {r6c7, r5c8, r5c9} (source r5c6).
+      → color(r6c7) = color(r5c6). Identify.
+  2.  Guardian: r9c2 guards oddagon {r9c2, r7c3, r8c3} (source r6c3).
+      → color(r9c2) = color(r6c3). Identify.
   3.  K₄ on {[r5c6=r6c7], [r6c3=r9c2], r6c6, r9c6}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 30/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 30/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000001000000001001001010000001000000001000001010001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -1106,21 +1117,20 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (set) ===
+=== Alt proof 1/1 [no_diamond] (oddwheel+guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  SET: {col 6} − {box 8}.
-      Remainder: {r6c6} = {r9c5}.
-      → color(r6c6) = color(r9c5). Identify.
-  2.  SET: {col 9} − {box 6}.
-      Remainder: {r9c9} = {r6c8}.
-      → color(r9c9) = color(r6c8). Identify.
-  3.  K₄ on {r6c3, [r6c6=r9c5], [r6c8=r9c9], r9c3}. Contradiction.
+  1.  Guardian: r9c5 guards oddagon {r9c5, r7c6, r8c6} (source r6c6).
+      → color(r9c5) = color(r6c6). Identify.
+  2.  Guardian: r4c9 guards oddagon {r4c9, r6c8, r6c3, r9c3, r9c9} (source [r6c6=r9c5]).
+      → color(r4c9) = color([r6c6=r9c5]). Identify.
+  3.  Odd wheel: hub [r4c9=r6c6=r9c5] forces rim to 2 colors.
+      Bivalue oddagon {r5c9, r6c8, r6c3, r9c3, r9c9} (length 5) cannot be 2-colored. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 31/32: PROVED cells=10 depth=1 diamonds=0 odd_wheels=0 circular_ladders=1 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=3
+pattern 31/32: PROVED cells=10 depth=1 diamonds=0 odd_wheels=0 circular_ladders=1 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=3
 000000000000000000000001001000000000000000000001001001001000000001000000010001001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -1158,7 +1168,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 32/32: PROVED cells=10 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=1 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 proofs=2
+pattern 32/32: PROVED cells=10 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=1 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000001001001000000000000000000001001001000000000000000001001001010
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.

@@ -331,6 +331,107 @@ impl ProofGraph {
         true
     }
 
+    /// Find all guardian deductions: for each vertex u, find odd cycles where
+    /// all-but-one vertex is adjacent to u. The non-adjacent vertex (guardian)
+    /// must share u's color. Returns (source, guardian, cycle) with cycle[0] = guardian.
+    fn find_all_guardians(&self) -> Vec<(usize, usize, Vec<usize>)> {
+        let verts = self.active_verts();
+        if verts.len() < 6 { return Vec::new(); } // need source + 5-cycle minimum
+
+        let mut results = Vec::new();
+        let mut seen_pairs: Vec<(usize, usize)> = Vec::new();
+
+        for &u in &verts {
+            let nbrs_u = self.adj[u] & self.active & !(1 << u);
+            if nbrs_u.count_ones() < 4 { continue; } // need ≥4 bivalue verts for a 5-cycle
+
+            // Potential guardians: active vertices not adjacent to u (and not u itself)
+            let non_adj_u = self.active & !nbrs_u & !(1 << u);
+            let mut g_mask = non_adj_u;
+            while g_mask != 0 {
+                let g = g_mask.trailing_zeros() as usize;
+                g_mask &= g_mask - 1;
+
+                // S = N(g) ∩ N(u): guardian's neighbors that are bivalue w.r.t. u
+                let s_mask = self.adj[g] & nbrs_u & self.active;
+                if s_mask.count_ones() < 2 { continue; }
+
+                if let Some(cycle) = self.find_guardian_cycle(g, s_mask, nbrs_u) {
+                    let pair = (u.min(g), u.max(g));
+                    if !seen_pairs.contains(&pair) {
+                        seen_pairs.push(pair);
+                        results.push((u, g, cycle));
+                    }
+                }
+            }
+        }
+        results
+    }
+
+    /// Find shortest odd cycle through guardian g where all other vertices
+    /// are in b_mask (neighbors of the source). Returns cycle as [g, a, ..., b].
+    fn find_guardian_cycle(
+        &self,
+        g: usize,
+        s_mask: u32,   // N(g) ∩ B
+        b_mask: u32,   // B = N(source) (bivalue set)
+    ) -> Option<Vec<usize>> {
+        // BFS from each a ∈ S through B, tracking distance.
+        // If another b ∈ S is reached at odd distance, the path a→...→b has
+        // odd length, forming cycle g→a→...→b→g of length odd+2 = odd.
+        let s_list: Vec<usize> = {
+            let mut v = Vec::new();
+            let mut m = s_mask;
+            while m != 0 { v.push(m.trailing_zeros() as usize); m &= m - 1; }
+            v
+        };
+
+        let mut best_cycle: Option<Vec<usize>> = None;
+
+        for (ai, &a) in s_list.iter().enumerate() {
+            let mut dist = [u32::MAX; 32];
+            let mut parent = [usize::MAX; 32];
+            dist[a] = 0;
+            let mut queue = std::collections::VecDeque::new();
+            queue.push_back(a);
+
+            while let Some(cur) = queue.pop_front() {
+                let mut nbrs = self.adj[cur] & b_mask & self.active & !(1 << cur);
+                while nbrs != 0 {
+                    let nb = nbrs.trailing_zeros() as usize;
+                    nbrs &= nbrs - 1;
+                    if dist[nb] == u32::MAX {
+                        dist[nb] = dist[cur] + 1;
+                        parent[nb] = cur;
+                        queue.push_back(nb);
+                    }
+                }
+            }
+
+            for &b in &s_list[(ai + 1)..] {
+                if dist[b] != u32::MAX && dist[b] % 2 == 1 {
+                    // Reconstruct path b → ... → a
+                    let mut path = Vec::new();
+                    let mut cur = b;
+                    while cur != a {
+                        path.push(cur);
+                        cur = parent[cur];
+                    }
+                    path.push(a);
+                    path.reverse(); // now a → ... → b
+
+                    let cycle_len = path.len() + 1; // +1 for guardian g
+                    if best_cycle.as_ref().map_or(true, |c| cycle_len < c.len()) {
+                        let mut cycle = vec![g];
+                        cycle.extend_from_slice(&path);
+                        best_cycle = Some(cycle);
+                    }
+                }
+            }
+        }
+        best_cycle
+    }
+
     /// Find all 3-prisms (circular ladders) with at least 2 satellites from
     /// distinct rungs where at least one new edge can be added.
     /// A 3-prism is two vertex-disjoint triangles connected by 3 rungs.
@@ -688,7 +789,7 @@ impl ProofGraph {
                 let neg_group = groups[j].1;
                 let max_k = pos_group.len().min(neg_group.len());
 
-                for k in 1..=max_k {
+                for k in 2..=max_k {
                     // Enumerate k-subsets of positive
                     for pos_sel in combinations(pos_group, k) {
                         for neg_sel in combinations(neg_group, k) {
@@ -1816,6 +1917,7 @@ pub const TECH_PIGEONHOLE_XWING: u32 = 1 << 4;
 pub const TECH_ODD_WHEEL: u32    = 1 << 5;
 pub const TECH_PARITY: u32       = 1 << 6;
 pub const TECH_BRANCH: u32       = 1 << 7;
+pub const TECH_GUARDIAN: u32     = 1 << 8;
 
 /// Human-readable label for a technique flag.
 fn tech_label(flag: u32) -> &'static str {
@@ -1828,6 +1930,7 @@ fn tech_label(flag: u32) -> &'static str {
         32 => "oddwheel",
         64 => "parity",
         128 => "branch",
+        256 => "guardian",
         _ => "unknown",
     }
 }
@@ -1841,6 +1944,7 @@ const DISABLEABLE_TECHNIQUES: &[(u32, &str)] = &[
     (TECH_PIGEONHOLE_XWING, "no_xwing"),
     (TECH_ODD_WHEEL, "no_oddwheel"),
     (TECH_PARITY, "no_parity"),
+    (TECH_GUARDIAN, "no_guardian"),
 ];
 
 // ── Proof tree ──────────────────────────────────────────────────────
@@ -1949,6 +2053,16 @@ pub enum ProofNode {
         trace_1: Vec<String>,          // deduction chain for diagonal (a,c)
         trace_2: Vec<String>,          // deduction chain for diagonal (b,d)
     },
+    /// Guardian of bivalue oddagon: vertex g is the unique non-neighbor of
+    /// source u in an odd cycle. All other cycle vertices neighbor u, so
+    /// they are restricted to 2 colors. An odd cycle can't be 2-colored,
+    /// so g must take u's color. Merge g with u and continue.
+    Guardian {
+        guardian: String,       // the non-adjacent vertex forced to source's color
+        source: String,         // the vertex providing the color constraint
+        cycle: Vec<String>,     // odd cycle in order, cycle[0] = guardian
+        next: Box<ProofNode>,
+    },
     /// Proof search exhausted depth limit.
     Failed,
 }
@@ -1967,7 +2081,8 @@ impl ProofNode {
                 if *is_contradiction { true } else { next.as_ref().unwrap().is_complete() }
             }
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
-            | ProofNode::ParityTransportDeduction { next, .. } => next.is_complete(),
+            | ProofNode::ParityTransportDeduction { next, .. }
+            | ProofNode::Guardian { next, .. } => next.is_complete(),
             ProofNode::Branch { same_color, diff_color, .. } => {
                 same_color.is_complete() && diff_color.is_complete()
             }
@@ -1987,7 +2102,8 @@ impl ProofNode {
                 if *is_contradiction { 0 } else { 1 + next.as_ref().unwrap().depth() }
             }
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
-            | ProofNode::ParityTransportDeduction { next, .. } => 1 + next.depth(),
+            | ProofNode::ParityTransportDeduction { next, .. }
+            | ProofNode::Guardian { next, .. } => 1 + next.depth(),
             ProofNode::Branch { same_color, diff_color, .. } => {
                 1 + same_color.depth().max(diff_color.depth())
             }
@@ -2006,7 +2122,8 @@ impl ProofNode {
                 if *is_contradiction { 0 } else { next.as_ref().unwrap().branch_count() }
             }
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
-            | ProofNode::ParityTransportDeduction { next, .. } => next.branch_count(),
+            | ProofNode::ParityTransportDeduction { next, .. }
+            | ProofNode::Guardian { next, .. } => next.branch_count(),
             ProofNode::Branch { same_color, diff_color, .. } => {
                 1 + same_color.branch_count() + diff_color.branch_count()
             }
@@ -2026,7 +2143,8 @@ impl ProofNode {
             }
             ProofNode::DiamondMerge { next, .. } => 1 + next.diamond_count(),
             ProofNode::CircularLadder { next, .. }
-            | ProofNode::ParityTransportDeduction { next, .. } => next.diamond_count(),
+            | ProofNode::ParityTransportDeduction { next, .. }
+            | ProofNode::Guardian { next, .. } => next.diamond_count(),
             ProofNode::Branch { same_color, diff_color, .. } => {
                 same_color.diamond_count() + diff_color.diamond_count()
             }
@@ -2044,7 +2162,8 @@ impl ProofNode {
                 if *is_contradiction { 0 } else { next.as_ref().unwrap().odd_wheel_count() }
             }
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
-            | ProofNode::ParityTransportDeduction { next, .. } => next.odd_wheel_count(),
+            | ProofNode::ParityTransportDeduction { next, .. }
+            | ProofNode::Guardian { next, .. } => next.odd_wheel_count(),
             ProofNode::Branch { same_color, diff_color, .. } => {
                 same_color.odd_wheel_count() + diff_color.odd_wheel_count()
             }
@@ -2063,7 +2182,8 @@ impl ProofNode {
             }
             ProofNode::CircularLadder { next, .. } => 1 + next.circular_ladder_count(),
             ProofNode::DiamondMerge { next, .. }
-            | ProofNode::ParityTransportDeduction { next, .. } => next.circular_ladder_count(),
+            | ProofNode::ParityTransportDeduction { next, .. }
+            | ProofNode::Guardian { next, .. } => next.circular_ladder_count(),
             ProofNode::Branch { same_color, diff_color, .. } => {
                 same_color.circular_ladder_count() + diff_color.circular_ladder_count()
             }
@@ -2081,7 +2201,8 @@ impl ProofNode {
                 if *is_contradiction { 0 } else { next.as_ref().unwrap().bridged_hexagon_count() }
             }
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
-            | ProofNode::ParityTransportDeduction { next, .. } => next.bridged_hexagon_count(),
+            | ProofNode::ParityTransportDeduction { next, .. }
+            | ProofNode::Guardian { next, .. } => next.bridged_hexagon_count(),
             ProofNode::Branch { same_color, diff_color, .. } => {
                 same_color.bridged_hexagon_count() + diff_color.bridged_hexagon_count()
             }
@@ -2099,7 +2220,8 @@ impl ProofNode {
                 1 + if *is_contradiction { 0 } else { next.as_ref().unwrap().set_equivalence_count() }
             }
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
-            | ProofNode::ParityTransportDeduction { next, .. } => next.set_equivalence_count(),
+            | ProofNode::ParityTransportDeduction { next, .. }
+            | ProofNode::Guardian { next, .. } => next.set_equivalence_count(),
             ProofNode::Branch { same_color, diff_color, .. } => {
                 same_color.set_equivalence_count() + diff_color.set_equivalence_count()
             }
@@ -2119,6 +2241,7 @@ impl ProofNode {
             }
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. } => next.parity_transport_count(),
             ProofNode::ParityTransportDeduction { next, .. } => 1 + next.parity_transport_count(),
+            ProofNode::Guardian { next, .. } => next.parity_transport_count(),
             ProofNode::Branch { same_color, diff_color, .. } => {
                 same_color.parity_transport_count() + diff_color.parity_transport_count()
             }
@@ -2136,9 +2259,29 @@ impl ProofNode {
                 if *is_contradiction { 0 } else { next.as_ref().unwrap().pigeonhole_xwing_count() }
             }
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
-            | ProofNode::ParityTransportDeduction { next, .. } => next.pigeonhole_xwing_count(),
+            | ProofNode::ParityTransportDeduction { next, .. }
+            | ProofNode::Guardian { next, .. } => next.pigeonhole_xwing_count(),
             ProofNode::Branch { same_color, diff_color, .. } => {
                 same_color.pigeonhole_xwing_count() + diff_color.pigeonhole_xwing_count()
+            }
+        }
+    }
+    pub fn guardian_count(&self) -> usize {
+        match self {
+            ProofNode::K4Contradiction { .. } | ProofNode::OddWheel { .. }
+            | ProofNode::BridgedHexagon { .. } | ProofNode::ParityTransport { .. }
+            | ProofNode::ParityChain { .. }
+            | ProofNode::HouseColoringContradiction { .. }
+            | ProofNode::PigeonholeXwing { .. }
+            | ProofNode::Failed => 0,
+            ProofNode::SetEquivalence { is_contradiction, next, .. } => {
+                if *is_contradiction { 0 } else { next.as_ref().unwrap().guardian_count() }
+            }
+            ProofNode::Guardian { next, .. } => 1 + next.guardian_count(),
+            ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
+            | ProofNode::ParityTransportDeduction { next, .. } => next.guardian_count(),
+            ProofNode::Branch { same_color, diff_color, .. } => {
+                same_color.guardian_count() + diff_color.guardian_count()
             }
         }
     }
@@ -2156,7 +2299,8 @@ impl ProofNode {
                 if *is_contradiction { 1 } else { 1 + next.as_ref().unwrap().size() }
             }
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
-            | ProofNode::ParityTransportDeduction { next, .. } => 1 + next.size(),
+            | ProofNode::ParityTransportDeduction { next, .. }
+            | ProofNode::Guardian { next, .. } => 1 + next.size(),
             ProofNode::Branch { same_color, diff_color, .. } => {
                 1 + same_color.size() + diff_color.size()
             }
@@ -2176,6 +2320,7 @@ impl ProofNode {
             ProofNode::Failed => 0,
             ProofNode::DiamondMerge { next, .. } => TECH_DIAMOND | next.technique_signature(),
             ProofNode::CircularLadder { next, .. } => TECH_CIRCULAR_LADDER | next.technique_signature(),
+            ProofNode::Guardian { next, .. } => TECH_GUARDIAN | next.technique_signature(),
             ProofNode::SetEquivalence { is_contradiction, next, .. } => {
                 TECH_SET | if *is_contradiction { 0 } else { next.as_ref().unwrap().technique_signature() }
             }
@@ -2193,7 +2338,7 @@ impl ProofNode {
             return "k4".to_string();
         }
         let mut parts = Vec::new();
-        for bit in 0..8 {
+        for bit in 0..9 {
             if sig & (1 << bit) != 0 {
                 parts.push(tech_label(1 << bit));
             }
@@ -2346,6 +2491,34 @@ fn find_best_proof(
                     tip_b: tip_b_name,
                     spine_u: spine_u_name,
                     spine_v: spine_v_name,
+                    next: Box::new(next),
+                });
+            }
+        }
+    }
+    }
+
+    // Try all guardian reductions
+    if disabled & TECH_GUARDIAN == 0 {
+    let guardians = graph.find_all_guardians();
+    for (source, guardian, cycle) in &guardians {
+        let source_name = graph.vertex_name(*source);
+        let guardian_name = graph.vertex_name(*guardian);
+        let cycle_names: Vec<String> = cycle.iter().map(|&v| graph.vertex_name(v)).collect();
+
+        let mut g = graph.clone();
+        let (keep, remove) = ((*source).min(*guardian), (*source).max(*guardian));
+        g.merge(keep, remove);
+
+        let next = find_best_proof(&g, branches_left, depth_remaining - 1, best_size - 1, disabled);
+        if next.is_complete() {
+            let total = 1 + next.size();
+            if total < best_size {
+                best_size = total;
+                best = Some(ProofNode::Guardian {
+                    guardian: guardian_name,
+                    source: source_name,
+                    cycle: cycle_names,
                     next: Box::new(next),
                 });
             }
@@ -2574,7 +2747,27 @@ fn find_greedy_proof(
         };
     }
 
-    // Priority 2: SET equivalence (after diamonds exhausted)
+    // Priority 2: guardian (after diamonds exhausted)
+    let guardians = graph.find_all_guardians();
+    if let Some((source, guardian, cycle)) = guardians.into_iter().next() {
+        let source_name = graph.vertex_name(source);
+        let guardian_name = graph.vertex_name(guardian);
+        let cycle_names: Vec<String> = cycle.iter().map(|&v| graph.vertex_name(v)).collect();
+
+        let mut g = graph.clone();
+        let (keep, remove) = (source.min(guardian), source.max(guardian));
+        g.merge(keep, remove);
+
+        let next = find_greedy_proof(&g, branches_left, depth_remaining - 1);
+        return ProofNode::Guardian {
+            guardian: guardian_name,
+            source: source_name,
+            cycle: cycle_names,
+            next: Box::new(next),
+        };
+    }
+
+    // Priority 3: SET equivalence (after diamonds and guardians exhausted)
     let set_deds = graph.find_set_deductions();
     if let Some((eq, ded)) = set_deds.into_iter().next() {
         let (equation, lhs_names, rhs_names, ded_text) = format_set_equation(&eq, graph);
@@ -2737,6 +2930,20 @@ fn format_node(node: &ProofNode, step: &mut usize, indent: usize) -> String {
             s += &format!(
                 "{}    → color({}) = color({}). Identify.\n",
                 pad, tip_a, tip_b,
+            );
+            s += &format_node(next, step, indent);
+            s
+        }
+        ProofNode::Guardian { guardian, source, cycle, next } => {
+            *step += 1;
+            let cycle_str = cycle.join(", ");
+            let mut s = format!(
+                "{}{}.  Guardian: {} guards oddagon {{{}}} (source {}).\n",
+                pad, step, guardian, cycle_str, source,
+            );
+            s += &format!(
+                "{}    → color({}) = color({}). Identify.\n",
+                pad, guardian, source,
             );
             s += &format_node(next, step, indent);
             s
@@ -2983,12 +3190,13 @@ pub struct ProofResult {
     pub greedy_set_equivalences: usize,
     pub greedy_parity_transports: usize,
     pub greedy_pigeonhole_xwings: usize,
+    pub greedy_guardians: usize,
 }
 
 impl ProofResult {
     pub fn summary(&self) -> String {
         format!(
-            "depth={} diamonds={} odd_wheels={} circular_ladders={} bridged_hexagons={} set_equivalences={} parity_transports={} pigeonhole_xwings={} branches={} complete={} greedy_branches={} greedy_odd_wheels={} greedy_circular_ladders={} greedy_bridged_hexagons={} greedy_set_equivalences={} greedy_parity_transports={} greedy_pigeonhole_xwings={} proofs={}",
+            "depth={} diamonds={} odd_wheels={} circular_ladders={} bridged_hexagons={} set_equivalences={} parity_transports={} pigeonhole_xwings={} guardians={} branches={} complete={} greedy_branches={} greedy_odd_wheels={} greedy_circular_ladders={} greedy_bridged_hexagons={} greedy_set_equivalences={} greedy_parity_transports={} greedy_pigeonhole_xwings={} greedy_guardians={} proofs={}",
             self.proof.depth(),
             self.proof.diamond_count(),
             self.proof.odd_wheel_count(),
@@ -2997,6 +3205,7 @@ impl ProofResult {
             self.proof.set_equivalence_count(),
             self.proof.parity_transport_count(),
             self.proof.pigeonhole_xwing_count(),
+            self.proof.guardian_count(),
             self.proof.branch_count(),
             self.proof.is_complete(),
             self.greedy_branches,
@@ -3006,6 +3215,7 @@ impl ProofResult {
             self.greedy_set_equivalences,
             self.greedy_parity_transports,
             self.greedy_pigeonhole_xwings,
+            self.greedy_guardians,
             1 + self.alt_proofs.len(),
         )
     }
@@ -3036,6 +3246,7 @@ pub fn prove_pattern(cells: &[u8]) -> ProofResult {
     let g_set_equivalences = greedy.set_equivalence_count();
     let g_parity_transports = greedy.parity_transport_count();
     let g_pigeonhole_xwings = greedy.pigeonhole_xwing_count();
+    let g_guardians = greedy.guardian_count();
 
     // Collect alternative proofs with different technique signatures.
     let optimal_sig = proof.technique_signature();
@@ -3087,6 +3298,7 @@ pub fn prove_pattern(cells: &[u8]) -> ProofResult {
         greedy_set_equivalences: g_set_equivalences,
         greedy_parity_transports: g_parity_transports,
         greedy_pigeonhole_xwings: g_pigeonhole_xwings,
+        greedy_guardians: g_guardians,
         alt_proofs,
         proof,
         text,

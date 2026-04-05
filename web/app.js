@@ -103,6 +103,15 @@ function computeAccumulatedColors(proofContainer, targetEl) {
           uf.union(allCells[0], allCells[j]);
         }
       }
+    } else if (stepData.type === 'guardian') {
+      const cellsG = parseCellsFromLabel(stepData.guardian);
+      const cellsS = parseCellsFromLabel(stepData.source);
+      if (cellsG.length > 0 && cellsS.length > 0) {
+        const allCells = [...cellsG, ...cellsS];
+        for (let j = 1; j < allCells.length; j++) {
+          uf.union(allCells[0], allCells[j]);
+        }
+      }
     }
 
     // Accumulate virtual edges from prior steps (not the target itself)
@@ -257,6 +266,7 @@ function getDifficulty(p) {
   const gse = p.proof?.greedy_set_equivalences ?? 0;
   const gpt = p.proof?.greedy_parity_transports ?? 0;
   const gxw = p.proof?.greedy_pigeonhole_xwings ?? 0;
+  const gg = p.proof?.greedy_guardians ?? 0;
   if (gb > 0) return 'branch';
   if (gow > 0) return 'oddagon';
   if (gbh > 0) return 'hexagon';
@@ -264,6 +274,7 @@ function getDifficulty(p) {
   if (gxw > 0) return 'xwing';
   if (gse > 0) return 'set';
   if (gpt > 0) return 'parity';
+  if (gg > 0) return 'guardian';
   return 'diamond';
 }
 
@@ -547,6 +558,8 @@ function renderProofSteps(steps, depth) {
   for (const step of steps) {
     if (step.type === 'diamond') {
       html += renderDiamondStep(step, depth);
+    } else if (step.type === 'guardian') {
+      html += renderGuardianStep(step, depth);
     } else if (step.type === 'odd_wheel') {
       html += renderOddWheelStep(step, depth);
     } else if (step.type === 'k4') {
@@ -590,6 +603,25 @@ function renderDiamondStep(step, depth) {
     `{${step.vertices.map(v => `<span class="step-vertex">${esc(v)}</span>`).join(', ')}} ` +
     `(spine <span class="step-vertex">${esc(step.spine_u)}</span>—<span class="step-vertex">${esc(step.spine_v)}</span>)` +
     `<br><span class="step-identify">→ color(${esc(step.tip_a)}) = color(${esc(step.tip_b)}). Identify.</span>` +
+    `</div>`;
+}
+
+function renderGuardianStep(step, depth) {
+  const data = escapeAttr(JSON.stringify({
+    type: 'guardian',
+    guardian: step.guardian,
+    source: step.source,
+    cycle: step.cycle,
+    vertices: step.vertices,
+  }));
+
+  return `<div class="proof-step" data-step='${data}'>` +
+    `<span class="step-num">${step.step}.</span> ` +
+    `<span class="step-diamond">Guardian</span>: ` +
+    `<span class="step-vertex">${esc(step.guardian)}</span> guards oddagon ` +
+    `{${step.cycle.map(v => `<span class="step-vertex">${esc(v)}</span>`).join(', ')}} ` +
+    `(source <span class="step-vertex">${esc(step.source)}</span>)` +
+    `<br><span class="step-identify">→ color(${esc(step.guardian)}) = color(${esc(step.source)}). Identify.</span>` +
     `</div>`;
 }
 
@@ -897,6 +929,37 @@ function highlightProofStep(pattern, el) {
     for (const cell of parseCellsFromLabel(stepData.tip_b)) {
       if (!highlights[cell] || highlights[cell] === 'highlighted')
         highlights[cell] = 'hl-identify';
+    }
+  } else if (stepData.type === 'guardian') {
+    // Cycle vertices (bivalue): light orange
+    for (const vName of stepData.cycle) {
+      for (const cell of parseCellsFromLabel(vName)) {
+        if (!highlights[cell] || highlights[cell] === 'highlighted')
+          highlights[cell] = 'hl-vertex';
+      }
+    }
+    // Source: purple
+    for (const cell of parseCellsFromLabel(stepData.source)) {
+      if (!highlights[cell] || highlights[cell] === 'highlighted')
+        highlights[cell] = 'hl-diamond';
+    }
+    // Guardian: blue (identified with source)
+    for (const cell of parseCellsFromLabel(stepData.guardian)) {
+      if (!highlights[cell] || highlights[cell] === 'highlighted')
+        highlights[cell] = 'hl-identify';
+    }
+    // Oddagon cycle edges (consecutive pairs, wrapping)
+    const cycleCellSets = stepData.cycle.map(vName => parseCellsFromLabel(vName));
+    edgeHL = new Map();
+    for (let ci = 0; ci < cycleCellSets.length; ci++) {
+      const nxt = (ci + 1) % cycleCellSets.length;
+      for (const u of cycleCellSets[ci]) {
+        for (const v of cycleCellSets[nxt]) {
+          if (NEIGHBORS[u].has(v)) {
+            edgeHL.set(Math.min(u, v) + ',' + Math.max(u, v), 'oddagon');
+          }
+        }
+      }
     }
   } else if (stepData.type === 'k4') {
     // Don't recolor K₄ cells — keep accumulated/default colors.

@@ -103,6 +103,11 @@ def translate_proof_tree(tree, iso):
             s['tip_b'] = translate_cell_name(s['tip_b'], iso)
             s['spine_u'] = translate_cell_name(s['spine_u'], iso)
             s['spine_v'] = translate_cell_name(s['spine_v'], iso)
+        elif s['type'] == 'guardian':
+            s['guardian'] = translate_cell_name(s['guardian'], iso)
+            s['source'] = translate_cell_name(s['source'], iso)
+            s['cycle'] = [translate_cell_name(v, iso) for v in s['cycle']]
+            s['vertices'] = [translate_cell_name(v, iso) for v in s['vertices']]
         elif s['type'] == 'k4':
             s['vertices'] = [translate_cell_name(v, iso) for v in s['vertices']]
         elif s['type'] == 'odd_wheel':
@@ -220,13 +225,23 @@ def parse_proof_file(path):
         fmt = None
         header_match = re.match(
             r'pattern (\d+)/(\d+): (PROVED|FAILED) cells=(\d+) '
-            r'depth=(\d+) diamonds=(\d+) odd_wheels=(\d+) circular_ladders=(\d+) bridged_hexagons=(\d+) set_equivalences=(\d+) parity_transports=(\d+) pigeonhole_xwings=(\d+) branches=(\d+) complete=(\w+)'
-            r'(?: greedy_branches=(\d+) greedy_odd_wheels=(\d+) greedy_circular_ladders=(\d+) greedy_bridged_hexagons=(\d+) greedy_set_equivalences=(\d+) greedy_parity_transports=(\d+) greedy_pigeonhole_xwings=(\d+))?'
+            r'depth=(\d+) diamonds=(\d+) odd_wheels=(\d+) circular_ladders=(\d+) bridged_hexagons=(\d+) set_equivalences=(\d+) parity_transports=(\d+) pigeonhole_xwings=(\d+) guardians=(\d+) branches=(\d+) complete=(\w+)'
+            r'(?: greedy_branches=(\d+) greedy_odd_wheels=(\d+) greedy_circular_ladders=(\d+) greedy_bridged_hexagons=(\d+) greedy_set_equivalences=(\d+) greedy_parity_transports=(\d+) greedy_pigeonhole_xwings=(\d+) greedy_guardians=(\d+))?'
             r'(?: proofs=(\d+))?',
             block
         )
         if header_match:
-            fmt = 'newest'
+            fmt = 'guardian'
+        if not header_match:
+            header_match = re.match(
+                r'pattern (\d+)/(\d+): (PROVED|FAILED) cells=(\d+) '
+                r'depth=(\d+) diamonds=(\d+) odd_wheels=(\d+) circular_ladders=(\d+) bridged_hexagons=(\d+) set_equivalences=(\d+) parity_transports=(\d+) pigeonhole_xwings=(\d+) branches=(\d+) complete=(\w+)'
+                r'(?: greedy_branches=(\d+) greedy_odd_wheels=(\d+) greedy_circular_ladders=(\d+) greedy_bridged_hexagons=(\d+) greedy_set_equivalences=(\d+) greedy_parity_transports=(\d+) greedy_pigeonhole_xwings=(\d+))?'
+                r'(?: proofs=(\d+))?',
+                block
+            )
+            if header_match:
+                fmt = 'newest'
         if not header_match:
             header_match = re.match(
                 r'pattern (\d+)/(\d+): (PROVED|FAILED) cells=(\d+) '
@@ -266,7 +281,22 @@ def parse_proof_file(path):
         circular_ladders = int(header_match.group(8))
         bridged_hexagons = int(header_match.group(9))
 
-        if fmt == 'newest':
+        if fmt == 'guardian':
+            set_equivalences = int(header_match.group(10))
+            parity_transports = int(header_match.group(11))
+            pigeonhole_xwings = int(header_match.group(12))
+            guardians = int(header_match.group(13))
+            branches = int(header_match.group(14))
+            complete = header_match.group(15) == 'true'
+            greedy_branches = int(header_match.group(16)) if header_match.group(16) else branches
+            greedy_odd_wheels = int(header_match.group(17)) if header_match.group(17) else odd_wheels
+            greedy_circular_ladders = int(header_match.group(18)) if header_match.group(18) else circular_ladders
+            greedy_bridged_hexagons = int(header_match.group(19)) if header_match.group(19) else bridged_hexagons
+            greedy_set_equivalences = int(header_match.group(20)) if header_match.group(20) else set_equivalences
+            greedy_parity_transports = int(header_match.group(21)) if header_match.group(21) else parity_transports
+            greedy_pigeonhole_xwings = int(header_match.group(22)) if header_match.group(22) else pigeonhole_xwings
+            greedy_guardians = int(header_match.group(23)) if header_match.group(23) else guardians
+        elif fmt == 'newest':
             set_equivalences = int(header_match.group(10))
             parity_transports = int(header_match.group(11))
             pigeonhole_xwings = int(header_match.group(12))
@@ -279,6 +309,8 @@ def parse_proof_file(path):
             greedy_set_equivalences = int(header_match.group(19)) if header_match.group(19) else set_equivalences
             greedy_parity_transports = int(header_match.group(20)) if header_match.group(20) else parity_transports
             greedy_pigeonhole_xwings = int(header_match.group(21)) if header_match.group(21) else pigeonhole_xwings
+            guardians = 0
+            greedy_guardians = 0
         elif fmt == 'new':
             set_equivalences = int(header_match.group(10))
             parity_transports = int(header_match.group(11))
@@ -292,6 +324,8 @@ def parse_proof_file(path):
             greedy_parity_transports = int(header_match.group(19)) if header_match.group(19) else parity_transports
             pigeonhole_xwings = 0
             greedy_pigeonhole_xwings = 0
+            guardians = 0
+            greedy_guardians = 0
         elif fmt == 'mid':
             set_equivalences = int(header_match.group(10))
             parity_transports = 0
@@ -305,6 +339,8 @@ def parse_proof_file(path):
             greedy_parity_transports = 0
             pigeonhole_xwings = 0
             greedy_pigeonhole_xwings = 0
+            guardians = 0
+            greedy_guardians = 0
         else:  # old
             set_equivalences = 0
             parity_transports = 0
@@ -318,6 +354,8 @@ def parse_proof_file(path):
             greedy_parity_transports = 0
             pigeonhole_xwings = 0
             greedy_pigeonhole_xwings = 0
+            guardians = 0
+            greedy_guardians = 0
 
         lines = block.split('\n')
         bitstring = lines[1].strip() if len(lines) > 1 else ''
@@ -328,7 +366,7 @@ def parse_proof_file(path):
         alt_proof_sections = []
         current_alt = None
         for bl in body_lines:
-            alt_header = re.match(r'=== Alt proof (\d+)/(\d+) \[(.+?)\] \((.+?)\) ===', bl.strip())
+            alt_header = re.match(r'=== Alt proof (\d+)/(\d+) \[(.+?)\] \((.*?)\) ===', bl.strip())
             if alt_header:
                 if current_alt is not None:
                     alt_proof_sections.append(current_alt)
@@ -373,6 +411,7 @@ def parse_proof_file(path):
             'set_equivalences': set_equivalences,
             'parity_transports': parity_transports,
             'pigeonhole_xwings': pigeonhole_xwings,
+            'guardians': guardians,
             'branches': branches,
             'complete': complete,
             'greedy_branches': greedy_branches,
@@ -382,6 +421,7 @@ def parse_proof_file(path):
             'greedy_set_equivalences': greedy_set_equivalences,
             'greedy_parity_transports': greedy_parity_transports,
             'greedy_pigeonhole_xwings': greedy_pigeonhole_xwings,
+            'greedy_guardians': greedy_guardians,
             'proof_text': proof_text,
             'proof_tree': proof_steps,
             'alt_proofs': alt_proofs,
@@ -430,6 +470,26 @@ def parse_proof_steps(lines):
                 'spine_u': spine_u,
                 'spine_v': spine_v,
                 'vertices': verts,
+            })
+            i += 1
+            continue
+
+        # Guardian step
+        gm = re.match(r'(\d+)\.\s+Guardian: (.+?) guards oddagon \{(.+?)\} \(source (.+?)\)\.', stripped)
+        if gm:
+            step_num = int(gm.group(1))
+            guardian = gm.group(2)
+            cycle = [v.strip() for v in gm.group(3).split(',')]
+            source = gm.group(4)
+            i += 1
+            id_line = lines[i].strip() if i < len(lines) else ''
+            steps.append({
+                'type': 'guardian',
+                'step': step_num,
+                'guardian': guardian,
+                'source': source,
+                'cycle': cycle,
+                'vertices': cycle + [source],
             })
             i += 1
             continue
@@ -891,6 +951,7 @@ def main():
                     'set_equivalences': proof_data['set_equivalences'],
                     'parity_transports': proof_data['parity_transports'],
                     'pigeonhole_xwings': proof_data['pigeonhole_xwings'],
+                    'guardians': proof_data['guardians'],
                     'branches': proof_data['branches'],
                     'complete': proof_data['complete'],
                     'greedy_branches': proof_data['greedy_branches'],
@@ -900,6 +961,7 @@ def main():
                     'greedy_set_equivalences': proof_data['greedy_set_equivalences'],
                     'greedy_parity_transports': proof_data['greedy_parity_transports'],
                     'greedy_pigeonhole_xwings': proof_data['greedy_pigeonhole_xwings'],
+                    'greedy_guardians': proof_data['greedy_guardians'],
                     'proof_length': proof_length,
                     'tree': translated_tree,
                 },
