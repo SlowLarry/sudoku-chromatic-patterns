@@ -53,11 +53,11 @@ enum SetDeduction {
 #[derive(Clone, Debug)]
 enum HouseColoringResult {
     /// No valid 3-coloring of the house system exists — terminal contradiction.
-    Contradiction,
+    Contradiction { houses: Vec<FullHouse> },
     /// Two cells always have the same color → merge.
-    ForcedSame(usize, usize),
+    ForcedSame(usize, usize, Vec<FullHouse>),
     /// Two non-adjacent cells always have different colors → add edge.
-    ForcedDiff(usize, usize),
+    ForcedDiff(usize, usize, Vec<FullHouse>),
 }
 
 impl std::fmt::Display for HouseType {
@@ -1863,7 +1863,8 @@ impl ProofGraph {
 
         if !any_valid {
             // No valid coloring exists — house system is contradictory
-            return Some(HouseColoringResult::Contradiction);
+            let house_list = houses.iter().map(|h| (*h).clone()).collect();
+            return Some(HouseColoringResult::Contradiction { houses: house_list });
         }
 
         // Find forced relationships — prefer same-color (merge) over diff-color (edge)
@@ -1871,7 +1872,8 @@ impl ProofGraph {
             for j in (i+1)..n_cells {
                 let idx = i * n_cells + j;
                 if same_possible[idx] && !diff_possible[idx] {
-                    return Some(HouseColoringResult::ForcedSame(cell_set[i], cell_set[j]));
+                    let house_list = houses.iter().map(|h| (*h).clone()).collect();
+                    return Some(HouseColoringResult::ForcedSame(cell_set[i], cell_set[j], house_list));
                 }
             }
         }
@@ -1880,7 +1882,8 @@ impl ProofGraph {
                 let idx = i * n_cells + j;
                 if diff_possible[idx] && !same_possible[idx] {
                     if self.adj[cell_set[i]] & (1 << cell_set[j]) == 0 {
-                        return Some(HouseColoringResult::ForcedDiff(cell_set[i], cell_set[j]));
+                        let house_list = houses.iter().map(|h| (*h).clone()).collect();
+                        return Some(HouseColoringResult::ForcedDiff(cell_set[i], cell_set[j], house_list));
                     }
                 }
             }
@@ -2726,12 +2729,77 @@ fn find_best_proof(
         }
     }
 
+    // Terminal / non-terminal: house coloring constraint
+    if disabled & TECH_PARITY == 0 {
+        if let Some(hcc) = graph.find_house_coloring_deduction() {
+            match hcc {
+                HouseColoringResult::Contradiction { houses } => {
+                    let house_names: Vec<String> = houses.iter().map(|h| format_house(h)).collect();
+                    return ProofNode::HouseColoringContradiction { houses: house_names };
+                }
+                _ => {} // non-terminal cases handled below
+            }
+        }
+    }
+
     if depth_remaining == 0 {
         return ProofNode::Failed;
     }
 
     let mut best: Option<ProofNode> = None;
     let mut best_size = size_budget;
+
+    // Non-terminal: house coloring deduction (merge or edge)
+    if disabled & TECH_PARITY == 0 {
+        if let Some(hcc) = graph.find_house_coloring_deduction() {
+            match hcc {
+                HouseColoringResult::ForcedSame(a, b, houses) => {
+                    let house_names: Vec<String> = houses.iter().map(|h| format_house(h)).collect();
+                    let cell_a = graph.vertex_name(a);
+                    let cell_b = graph.vertex_name(b);
+                    let mut g = graph.clone();
+                    let (keep, remove) = (a.min(b), a.max(b));
+                    g.merge(keep, remove);
+                    let next = find_best_proof(&g, branches_left, depth_remaining - 1, best_size - 1, disabled);
+                    if next.is_complete() {
+                        let total = 1 + next.size();
+                        if total < best_size {
+                            best_size = total;
+                            best = Some(ProofNode::ParityTransportDeduction {
+                                houses: house_names,
+                                cell_a,
+                                cell_b,
+                                forced_same: true,
+                                next: Box::new(next),
+                            });
+                        }
+                    }
+                }
+                HouseColoringResult::ForcedDiff(a, b, houses) => {
+                    let house_names: Vec<String> = houses.iter().map(|h| format_house(h)).collect();
+                    let cell_a = graph.vertex_name(a);
+                    let cell_b = graph.vertex_name(b);
+                    let mut g = graph.clone();
+                    g.add_edge(a, b);
+                    let next = find_best_proof(&g, branches_left, depth_remaining - 1, best_size - 1, disabled);
+                    if next.is_complete() {
+                        let total = 1 + next.size();
+                        if total < best_size {
+                            best_size = total;
+                            best = Some(ProofNode::ParityTransportDeduction {
+                                houses: house_names,
+                                cell_a,
+                                cell_b,
+                                forced_same: false,
+                                next: Box::new(next),
+                            });
+                        }
+                    }
+                }
+                HouseColoringResult::Contradiction { .. } => {} // already handled above
+            }
+        }
+    }
 
     // Try all diamond reductions
     if disabled & TECH_DIAMOND == 0 {
@@ -3015,6 +3083,47 @@ fn find_greedy_proof(
     // Terminal: parity transport (pigeonhole chain)
     if let Some(pc) = graph.find_parity_chain() {
         return pc;
+    }
+
+    // Terminal / non-terminal: house coloring constraint
+    if let Some(hcc) = graph.find_house_coloring_deduction() {
+        match hcc {
+            HouseColoringResult::Contradiction { houses } => {
+                let house_names: Vec<String> = houses.iter().map(|h| format_house(h)).collect();
+                return ProofNode::HouseColoringContradiction { houses: house_names };
+            }
+            HouseColoringResult::ForcedSame(a, b, houses) => {
+                let house_names: Vec<String> = houses.iter().map(|h| format_house(h)).collect();
+                let cell_a = graph.vertex_name(a);
+                let cell_b = graph.vertex_name(b);
+                let mut g = graph.clone();
+                let (keep, remove) = (a.min(b), a.max(b));
+                g.merge(keep, remove);
+                let next = find_greedy_proof(&g, branches_left, depth_remaining - 1);
+                return ProofNode::ParityTransportDeduction {
+                    houses: house_names,
+                    cell_a,
+                    cell_b,
+                    forced_same: true,
+                    next: Box::new(next),
+                };
+            }
+            HouseColoringResult::ForcedDiff(a, b, houses) => {
+                let house_names: Vec<String> = houses.iter().map(|h| format_house(h)).collect();
+                let cell_a = graph.vertex_name(a);
+                let cell_b = graph.vertex_name(b);
+                let mut g = graph.clone();
+                g.add_edge(a, b);
+                let next = find_greedy_proof(&g, branches_left, depth_remaining - 1);
+                return ProofNode::ParityTransportDeduction {
+                    houses: house_names,
+                    cell_a,
+                    cell_b,
+                    forced_same: false,
+                    next: Box::new(next),
+                };
+            }
+        }
     }
 
     if depth_remaining == 0 {
