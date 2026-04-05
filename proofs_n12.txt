@@ -1966,12 +1966,12 @@ Proof of non-3-colorability:
       row 8 {r8c3, r8c5, r8c9}
       row 9 {r9c2, r9c6, r9c9}
       Parallel links: row 5↔row 6 (col, col, box); row 8↔row 9 (box, box, col)
-      → {row 5, row 6} and {row 8, row 9} each have same permutation parity.
-      Each pair shares a column → 4 distinct permutations.
-      Same parity class has only 3 permutations → pairs must use opposite parity classes.
-      row 5 and row 8: r5c3↔r8c3 (col 3); r5c9↔r8c9 (col 9) adjacent.
-      Relative permutation is odd with 2 non-fixed points → transposition fixing the third position.
-      → color(r5c6) = color(r8c5). Identify.
+      All 6 pairs share a column → 4 distinct permutations.
+      {row 5, row 6} same parity; {row 8, row 9} same parity.
+      Only 3 per parity class → opposite classes.
+      row 5 and row 8 share 2 columns: r5c3↔r8c3 (col 3), r5c9↔r8c9 (col 9).
+      Opposite parity → relative permutation is a transposition.
+      Fixpoint: color(r5c6) = color(r8c5). Identify.
   4.  Diamond {r5c9, r5c3, [r5c6=r8c5], r8c3} (spine r5c3—[r5c6=r8c5]).
       → color(r5c9) = color(r8c3). Identify.
   5.  Diamond {[r5c6=r8c5], r5c3, [r5c9=r8c3], r6c3} (spine r5c3—[r5c9=r8c3]).
@@ -2034,12 +2034,12 @@ Proof of non-3-colorability:
       row 8 {r8c3, r8c6, r8c7}
       row 9 {r9c2, r9c6, r9c8}
       Parallel links: row 5↔row 6 (col, box, box); row 8↔row 9 (box, col, box)
-      → {row 5, row 6} and {row 8, row 9} each have same permutation parity.
-      Each pair shares a column → 4 distinct permutations.
-      Same parity class has only 3 permutations → pairs must use opposite parity classes.
-      row 5 and row 8: r5c3↔r8c3 (col 3); r5c6↔r8c6 (col 6) adjacent.
-      Relative permutation is odd with 2 non-fixed points → transposition fixing the third position.
-      → color(r5c9) = color(r8c7). Identify.
+      All 6 pairs share a column → 4 distinct permutations.
+      {row 5, row 6} same parity; {row 8, row 9} same parity.
+      Only 3 per parity class → opposite classes.
+      row 5 and row 8 share 2 columns: r5c3↔r8c3 (col 3), r5c6↔r8c6 (col 6).
+      Opposite parity → relative permutation is a transposition.
+      Fixpoint: color(r5c9) = color(r8c7). Identify.
   2.  Pigeonhole X-wing on {r5c6, [r5c9=r8c7], r6c8, r6c5}:
       Diagonals: {r5c6, r6c8} and {[r5c9=r8c7], r6c5} (non-adjacent).
       By pigeonhole, one diagonal must share a color.
@@ -2071,12 +2071,12 @@ Proof of non-3-colorability:
       row 8 {r8c3, r8c6, r8c7}
       row 9 {r9c2, r9c6, r9c8}
       Parallel links: row 5↔row 6 (col, box, box); row 8↔row 9 (box, col, box)
-      → {row 5, row 6} and {row 8, row 9} each have same permutation parity.
-      Each pair shares a column → 4 distinct permutations.
-      Same parity class has only 3 permutations → pairs must use opposite parity classes.
-      row 5 and row 8: r5c3↔r8c3 (col 3); r5c6↔r8c6 (col 6) adjacent.
-      Relative permutation is odd with 2 non-fixed points → transposition fixing the third position.
-      → color(r5c9) = color(r8c7). Identify.
+      All 6 pairs share a column → 4 distinct permutations.
+      {row 5, row 6} same parity; {row 8, row 9} same parity.
+      Only 3 per parity class → opposite classes.
+      row 5 and row 8 share 2 columns: r5c3↔r8c3 (col 3), r5c6↔r8c6 (col 6).
+      Opposite parity → relative permutation is a transposition.
+      Fixpoint: color(r5c9) = color(r8c7). Identify.
   2.  Diamond {r5c6, r5c3, [r5c9=r8c7], r8c3} (spine r5c3—[r5c9=r8c7]).
       → color(r5c6) = color(r8c3). Identify.
   3.  Diamond {[r5c9=r8c7], r5c3, [r5c6=r8c3], r6c3} (spine r5c3—[r5c6=r8c3]).

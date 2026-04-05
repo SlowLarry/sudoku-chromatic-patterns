@@ -843,16 +843,22 @@ function renderPermutationFixpointStep(step, depth) {
     `<span class="step-num">${step.step}.</span> ` +
     `<span class="step-diamond">Permutation fixpoint</span>:`;
 
+  // Show parity pairs grouped
+  const pair1 = step.rows.slice(0, 2);
+  const pair2 = step.rows.slice(2, 4);
+  const pair1Str = pair1.map(r => `row ${r.row_id}`).join(', ');
+  const pair2Str = pair2.map(r => `row ${r.row_id}`).join(', ');
   for (const row of step.rows) {
     const cellStr = row.cells.map(v => `<span class="step-vertex">${esc(v)}</span>`).join(', ');
     html += `<br>&nbsp;&nbsp;row ${row.row_id} {${cellStr}}`;
   }
-
-  html += `<br><span class="step-identify">\u2192 Opposite parity classes \u2192 transposition fixpoint.</span>`;
+  html += `<br>All 6 pairs share a column \u2192 4 distinct permutations.`;
+  html += `<br>{${esc(pair1Str)}} same parity; {${esc(pair2Str)}} same parity.`;
+  html += `<br><span class="step-identify">Only 3 per class \u2192 opposite classes \u2192 transposition fixpoint.</span>`;
   if (step.is_contradiction) {
-    html += `<br><span class="step-k4">\u2192 color(${esc(step.cell_a)}) = color(${esc(step.cell_b)}), but adjacent. Contradiction.</span>`;
+    html += `<br><span class="step-k4">Fixpoint: color(${esc(step.cell_a)}) = color(${esc(step.cell_b)}), but adjacent. Contradiction.</span>`;
   } else {
-    html += `<br><span class="step-identify">\u2192 color(${esc(step.cell_a)}) = color(${esc(step.cell_b)}). Identify.</span>`;
+    html += `<br><span class="step-identify">Fixpoint: color(${esc(step.cell_a)}) = color(${esc(step.cell_b)}). Identify.</span>`;
   }
   html += `</div>`;
   return html;
@@ -1326,18 +1332,18 @@ function highlightProofStep(pattern, el) {
       }
     }
   } else if (stepData.type === 'permutation_fixpoint') {
-    // Alternating colors per row, fixpoint cells highlighted
-    const rowColors = ['hl-diamond', 'hl-identify', 'hl-set', 'hl-branch'];
+    // Two same-parity pairs: pair 1 (rows 0,1) vs pair 2 (rows 2,3)
     if (stepData.rows) {
       stepData.rows.forEach((row, ri) => {
+        const pairColor = ri < 2 ? 'hl-diamond' : 'hl-branch';
         for (const vName of row.cells) {
           for (const cell of parseCellsFromLabel(vName)) {
-            highlights[cell] = rowColors[ri % rowColors.length];
+            highlights[cell] = pairColor;
           }
         }
       });
     }
-    // Highlight fixpoint pair
+    // Override fixpoint cells with identify highlight
     if (stepData.cell_a) {
       for (const cell of parseCellsFromLabel(stepData.cell_a)) {
         highlights[cell] = 'hl-identify';

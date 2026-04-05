@@ -849,22 +849,22 @@ def parse_proof_steps(lines):
                     links_text = sl
                     i += 1
                     continue
-                # Cross pair line: "row 5 and row 8: ..."
-                cross_m = re.match(r'((?:row|col)\s+\d+)\s+and\s+((?:row|col)\s+\d+):', sl)
+                # Cross pair line: "row 5 and row 8 share 2 columns: ..." or "row 5 and row 8: ..."
+                cross_m = re.match(r'((?:row|col)\s+\d+)\s+and\s+((?:row|col)\s+\d+)[^:]*:', sl)
                 if cross_m:
                     cross_pair = f'{cross_m.group(1)} and {cross_m.group(2)}'
                     shared_desc = sl
                     i += 1
                     continue
-                # "→ color(r5c9) = color(r8c7). Identify."
-                merge_m = re.match(r'→\s*color\((.+?)\)\s*=\s*color\((.+?)\)\.\s*Identify\.', sl)
+                # "Fixpoint: color(r5c9) = color(r8c7). Identify." or "→ color(...) = color(...). Identify."
+                merge_m = re.match(r'(?:→|Fixpoint:)\s*color\((.+?)\)\s*=\s*color\((.+?)\)\.\s*Identify\.', sl)
                 if merge_m:
                     cell_a, cell_b = merge_m.group(1), merge_m.group(2)
                     is_contradiction = False
                     i += 1
                     break
-                # "→ color(r5c9) = color(r8c7), but they are adjacent. Contradiction."
-                contra_m = re.match(r'→\s*color\((.+?)\)\s*=\s*color\((.+?)\),\s*but they are adjacent', sl)
+                # "Fixpoint: color(r5c9) = color(r8c7), but they are adjacent. Contradiction."
+                contra_m = re.match(r'(?:→|Fixpoint:)\s*color\((.+?)\)\s*=\s*color\((.+?)\),\s*but they are adjacent', sl)
                 if contra_m:
                     cell_a, cell_b = contra_m.group(1), contra_m.group(2)
                     is_contradiction = True

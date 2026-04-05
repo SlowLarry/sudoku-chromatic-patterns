@@ -3885,36 +3885,34 @@ fn format_node(node: &ProofNode, step: &mut usize, indent: usize) -> String {
                 pad, links.join("; "),
             );
             s += &format!(
-                "{}    \u{2192} {{{}}} and {{{}}} each have same permutation parity.\n",
-                pad,
-                [&house_names[0], &house_names[1]].iter().map(|s| s.as_str()).collect::<Vec<_>>().join(", "),
-                [&house_names[2], &house_names[3]].iter().map(|s| s.as_str()).collect::<Vec<_>>().join(", "),
-            );
-            s += &format!(
-                "{}    Each pair shares a {} \u{2192} 4 distinct permutations.\n",
+                "{}    All 6 pairs share a {} \u{2192} 4 distinct permutations.\n",
                 pad, vis_name,
             );
             s += &format!(
-                "{}    Same parity class has only 3 permutations \u{2192} pairs must use opposite parity classes.\n",
+                "{}    {{{}, {}}} same parity; {{{}, {}}} same parity.\n",
+                pad, house_names[0], house_names[1], house_names[2], house_names[3],
+            );
+            s += &format!(
+                "{}    Only 3 per parity class \u{2192} opposite classes.\n",
                 pad,
             );
             s += &format!(
-                "{}    {} and {}: {} adjacent.\n",
-                pad, cross_pair.0, cross_pair.1,
-                shared_desc.join("; "),
+                "{}    {} and {} share 2 {}s: {}.\n",
+                pad, cross_pair.0, cross_pair.1, vis_name,
+                shared_desc.join(", "),
             );
             s += &format!(
-                "{}    Relative permutation is odd with 2 non-fixed points \u{2192} transposition fixing the third position.\n",
+                "{}    Opposite parity \u{2192} relative permutation is a transposition.\n",
                 pad,
             );
             if *is_contradiction {
                 s += &format!(
-                    "{}    \u{2192} color({}) = color({}), but they are adjacent. Contradiction.\n",
+                    "{}    Fixpoint: color({}) = color({}), but they are adjacent. Contradiction.\n",
                     pad, cell_a, cell_b,
                 );
             } else {
                 s += &format!(
-                    "{}    \u{2192} color({}) = color({}). Identify.\n",
+                    "{}    Fixpoint: color({}) = color({}). Identify.\n",
                     pad, cell_a, cell_b,
                 );
                 if let Some(n) = next {
