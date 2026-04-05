@@ -374,6 +374,11 @@ select:focus, input:focus {
   stroke-dasharray: 4 3;
   opacity: 0.85;
 }
+.edge-line.virtual.k4-edge {
+  stroke: #f85149;
+  stroke-width: 2.5;
+  opacity: 0.95;
+}
 
 #grid-legend {
   margin-top: 8px;

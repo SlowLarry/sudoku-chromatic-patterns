@@ -1077,14 +1077,24 @@ function highlightProofStep(pattern, el) {
     }
   } else if (stepData.type === 'k4') {
     // Don't recolor K₄ cells — keep accumulated/default colors.
-    // Show K₄ edges in red instead.
+    // Show K₄ edges in red instead (both real and virtual).
     const k4Cells = stepData.vertices.flatMap(v => parseCellsFromLabel(v));
+    const k4Set = new Set(k4Cells);
     edgeHL = new Map();
     for (let i = 0; i < k4Cells.length; i++) {
       for (let j = i + 1; j < k4Cells.length; j++) {
         const u = k4Cells[i], v = k4Cells[j];
         if (NEIGHBORS[u].has(v)) {
           edgeHL.set(Math.min(u, v) + ',' + Math.max(u, v), 'k4-edge');
+        }
+      }
+    }
+    // Restyle virtual edges between K₄ vertices as red
+    if (virtEdges) {
+      for (let vi = 0; vi < virtEdges.length; vi++) {
+        const [vu, vv, vcls] = virtEdges[vi];
+        if (k4Set.has(vu) && k4Set.has(vv)) {
+          virtEdges[vi] = [vu, vv, 'k4-edge'];
         }
       }
     }

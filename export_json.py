@@ -78,15 +78,11 @@ def translate_trace_line(line, iso):
 
 
 def compute_proof_length(tree):
-    """Count total proof steps including X-wing trace substeps.
-    Each step counts as 1, plus each trace line in X-wing steps."""
+    """Count total proof steps. Each step counts as 1 (X-wing = 1 step)."""
     total = 0
     for step in tree:
         total += 1  # the step itself
-        if step['type'] == 'pigeonhole_xwing':
-            total += len(step.get('trace_1', []))
-            total += len(step.get('trace_2', []))
-        elif step['type'] == 'branch':
+        if step['type'] == 'branch':
             total += compute_proof_length(step.get('case_a', []))
             total += compute_proof_length(step.get('case_b', []))
     return total
