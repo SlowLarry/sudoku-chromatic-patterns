@@ -69,7 +69,10 @@ def merge_vertices(edges, n, a, b):
 
 
 def find_diamonds(edges, n):
-    """Find all diamond structures: non-adjacent pairs sharing ≥2 common neighbors."""
+    """Find all diamond structures: non-adjacent pairs with two adjacent common neighbors.
+
+    A valid diamond is K₄ minus one edge: tips a,b (non-adjacent) sharing
+    spine vertices u,v where u-v IS an edge."""
     adj = defaultdict(set)
     for i, j in edges:
         adj[i].add(j)
@@ -80,8 +83,17 @@ def find_diamonds(edges, n):
         for b in range(a + 1, n):
             if b in adj[a]:
                 continue
-            common = adj[a] & adj[b]
-            if len(common) >= 2:
+            common = sorted(adj[a] & adj[b])
+            # Need at least one adjacent pair among common neighbors (spine)
+            has_spine = False
+            for ci in range(len(common)):
+                for cj in range(ci + 1, len(common)):
+                    if common[cj] in adj[common[ci]]:
+                        has_spine = True
+                        break
+                if has_spine:
+                    break
+            if has_spine:
                 diamonds.append((a, b))
     return diamonds
 
