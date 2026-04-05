@@ -52,15 +52,16 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (guardian) ===
+=== Alt proof 1/1 [no_diamond] (set+guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Guardian: r8c8 guards oddagon {r8c8, r7c9, r8c9} (source r6c9).
-      → color(r8c8) = color(r6c9). Identify.
-  2.  Guardian: r6c3 guards oddagon {r6c3, r6c6, [r6c9=r8c8]} (source r8c6).
-      → color(r6c3) = color(r8c6). Identify.
-  3.  K₄ on {[r6c3=r8c6], r9c3, r9c4, r9c5}. Contradiction.
+  1.  Guardian: r6c6 guards oddagon {r6c6, r6c9, r7c9, r8c8, r8c6} (source r8c9).
+      → color(r6c6) = color(r8c9). Identify.
+  2.  SET: {row 8, row 9} − {box 8, box 9}.
+      Remainder: {r9c3} = {r7c9}.
+      → color(r9c3) = color(r7c9). Identify.
+  3.  K₄ on {r6c3, [r6c6=r8c9], r6c9, [r7c9=r9c3]}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -79,16 +80,17 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/3 [no_diamond] (oddwheel+guardian) ===
+=== Alt proof 1/3 [no_diamond] (set+oddwheel+guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Guardian: r9c5 guards oddagon {r9c5, r8c6, r9c6} (source r6c6).
-      → color(r9c5) = color(r6c6). Identify.
-  2.  Guardian: r7c9 guards oddagon {r7c9, r8c7, r8c8} (source r8c6).
-      → color(r7c9) = color(r8c6). Identify.
-  3.  Odd wheel: hub [r6c6=r9c5] forces rim to 2 colors.
-      Bivalue oddagon {r6c3, r6c9, [r7c9=r8c6], r9c6, r9c3} (length 5) cannot be 2-colored. Contradiction.
+  1.  Guardian: r6c3 guards oddagon {r6c3, r6c6, r8c6, r9c5, r9c3} (source r9c6).
+      → color(r6c3) = color(r9c6). Identify.
+  2.  SET: {row 8, row 9} − {box 8, box 9}.
+      Remainder: {r9c3} = {r7c9}.
+      → color(r9c3) = color(r7c9). Identify.
+  3.  Odd wheel: hub [r6c3=r9c6] forces rim to 2 colors.
+      Bivalue oddagon {r6c6, r6c9, [r7c9=r9c3], r9c5, r8c6} (length 5) cannot be 2-colored. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -134,15 +136,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (guardian) ===
+=== Alt proof 1/1 [no_diamond] (set+branch) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Guardian: r7c9 guards oddagon {r7c9, r8c7, r8c8} (source r8c6).
-      → color(r7c9) = color(r8c6). Identify.
-  2.  Guardian: r6c3 guards oddagon {r6c3, r6c6, r6c9} (source [r7c9=r8c6]).
-      → color(r6c3) = color([r7c9=r8c6]). Identify.
-  3.  K₄ on {[r6c3=r7c9=r8c6], r9c3, r9c4, r9c5}. Contradiction.
+  1.  SET: {row 8, row 9} − {box 8, box 9}.
+      Remainder: {r9c3} = {r7c9}.
+      → color(r9c3) = color(r7c9). Identify.
+  2.  Branch on [r7c9=r9c3], r8c6:
+      Case A: color([r7c9=r9c3]) = color(r8c6). Identify.
+        3.  K₄ on {r6c3, r6c6, r6c9, [r7c9=r8c6=r9c3]}. Contradiction.
+      Case B: color([r7c9=r9c3]) ≠ color(r8c6). Add edge.
+        4.  K₄ on {[r7c9=r9c3], r8c6, r8c7, r8c8}. Contradiction.
+      Both cases contradict 3-colorability.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -213,15 +219,30 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/3 [no_diamond] (guardian) ===
+=== Alt proof 1/3 [no_diamond] (ladder+xwing+guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Guardian: r9c8 guards oddagon {r9c8, r7c9, r8c9} (source r6c9).
-      → color(r9c8) = color(r6c9). Identify.
-  2.  Guardian: r8c6 guards oddagon {r8c6, r6c6, [r6c9=r9c8], r9c3, r8c3} (source r6c3).
-      → color(r8c6) = color(r6c3). Identify.
-  3.  K₄ on {[r6c3=r8c6], [r6c9=r9c8], r9c3, r9c5}. Contradiction.
+  1.  Circular ladder {r6c3—r8c3, r6c6—r8c6, r6c9—r8c9}:
+      Satellites r9c3 (rung 1), r7c9 (rung 3) forced to distinct colors. Add edge.
+  2.  Guardian: r6c3 guards oddagon {r6c3, r6c9, r8c9, r9c8, r9c3} (source r7c9).
+      → color(r6c3) = color(r7c9). Identify.
+  3.  Pigeonhole X-wing on {r8c6, r8c9, r9c8, r9c5}:
+      Diagonals: {r8c6, r9c8} and {r8c9, r9c5} (non-adjacent).
+      By pigeonhole, one diagonal must share a color.
+      Case 1: color(r8c6) = color(r9c8) = X
+        row 8 {r8c3, r8c6, r8c9}: r8c6=X → r8c3, r8c9≠X
+        row 9 {r9c3, r9c5, r9c8}: r9c8=X → r9c3, r9c5≠X
+        col 3 {[r6c3=r7c9], r8c3, r9c3}: r8c3, r9c3≠X → [r6c3=r7c9]=X
+        col 9 {[r6c3=r7c9], r6c9, r8c9}: [r6c3=r7c9]=X → r6c9≠X
+        box 9 {[r6c3=r7c9], r8c9, r9c8}: [r6c3=r7c9]=X and r9c8=X clash
+        Contradiction.
+      Case 2: color(r8c9) = color(r9c5) = X
+        row 8 {r8c3, r8c6, r8c9}: r8c9=X → r8c3, r8c6≠X
+        row 9 {r9c3, r9c5, r9c8}: r9c5=X → r9c3, r9c8≠X
+        col 3 {[r6c3=r7c9], r8c3, r9c3}: r8c3, r9c3≠X → [r6c3=r7c9]=X
+        col 9 {[r6c3=r7c9], r6c9, r8c9}: [r6c3=r7c9]=X and r8c9=X clash
+        Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -424,15 +445,16 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (guardian) ===
+=== Alt proof 1/1 [no_diamond] (oddwheel+guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Guardian: r5c9 guards oddagon {r5c9, r6c8, r6c9} (source r6c6).
-      → color(r5c9) = color(r6c6). Identify.
-  2.  Guardian: r8c3 guards oddagon {r8c3, r8c6, r8c9} (source [r5c9=r6c6]).
-      → color(r8c3) = color([r5c9=r6c6]). Identify.
-  3.  K₄ on {[r5c9=r6c6=r8c3], r9c2, r9c3, r9c6}. Contradiction.
+  1.  Guardian: r8c6 guards oddagon {r8c6, r6c6, r6c8, r5c9, r8c9} (source r6c9).
+      → color(r8c6) = color(r6c9). Identify.
+  2.  Guardian: r9c2 guards oddagon {r9c2, r8c3, r8c9, r5c9, r6c8, r6c6, r9c6} (source [r6c9=r8c6]).
+      → color(r9c2) = color([r6c9=r8c6]). Identify.
+  3.  Odd wheel: hub [r6c9=r8c6=r9c2] forces rim to 2 colors.
+      Bivalue oddagon {r5c9, r6c8, r6c6, r9c6, r9c3, r8c3, r8c9} (length 7) cannot be 2-colored. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -449,15 +471,16 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (guardian) ===
+=== Alt proof 1/1 [no_diamond] (oddwheel+guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Guardian: r5c9 guards oddagon {r5c9, r6c8, r6c9} (source r6c6).
-      → color(r5c9) = color(r6c6). Identify.
-  2.  Guardian: r8c3 guards oddagon {r8c3, r8c6, r8c9} (source [r5c9=r6c6]).
-      → color(r8c3) = color([r5c9=r6c6]). Identify.
-  3.  K₄ on {[r5c9=r6c6=r8c3], r9c1, r9c2, r9c6}. Contradiction.
+  1.  Guardian: r8c6 guards oddagon {r8c6, r6c6, r6c8, r5c9, r8c9} (source r6c9).
+      → color(r8c6) = color(r6c9). Identify.
+  2.  Guardian: r9c1 guards oddagon {r9c1, r8c3, r8c9, r5c9, r6c8, r6c6, r9c6} (source [r6c9=r8c6]).
+      → color(r9c1) = color([r6c9=r8c6]). Identify.
+  3.  Odd wheel: hub [r6c9=r8c6=r9c1] forces rim to 2 colors.
+      Bivalue oddagon {r5c9, r6c8, r6c6, r9c6, r9c2, r8c3, r8c9} (length 7) cannot be 2-colored. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -506,7 +529,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 14/32: PROVED cells=10 depth=1 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=4
+pattern 14/32: PROVED cells=10 depth=1 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=3
 000000000000000000000000000000000000000000001000001110000000000001001001001001001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -531,31 +554,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/3 [no_diamond] (xwing+guardian) ===
-Proof of non-3-colorability:
-  Assume for contradiction it is 3-colorable.
-
-  1.  Guardian: r6c6 guards oddagon {r6c6, r6c7, r6c8} (source r5c9).
-      → color(r6c6) = color(r5c9). Identify.
-  2.  Pigeonhole X-wing on {r8c3, r8c9, r9c9, r9c3}:
-      Diagonals: {r8c3, r9c9} and {r8c9, r9c3} (non-adjacent).
-      By pigeonhole, one diagonal must share a color.
-      Case 1: color(r8c3) = color(r9c9) = X
-        row 8 {r8c3, r8c6, r8c9}: r8c3=X → r8c6, r8c9≠X
-        row 9 {r9c3, r9c6, r9c9}: r9c9=X → r9c3, r9c6≠X
-        col 6 {[r5c9=r6c6], r8c6, r9c6}: r8c6, r9c6≠X → [r5c9=r6c6]=X
-        col 9 {[r5c9=r6c6], r8c9, r9c9}: [r5c9=r6c6]=X and r9c9=X clash
-        Contradiction.
-      Case 2: color(r8c9) = color(r9c3) = X
-        row 8 {r8c3, r8c6, r8c9}: r8c9=X → r8c3, r8c6≠X
-        row 9 {r9c3, r9c6, r9c9}: r9c3=X → r9c6, r9c9≠X
-        col 6 {[r5c9=r6c6], r8c6, r9c6}: r8c6, r9c6≠X → [r5c9=r6c6]=X
-        col 9 {[r5c9=r6c6], r8c9, r9c9}: [r5c9=r6c6]=X and r8c9=X clash
-        Contradiction.
-
-  Therefore the pattern is not 3-colorable. □
-
-=== Alt proof 2/3 [no_xwing] (ladder) ===
+=== Alt proof 1/2 [no_diamond] (ladder) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
@@ -565,7 +564,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 3/3 [greedy] (diamond) ===
+=== Alt proof 2/2 [greedy] (diamond) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
@@ -579,7 +578,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 15/32: PROVED cells=10 depth=1 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=4
+pattern 15/32: PROVED cells=10 depth=1 diamonds=1 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=3
 000000000000000000000000000000000000000000001000001110000000000001001001010001001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -604,31 +603,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/3 [no_diamond] (xwing+guardian) ===
-Proof of non-3-colorability:
-  Assume for contradiction it is 3-colorable.
-
-  1.  Guardian: r6c6 guards oddagon {r6c6, r6c7, r6c8} (source r5c9).
-      → color(r6c6) = color(r5c9). Identify.
-  2.  Pigeonhole X-wing on {r8c3, r8c9, r9c9, r9c2}:
-      Diagonals: {r8c3, r9c9} and {r8c9, r9c2} (non-adjacent).
-      By pigeonhole, one diagonal must share a color.
-      Case 1: color(r8c3) = color(r9c9) = X
-        row 8 {r8c3, r8c6, r8c9}: r8c3=X → r8c6, r8c9≠X
-        row 9 {r9c2, r9c6, r9c9}: r9c9=X → r9c2, r9c6≠X
-        col 6 {[r5c9=r6c6], r8c6, r9c6}: r8c6, r9c6≠X → [r5c9=r6c6]=X
-        col 9 {[r5c9=r6c6], r8c9, r9c9}: [r5c9=r6c6]=X and r9c9=X clash
-        Contradiction.
-      Case 2: color(r8c9) = color(r9c2) = X
-        row 8 {r8c3, r8c6, r8c9}: r8c9=X → r8c3, r8c6≠X
-        row 9 {r9c2, r9c6, r9c9}: r9c2=X → r9c6, r9c9≠X
-        col 6 {[r5c9=r6c6], r8c6, r9c6}: r8c6, r9c6≠X → [r5c9=r6c6]=X
-        col 9 {[r5c9=r6c6], r8c9, r9c9}: [r5c9=r6c6]=X and r8c9=X clash
-        Contradiction.
-
-  Therefore the pattern is not 3-colorable. □
-
-=== Alt proof 2/3 [no_xwing] (ladder) ===
+=== Alt proof 1/2 [no_diamond] (ladder) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
@@ -638,7 +613,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 3/3 [greedy] (diamond) ===
+=== Alt proof 2/2 [greedy] (diamond) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
@@ -665,15 +640,16 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (guardian) ===
+=== Alt proof 1/1 [no_diamond] (set+guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Guardian: r6c6 guards oddagon {r6c6, r6c7, r6c8} (source r5c9).
-      → color(r6c6) = color(r5c9). Identify.
-  2.  Guardian: r8c3 guards oddagon {r8c3, r8c6, r8c9} (source [r5c9=r6c6]).
-      → color(r8c3) = color([r5c9=r6c6]). Identify.
-  3.  K₄ on {[r5c9=r6c6=r8c3], r9c2, r9c3, r9c9}. Contradiction.
+  1.  SET: {row 6, row 9} − {box 6, box 7}.
+      Remainder: {r6c6, r9c9} = {r5c9, r8c3}.
+      → Both sides forced all-distinct. Virtual edges added.
+  2.  Guardian: r6c6 guards oddagon {r6c6, r8c6, r8c3, r5c9, r9c9} (source r8c9).
+      → color(r6c6) = color(r8c9). Identify.
+  3.  K₄ on {r5c9, [r6c6=r8c9], r6c7, r6c8}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -690,15 +666,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (guardian) ===
+=== Alt proof 1/1 [no_diamond] (oddwheel+branch+guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Guardian: r5c9 guards oddagon {r5c9, r6c7, r6c8} (source r6c6).
-      → color(r5c9) = color(r6c6). Identify.
-  2.  Guardian: r8c3 guards oddagon {r8c3, r8c6, r8c9} (source [r5c9=r6c6]).
-      → color(r8c3) = color([r5c9=r6c6]). Identify.
-  3.  K₄ on {[r5c9=r6c6=r8c3], r9c2, r9c3, r9c6}. Contradiction.
+  1.  Branch on r5c9, r6c6:
+      Case A: color(r5c9) = color(r6c6). Identify.
+        2.  Guardian: r9c2 guards oddagon {r9c2, r8c3, r8c9, [r5c9=r6c6], r9c6} (source r8c6).
+            → color(r9c2) = color(r8c6). Identify.
+        3.  Odd wheel: hub [r8c6=r9c2] forces rim to 2 colors.
+            Bivalue oddagon {[r5c9=r6c6], r8c9, r8c3, r9c3, r9c6} (length 5) cannot be 2-colored. Contradiction.
+      Case B: color(r5c9) ≠ color(r6c6). Add edge.
+        4.  K₄ on {r5c9, r6c6, r6c7, r6c8}. Contradiction.
+      Both cases contradict 3-colorability.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -715,15 +695,16 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (guardian) ===
+=== Alt proof 1/1 [no_diamond] (set+guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Guardian: r6c6 guards oddagon {r6c6, r6c7, r6c8} (source r5c9).
-      → color(r6c6) = color(r5c9). Identify.
-  2.  Guardian: r8c3 guards oddagon {r8c3, r8c6, r8c9} (source [r5c9=r6c6]).
-      → color(r8c3) = color([r5c9=r6c6]). Identify.
-  3.  K₄ on {[r5c9=r6c6=r8c3], r9c1, r9c2, r9c9}. Contradiction.
+  1.  SET: {row 6, row 9} − {box 6, box 7}.
+      Remainder: {r6c6, r9c9} = {r5c9, r8c3}.
+      → Both sides forced all-distinct. Virtual edges added.
+  2.  Guardian: r6c6 guards oddagon {r6c6, r8c6, r8c3, r5c9, r9c9} (source r8c9).
+      → color(r6c6) = color(r8c9). Identify.
+  3.  K₄ on {r5c9, [r6c6=r8c9], r6c7, r6c8}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -740,15 +721,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (guardian) ===
+=== Alt proof 1/1 [no_diamond] (oddwheel+branch+guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Guardian: r5c9 guards oddagon {r5c9, r6c7, r6c8} (source r6c6).
-      → color(r5c9) = color(r6c6). Identify.
-  2.  Guardian: r8c3 guards oddagon {r8c3, r8c6, r8c9} (source [r5c9=r6c6]).
-      → color(r8c3) = color([r5c9=r6c6]). Identify.
-  3.  K₄ on {[r5c9=r6c6=r8c3], r9c1, r9c2, r9c6}. Contradiction.
+  1.  Branch on r5c9, r6c6:
+      Case A: color(r5c9) = color(r6c6). Identify.
+        2.  Guardian: r9c1 guards oddagon {r9c1, r8c3, r8c9, [r5c9=r6c6], r9c6} (source r8c6).
+            → color(r9c1) = color(r8c6). Identify.
+        3.  Odd wheel: hub [r8c6=r9c1] forces rim to 2 colors.
+            Bivalue oddagon {[r5c9=r6c6], r8c9, r8c3, r9c2, r9c6} (length 5) cannot be 2-colored. Contradiction.
+      Case B: color(r5c9) ≠ color(r6c6). Add edge.
+        4.  K₄ on {r5c9, r6c6, r6c7, r6c8}. Contradiction.
+      Both cases contradict 3-colorability.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -805,15 +790,22 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (guardian) ===
+=== Alt proof 1/1 [no_diamond] (hexagon+branch) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Guardian: r6c6 guards oddagon {r6c6, r6c7, r6c8} (source r5c9).
-      → color(r6c6) = color(r5c9). Identify.
-  2.  Guardian: r9c5 guards oddagon {r9c5, r7c6, r8c6} (source [r5c9=r6c6]).
-      → color(r9c5) = color([r5c9=r6c6]). Identify.
-  3.  K₄ on {[r5c9=r6c6=r9c5], r8c9, r9c8, r9c9}. Contradiction.
+  1.  Branch on r6c7, r8c9:
+      Case A: color(r6c7) = color(r8c9). Identify.
+        2.  Bridged hexagon: ring {r5c9, r6c8, r6c6, r7c6, r9c5, r9c9}
+            Bridges: [r6c7=r8c9]—r8c6 (edges r5c9—r6c8 ↔ r7c6—r9c5), [r6c7=r8c9]—r9c8 (edges r6c8—r6c6 ↔ r9c5—r9c9), r8c6—[r6c7=r8c9] (edges r6c6—r7c6 ↔ r9c9—r5c9).
+            Each bridge forces opposite edges to miss different colors,
+            but every 3-coloring of C₆ requires at least one matching pair. Contradiction.
+      Case B: color(r6c7) ≠ color(r8c9). Add edge.
+        3.  Bridged hexagon: ring {r5c9, r6c7, r6c6, r7c6, r9c5, r9c9}
+            Bridges: r8c9—r8c6 (edges r5c9—r6c7 ↔ r7c6—r9c5), r6c8—r9c8 (edges r6c7—r6c6 ↔ r9c5—r9c9), r8c6—r8c9 (edges r6c6—r7c6 ↔ r9c9—r5c9).
+            Each bridge forces opposite edges to miss different colors,
+            but every 3-coloring of C₆ requires at least one matching pair. Contradiction.
+      Both cases contradict 3-colorability.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -830,15 +822,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (guardian) ===
+=== Alt proof 1/1 [no_diamond] (set+branch) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Guardian: r5c9 guards oddagon {r5c9, r6c7, r6c8} (source r6c6).
-      → color(r5c9) = color(r6c6). Identify.
-  2.  Guardian: r9c5 guards oddagon {r9c5, r7c6, r8c6} (source [r5c9=r6c6]).
-      → color(r9c5) = color([r5c9=r6c6]). Identify.
-  3.  K₄ on {[r5c9=r6c6=r9c5], r8c9, r9c7, r9c8}. Contradiction.
+  1.  Branch on r8c9, r9c5:
+      Case A: color(r8c9) = color(r9c5). Identify.
+        2.  SET: {row 6, row 9} − {box 6, box 9}.
+            Remainder: {r6c6, [r8c9=r9c5]} = {r5c9, [r8c9=r9c5]}.
+            → Both sides forced all-distinct. Virtual edges added.
+        3.  K₄ on {r6c6, r7c6, r8c6, [r8c9=r9c5]}. Contradiction.
+      Case B: color(r8c9) ≠ color(r9c5). Add edge.
+        4.  K₄ on {r8c9, r9c5, r9c7, r9c8}. Contradiction.
+      Both cases contradict 3-colorability.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -938,7 +934,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 25/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
+pattern 25/32: PROVED cells=10 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=1
 000000000000000000000000000000000000000001001001000110000001000000001000001010001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -948,18 +944,6 @@ Proof of non-3-colorability:
   2.  Diamond {r5c6, r7c6, r8c6, r9c5} (spine r7c6—r8c6).
       → color(r5c6) = color(r9c5). Identify.
   3.  K₄ on {[r5c6=r9c5], [r5c9=r6c3], r9c3, r9c9}. Contradiction.
-
-  Therefore the pattern is not 3-colorable. □
-
-=== Alt proof 1/1 [no_diamond] (guardian) ===
-Proof of non-3-colorability:
-  Assume for contradiction it is 3-colorable.
-
-  1.  Guardian: r6c3 guards oddagon {r6c3, r6c7, r6c8} (source r5c9).
-      → color(r6c3) = color(r5c9). Identify.
-  2.  Guardian: r9c5 guards oddagon {r9c5, r9c3, r9c9} (source [r5c9=r6c3]).
-      → color(r9c5) = color([r5c9=r6c3]). Identify.
-  3.  K₄ on {r5c6, [r5c9=r6c3=r9c5], r7c6, r8c6}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -1015,20 +999,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/3 [no_diamond] (oddwheel+guardian) ===
-Proof of non-3-colorability:
-  Assume for contradiction it is 3-colorable.
-
-  1.  Guardian: r9c2 guards oddagon {r9c2, r7c3, r8c3} (source r6c3).
-      → color(r9c2) = color(r6c3). Identify.
-  2.  Guardian: r5c6 guards oddagon {r5c6, r6c6, r9c6} (source [r6c3=r9c2]).
-      → color(r5c6) = color([r6c3=r9c2]). Identify.
-  3.  Odd wheel: hub [r5c6=r6c3=r9c2] forces rim to 2 colors.
-      Bivalue oddagon {r5c9, r6c8, r6c6, r9c6, r9c9} (length 5) cannot be 2-colored. Contradiction.
-
-  Therefore the pattern is not 3-colorable. □
-
-=== Alt proof 2/3 [no_oddwheel] (diamond+guardian) ===
+=== Alt proof 1/3 [no_oddwheel] (diamond+guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
@@ -1040,7 +1011,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 3/3 [greedy] (diamond) ===
+=== Alt proof 2/3 [greedy] (diamond) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
@@ -1051,6 +1022,21 @@ Proof of non-3-colorability:
   3.  Diamond {r5c9, r5c6, [r6c8=r9c6], r6c6} (spine r5c6—[r6c8=r9c6]).
       → color(r5c9) = color(r6c6). Identify.
   4.  K₄ on {[r5c9=r6c6], [r6c3=r9c2], [r6c8=r9c6], r9c9}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+=== Alt proof 3/3 [no_diamond] (branch+guardian) ===
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Branch on r6c3, r9c2:
+      Case A: color(r6c3) = color(r9c2). Identify.
+        2.  Guardian: r5c9 guards oddagon {r5c9, r6c8, r6c6, r9c6, r9c9} (source [r6c3=r9c2]).
+            → color(r5c9) = color([r6c3=r9c2]). Identify.
+        3.  K₄ on {r5c6, [r5c9=r6c3=r9c2], r6c6, r9c6}. Contradiction.
+      Case B: color(r6c3) ≠ color(r9c2). Add edge.
+        4.  K₄ on {r6c3, r7c3, r8c3, r9c2}. Contradiction.
+      Both cases contradict 3-colorability.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -1067,15 +1053,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (guardian) ===
+=== Alt proof 1/1 [no_diamond] (oddwheel+branch+guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Guardian: r6c9 guards oddagon {r6c9, r5c8, r5c9} (source r5c6).
-      → color(r6c9) = color(r5c6). Identify.
-  2.  Guardian: r9c2 guards oddagon {r9c2, r7c3, r8c3} (source r6c3).
-      → color(r9c2) = color(r6c3). Identify.
-  3.  K₄ on {[r5c6=r6c9], [r6c3=r9c2], r6c6, r9c6}. Contradiction.
+  1.  Branch on r6c3, r9c2:
+      Case A: color(r6c3) = color(r9c2). Identify.
+        2.  Guardian: r5c8 guards oddagon {r5c8, r5c6, r9c6, [r6c3=r9c2], r6c9} (source r6c6).
+            → color(r5c8) = color(r6c6). Identify.
+        3.  Odd wheel: hub [r5c8=r6c6] forces rim to 2 colors.
+            Bivalue oddagon {r5c6, r5c9, r6c9, [r6c3=r9c2], r9c6} (length 5) cannot be 2-colored. Contradiction.
+      Case B: color(r6c3) ≠ color(r9c2). Add edge.
+        4.  K₄ on {r6c3, r7c3, r8c3, r9c2}. Contradiction.
+      Both cases contradict 3-colorability.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -1092,15 +1082,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (guardian) ===
+=== Alt proof 1/1 [no_diamond] (oddwheel+branch+guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Guardian: r6c7 guards oddagon {r6c7, r5c8, r5c9} (source r5c6).
-      → color(r6c7) = color(r5c6). Identify.
-  2.  Guardian: r9c2 guards oddagon {r9c2, r7c3, r8c3} (source r6c3).
-      → color(r9c2) = color(r6c3). Identify.
-  3.  K₄ on {[r5c6=r6c7], [r6c3=r9c2], r6c6, r9c6}. Contradiction.
+  1.  Branch on r6c3, r9c2:
+      Case A: color(r6c3) = color(r9c2). Identify.
+        2.  Guardian: r5c8 guards oddagon {r5c8, r5c6, r9c6, [r6c3=r9c2], r6c7} (source r6c6).
+            → color(r5c8) = color(r6c6). Identify.
+        3.  Odd wheel: hub [r5c8=r6c6] forces rim to 2 colors.
+            Bivalue oddagon {r5c6, r5c9, r6c7, [r6c3=r9c2], r9c6} (length 5) cannot be 2-colored. Contradiction.
+      Case B: color(r6c3) ≠ color(r9c2). Add edge.
+        4.  K₄ on {r6c3, r7c3, r8c3, r9c2}. Contradiction.
+      Both cases contradict 3-colorability.
 
   Therefore the pattern is not 3-colorable. □
 
@@ -1117,16 +1111,19 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (oddwheel+guardian) ===
+=== Alt proof 1/1 [no_diamond] (oddwheel+branch+guardian) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Guardian: r9c5 guards oddagon {r9c5, r7c6, r8c6} (source r6c6).
-      → color(r9c5) = color(r6c6). Identify.
-  2.  Guardian: r4c9 guards oddagon {r4c9, r6c8, r6c3, r9c3, r9c9} (source [r6c6=r9c5]).
-      → color(r4c9) = color([r6c6=r9c5]). Identify.
-  3.  Odd wheel: hub [r4c9=r6c6=r9c5] forces rim to 2 colors.
-      Bivalue oddagon {r5c9, r6c8, r6c3, r9c3, r9c9} (length 5) cannot be 2-colored. Contradiction.
+  1.  Branch on r6c6, r9c5:
+      Case A: color(r6c6) = color(r9c5). Identify.
+        2.  Guardian: r4c9 guards oddagon {r4c9, r6c8, r6c3, r9c3, r9c9} (source [r6c6=r9c5]).
+            → color(r4c9) = color([r6c6=r9c5]). Identify.
+        3.  Odd wheel: hub [r4c9=r6c6=r9c5] forces rim to 2 colors.
+            Bivalue oddagon {r5c9, r6c8, r6c3, r9c3, r9c9} (length 5) cannot be 2-colored. Contradiction.
+      Case B: color(r6c6) ≠ color(r9c5). Add edge.
+        4.  K₄ on {r6c6, r7c6, r8c6, r9c5}. Contradiction.
+      Both cases contradict 3-colorability.
 
   Therefore the pattern is not 3-colorable. □
 

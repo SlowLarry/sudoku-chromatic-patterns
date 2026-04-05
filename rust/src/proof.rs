@@ -421,6 +421,8 @@ impl ProofGraph {
                     path.reverse(); // now a → ... → b
 
                     let cycle_len = path.len() + 1; // +1 for guardian g
+                    // Skip length-3 oddagons (guardian + 2 bivalue = diamond)
+                    if cycle_len < 5 { continue; }
                     if best_cycle.as_ref().map_or(true, |c| cycle_len < c.len()) {
                         let mut cycle = vec![g];
                         cycle.extend_from_slice(&path);
@@ -3268,10 +3270,13 @@ pub fn prove_pattern(cells: &[u8]) -> ProofResult {
 
     // For each technique in the optimal proof, try disabling it
     if proof.is_complete() {
+        let optimal_branches = proof.branch_count();
+        // Cap alt proof branch search: at most optimal branches + 1, and never more than 2
+        let max_alt_branches = (optimal_branches + 1).min(2);
         for &(flag, label) in DISABLEABLE_TECHNIQUES {
             if optimal_sig & flag == 0 { continue; } // not used in optimal, skip
             let mut alt = ProofNode::Failed;
-            for max_br in 0..=10 {
+            for max_br in 0..=max_alt_branches {
                 alt = find_best_proof(&graph, max_br, 50, max_alt_size, flag);
                 if alt.is_complete() { break; }
             }
