@@ -1,10 +1,12 @@
 """Compute parent-child family tree relationships between minimal 4-chromatic patterns.
 
-A pattern P of size N is a child of pattern Q of size N-1 if:
-  - P contains a diamond (non-adjacent pair sharing ≥2 common neighbors)
-  - Merging the diamond tips in P's graph yields a graph isomorphic to Q's graph
+A pattern P of size N is a child of pattern Q of size M (M < N) if:
+  - P can be reduced to Q's graph by a chain of diamond merges
+  - Each merge identifies two non-adjacent vertices sharing ≥2 common neighbors
 
-This script reads patterns.json, computes all diamond-merge parent relationships,
+Supports chains of arbitrary depth to bridge gaps (e.g., N=12 → N=10 via 2 merges).
+
+This script reads patterns.json, computes all diamond-merge relationships,
 and writes family_tree.json for the web viewer.
 
 Must be run under WSL with pynauty available.
@@ -84,6 +86,45 @@ def find_diamonds(edges, n):
     return diamonds
 
 
+def find_ancestors(edges, n, catalog_sizes, cert_to_id, max_depth, visited_certs=None):
+    """Recursively find catalog matches via chains of diamond merges.
+
+    Returns list of (ancestor_id, chain_depth) tuples.
+    """
+    if visited_certs is None:
+        visited_certs = set()
+
+    # Prevent revisiting same graph
+    cert = graph_certificate(edges, n)
+    if cert in visited_certs:
+        return []
+    visited_certs.add(cert)
+
+    results = []
+    diamonds = find_diamonds(edges, n)
+
+    for a, b in diamonds:
+        merged_edges, merged_n = merge_vertices(edges, n, a, b)
+        merged_cert = graph_certificate(merged_edges, merged_n)
+
+        # Check if merged graph matches a catalog pattern
+        if merged_n in catalog_sizes:
+            key = (merged_n, merged_cert)
+            if key in cert_to_id:
+                results.append((cert_to_id[key], 1))
+
+        # Recurse deeper if allowed
+        if max_depth > 1 and merged_n > min(catalog_sizes):
+            deeper = find_ancestors(
+                [tuple(e) for e in merged_edges], merged_n,
+                catalog_sizes, cert_to_id, max_depth - 1, visited_certs
+            )
+            for anc_id, depth in deeper:
+                results.append((anc_id, depth + 1))
+
+    return results
+
+
 def main():
     base = Path(__file__).parent
     data = json.load(open(base / 'web' / 'data' / 'patterns.json'))
@@ -93,6 +134,8 @@ def main():
     by_size = defaultdict(list)
     for p in patterns:
         by_size[p['size']].append(p)
+
+    catalog_sizes = set(by_size.keys())
 
     # Precompute certificates for each size
     print("Computing canonical certificates...")
@@ -106,16 +149,29 @@ def main():
         print(f"  N={size}: {len(pats)} certificates computed")
     print(f"  Total: {len(cert_to_id)} in {time.time()-t0:.1f}s")
 
-    # Find parent-child relationships via diamond merges
+    # Determine max chain depth per size based on gaps
+    # e.g., N=12 needs depth 2 to reach N=10 (gap of 1 at N=11)
+    all_sizes = sorted(catalog_sizes)
+    max_chain = {}
+    for size in all_sizes:
+        # Find nearest smaller catalog size
+        smaller = [s for s in all_sizes if s < size]
+        if not smaller:
+            max_chain[size] = 0
+        else:
+            gap = size - max(smaller)
+            max_chain[size] = gap  # depth = gap (1 merge per step)
+    print(f"\nMax chain depths: {max_chain}")
+
+    # Find parent-child relationships via diamond merge chains
     print("\nFinding diamond parent-child relationships...")
     family = defaultdict(lambda: {'parents': [], 'children': []})
     total_links = 0
 
     for size in sorted(by_size.keys()):
-        parent_size = size - 1
-        has_parents = parent_size in {s for (s, _) in cert_to_id}
-        if not has_parents:
-            print(f"  N={size}: no N={parent_size} catalog, skipping")
+        depth = max_chain[size]
+        if depth == 0:
+            print(f"  N={size}: no smaller patterns, skipping")
             continue
 
         pats = by_size[size]
@@ -125,31 +181,28 @@ def main():
         for pi, p in enumerate(pats):
             n = p['size']
             edges = [tuple(e) for e in p['edges']]
-            diamonds = find_diamonds(edges, n)
 
-            found_parents = set()
-            for a, b in diamonds:
-                merged_edges, merged_n = merge_vertices(edges, n, a, b)
-                cert = graph_certificate(merged_edges, merged_n)
-                key = (parent_size, cert)
+            ancestors = find_ancestors(edges, n, catalog_sizes, cert_to_id, depth)
 
-                if key in cert_to_id:
-                    parent_id = cert_to_id[key]
-                    if parent_id not in found_parents:
-                        found_parents.add(parent_id)
-                        cell_a = p['cells'][a]
-                        cell_b = p['cells'][b]
-                        family[p['id']]['parents'].append({
-                            'id': parent_id,
-                            'merge': f"r{cell_a[0]+1}c{cell_a[1]+1}=r{cell_b[0]+1}c{cell_b[1]+1}",
-                            'type': 'diamond',
-                        })
-                        family[parent_id]['children'].append({
-                            'id': p['id'],
-                            'type': 'diamond',
-                        })
-                        found += 1
-                        total_links += 1
+            # Deduplicate by ancestor id
+            seen_ancestors = set()
+            for anc_id, chain_depth in ancestors:
+                if anc_id in seen_ancestors:
+                    continue
+                seen_ancestors.add(anc_id)
+
+                family[p['id']]['parents'].append({
+                    'id': anc_id,
+                    'chain': chain_depth,
+                    'type': 'diamond',
+                })
+                family[anc_id]['children'].append({
+                    'id': p['id'],
+                    'chain': chain_depth,
+                    'type': 'diamond',
+                })
+                found += 1
+                total_links += 1
 
             if (pi + 1) % 500 == 0:
                 print(f"    {pi+1}/{len(pats)}...")

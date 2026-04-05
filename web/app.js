@@ -361,17 +361,20 @@ function renderDetail(p) {
       let html = '';
       if (fam.parents.length > 0) {
         html += '<div class="family-group"><span class="family-label">Parents:</span> ';
-        html += fam.parents.map(par =>
-          `<a href="#" class="family-link" data-id="${esc(par.id)}">${esc(par.id)}</a>` +
-          `<span class="family-merge">(${esc(par.merge)})</span>`
-        ).join(' ');
+        html += fam.parents.map(par => {
+          const chainLabel = par.chain > 1 ? `<span class="family-merge">(${par.chain}× diamond)</span>` :
+                             par.merge ? `<span class="family-merge">(${esc(par.merge)})</span>` :
+                             '<span class="family-merge">(diamond)</span>';
+          return `<a href="#" class="family-link" data-id="${esc(par.id)}">${esc(par.id)}</a>${chainLabel}`;
+        }).join(' ');
         html += '</div>';
       }
       if (fam.children.length > 0) {
         html += '<div class="family-group"><span class="family-label">Children:</span> ';
-        html += fam.children.map(ch =>
-          `<a href="#" class="family-link" data-id="${esc(ch.id)}">${esc(ch.id)}</a>`
-        ).join(' ');
+        html += fam.children.map(ch => {
+          const chainLabel = ch.chain > 1 ? `<span class="family-merge">(${ch.chain}× diamond)</span>` : '';
+          return `<a href="#" class="family-link" data-id="${esc(ch.id)}">${esc(ch.id)}</a>${chainLabel}`;
+        }).join(' ');
         html += '</div>';
       }
       familyEl.innerHTML = html;
