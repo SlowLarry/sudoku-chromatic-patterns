@@ -205,6 +205,26 @@ select:focus, input:focus {
 .proof-badge.branch { background: #3d2200; color: #f0883e; }
 
 /* ── Detail View ─────────────────────────────────────────────── */
+/* Family tree section */
+#detail-family {
+  margin-top: 8px;
+  padding: 6px 8px;
+  background: #161b22;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+.family-group { margin: 2px 0; }
+.family-label { color: #8b949e; font-weight: 600; margin-right: 4px; }
+.family-link {
+  color: #58a6ff;
+  text-decoration: none;
+  margin-right: 2px;
+  cursor: pointer;
+}
+.family-link:hover { text-decoration: underline; }
+.family-merge { color: #6e7681; font-size: 0.72rem; margin-right: 8px; }
+
 #detail-placeholder {
   display: flex;
   align-items: center;

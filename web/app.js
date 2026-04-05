@@ -1,5 +1,6 @@
 // ── Data & State ────────────────────────────────────────────────
 let DATA = null;
+let FAMILY = null;
 let filteredPatterns = [];
 let selectedPattern = null;
 let activeProofStep = null;
@@ -213,6 +214,11 @@ for (let v = 0; v < 81; v++) {
 async function init() {
   const resp = await fetch('data/patterns.json');
   DATA = await resp.json();
+  // Load family tree (optional, may not exist)
+  try {
+    const famResp = await fetch('data/family_tree.json');
+    if (famResp.ok) FAMILY = await famResp.json();
+  } catch (e) { /* ignore */ }
   populateCounts();
   applyFilters();
   setupEventListeners();
@@ -314,6 +320,9 @@ function selectPattern(p) {
   for (const row of document.querySelectorAll('.pattern-row')) {
     row.classList.toggle('selected', row.dataset.id === p.id);
   }
+  // Scroll selected row into view
+  const selRow = document.querySelector('.pattern-row.selected');
+  if (selRow) selRow.scrollIntoView({ block: 'nearest' });
 
   document.getElementById('detail-placeholder').style.display = 'none';
   document.getElementById('detail-view').style.display = 'block';
@@ -343,6 +352,59 @@ function renderDetail(p) {
     metaItem('X-wings', p.proof?.pigeonhole_xwings ?? 0),
     metaItem('Branches', p.proof?.branches ?? 0),
   ].join('');
+
+  // Family tree section
+  const familyEl = document.getElementById('detail-family');
+  if (familyEl) {
+    const fam = FAMILY && FAMILY[p.id];
+    if (fam && (fam.parents.length > 0 || fam.children.length > 0)) {
+      let html = '';
+      if (fam.parents.length > 0) {
+        html += '<div class="family-group"><span class="family-label">Parents:</span> ';
+        html += fam.parents.map(par =>
+          `<a href="#" class="family-link" data-id="${esc(par.id)}">${esc(par.id)}</a>` +
+          `<span class="family-merge">(${esc(par.merge)})</span>`
+        ).join(' ');
+        html += '</div>';
+      }
+      if (fam.children.length > 0) {
+        html += '<div class="family-group"><span class="family-label">Children:</span> ';
+        html += fam.children.map(ch =>
+          `<a href="#" class="family-link" data-id="${esc(ch.id)}">${esc(ch.id)}</a>`
+        ).join(' ');
+        html += '</div>';
+      }
+      familyEl.innerHTML = html;
+      familyEl.style.display = '';
+      // Add click handlers
+      for (const link of familyEl.querySelectorAll('.family-link')) {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const target = DATA.patterns.find(pp => pp.id === link.dataset.id);
+          if (!target) return;
+          // If target not in current filter, reset to show all
+          if (!filteredPatterns.find(pp => pp.id === target.id)) {
+            for (const btn of document.querySelectorAll('#size-buttons .btn')) {
+              btn.classList.toggle('active', btn.dataset.size === 'all');
+            }
+            for (const btn of document.querySelectorAll('#diff-buttons .btn')) {
+              btn.classList.toggle('active', btn.dataset.diff === 'all');
+            }
+            for (const btn of document.querySelectorAll('#branch-buttons .btn')) {
+              btn.classList.toggle('active', btn.dataset.branches === 'all');
+            }
+            document.getElementById('degree-filter').value = '';
+            document.getElementById('search-id').value = '';
+            applyFilters();
+          }
+          selectPattern(target);
+        });
+      }
+    } else {
+      familyEl.innerHTML = '';
+      familyEl.style.display = 'none';
+    }
+  }
 
   document.getElementById('bitstring-text').textContent = p.bitstring;
 
