@@ -1991,6 +1991,36 @@ impl ProofGraph {
                             notx_cells.join(", "), vname(forced_cell),
                         ));
                         forced_x |= unknown;
+                    } else if unknown == 0 {
+                        // All cells in house are ≠X: contradiction (one must be X)
+                        trace.push(format!(
+                            "{} {{{}, {}, {}}}: all ≠X, but one must be X",
+                            house_label(h), vname(c[0]), vname(c[1]), vname(c[2]),
+                        ));
+                        return Some((c[0], c[1], trace));
+                    }
+                }
+            }
+
+            // Adjacency-based ≠X: if v=X, all its neighbors are ≠X
+            {
+                let mut xbits = forced_x;
+                while xbits != 0 {
+                    let v = xbits.trailing_zeros() as usize;
+                    xbits &= xbits - 1;
+                    let new_not = adj[v] & !forced_x & !forced_not_x;
+                    if new_not != 0 {
+                        let mut excluded = Vec::new();
+                        let mut bits = new_not;
+                        while bits != 0 {
+                            excluded.push(vname(bits.trailing_zeros() as usize));
+                            bits &= bits - 1;
+                        }
+                        trace.push(format!(
+                            "{}=X \u{2192} {}≠X (adjacent)",
+                            vname(v), excluded.join(", "),
+                        ));
+                        forced_not_x |= new_not;
                     }
                 }
             }

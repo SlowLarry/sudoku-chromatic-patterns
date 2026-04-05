@@ -458,10 +458,15 @@ def parse_proof_file(path):
 
 
 def _extract_clash(trace_line):
-    """Extract the two clashing cell names from a trace line like 'r6c3=X and r9c3=X are adjacent'."""
-    m = re.match(r'(.+?)=X and (.+?)=X (?:are adjacent|clash)', trace_line)
+    """Extract the two clashing cell names from a trace line."""
+    # Match "...{cell}=X and {cell}=X ..." where cell is rNcN or [rNcN=rNcN...]
+    m = re.search(r'(\[?r\d+c\d+(?:=[^\]]+)?\]?)=X and (\[?r\d+c\d+(?:=[^\]]+)?\]?)=X', trace_line)
     if m:
         return [m.group(1).strip(), m.group(2).strip()]
+    # "all ≠X" house contradiction: extract first two cells from house
+    m2 = re.match(r'(?:row|col|box) \d+ \{(.+?), (.+?),', trace_line)
+    if m2 and 'all' in trace_line:
+        return [m2.group(1).strip(), m2.group(2).strip()]
     return []
 
 
