@@ -563,7 +563,11 @@ function renderProof(p, activeIdx) {
     variants.push({ label: 'Optimal', tree: p.proof.tree, complete: p.proof.complete, proof_length: p.proof.proof_length });
   }
   if (p.greedy_proof && p.greedy_proof.tree && p.greedy_proof.tree.length > 0) {
-    variants.push({ label: 'Greedy', tree: p.greedy_proof.tree, complete: true, proof_length: p.greedy_proof.proof_length });
+    const optJson = variants.length > 0 ? JSON.stringify(variants[0].tree) : '';
+    const greedyJson = JSON.stringify(p.greedy_proof.tree);
+    if (greedyJson !== optJson) {
+      variants.push({ label: 'Greedy', tree: p.greedy_proof.tree, complete: true, proof_length: p.greedy_proof.proof_length });
+    }
   }
   if (p.alt_proofs) {
     for (const alt of p.alt_proofs) {
