@@ -124,6 +124,15 @@ function computeAccumulatedColors(proofContainer, targetEl) {
           }
         }
       }
+    } else if (stepData.type === 'permutation_fixpoint' && !stepData.is_contradiction) {
+      const cellsA = parseCellsFromLabel(stepData.cell_a);
+      const cellsB = parseCellsFromLabel(stepData.cell_b);
+      if (cellsA.length > 0 && cellsB.length > 0) {
+        const allCells = [...cellsA, ...cellsB];
+        for (let j = 1; j < allCells.length; j++) {
+          uf.union(allCells[0], allCells[j]);
+        }
+      }
     }
 
     // Accumulate virtual edges from prior steps (not the target itself)
@@ -307,7 +316,7 @@ function renderPatternList() {
 
     const diff = getDifficulty(p);
     const badgeClass = diff;
-    const badgeText = diff === 'branch' ? `${p.proof?.greedy_branches}br` : diff;
+    const badgeText = diff === 'branch' ? `${p.proof?.greedy_branches}br` : diff === 'set' ? 'SET' : diff;
 
     row.innerHTML =
       `<span class="col-id">${p.id}</span>` +
@@ -351,7 +360,7 @@ function renderDetail(p) {
     metaItem('Edges', p.num_edges),
     metaItem('Degrees', `[${p.degree_sequence.join(', ')}]`),
     metaItem('Rows', p.rows_used.map(r => r + 1).join(', ')),
-    metaItem('Difficulty', getDifficulty(p)),
+    metaItem('Difficulty', getDifficulty(p) === 'set' ? 'SET' : getDifficulty(p)),
     metaItem('Proof depth', p.proof?.depth ?? '?'),
     metaItem('Proof length', p.proof?.proof_length ?? '?'),
     metaItem('Diamonds', p.proof?.diamonds ?? '?'),
@@ -571,7 +580,7 @@ function renderProof(p, activeIdx) {
   }
   if (p.alt_proofs) {
     for (const alt of p.alt_proofs) {
-      variants.push({ label: alt.techniques || alt.label, tree: alt.tree, complete: true, proof_length: alt.proof_length });
+      variants.push({ label: (alt.techniques || alt.label).replace(/\bset\b/g, 'SET'), tree: alt.tree, complete: true, proof_length: alt.proof_length });
     }
   }
 
@@ -665,6 +674,8 @@ function renderProofSteps(steps, depth) {
       html += renderParityChainStep(step, depth);
     } else if (step.type === 'parity_chain_deduction') {
       html += renderParityChainDeductionStep(step, depth);
+    } else if (step.type === 'permutation_fixpoint') {
+      html += renderPermutationFixpointStep(step, depth);
     } else if (step.type === 'branch') {
       html += renderBranchStep(step, depth);
     }
@@ -812,6 +823,36 @@ function renderParityChainDeductionStep(step, depth) {
   }
   for (const m of (step.merges || [])) {
     html += `<br><span class="step-identify">\u2192 color(${esc(m[0])}) = color(${esc(m[1])}). Identify.</span>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function renderPermutationFixpointStep(step, depth) {
+  const allCells = step.rows.flatMap(row => row.cells);
+  const data = escapeAttr(JSON.stringify({
+    type: 'permutation_fixpoint',
+    cells: allCells,
+    rows: step.rows,
+    cell_a: step.cell_a,
+    cell_b: step.cell_b,
+    is_contradiction: step.is_contradiction,
+  }));
+
+  let html = `<div class="proof-step" data-step='${data}'>` +
+    `<span class="step-num">${step.step}.</span> ` +
+    `<span class="step-diamond">Permutation fixpoint</span>:`;
+
+  for (const row of step.rows) {
+    const cellStr = row.cells.map(v => `<span class="step-vertex">${esc(v)}</span>`).join(', ');
+    html += `<br>&nbsp;&nbsp;row ${row.row_id} {${cellStr}}`;
+  }
+
+  html += `<br><span class="step-identify">\u2192 Opposite parity classes \u2192 transposition fixpoint.</span>`;
+  if (step.is_contradiction) {
+    html += `<br><span class="step-k4">\u2192 color(${esc(step.cell_a)}) = color(${esc(step.cell_b)}), but adjacent. Contradiction.</span>`;
+  } else {
+    html += `<br><span class="step-identify">\u2192 color(${esc(step.cell_a)}) = color(${esc(step.cell_b)}). Identify.</span>`;
   }
   html += `</div>`;
   return html;
@@ -1282,6 +1323,29 @@ function highlightProofStep(pattern, el) {
         for (const cell of parseCellsFromLabel(vName)) {
           highlights[cell] = 'hl-identify';
         }
+      }
+    }
+  } else if (stepData.type === 'permutation_fixpoint') {
+    // Alternating colors per row, fixpoint cells highlighted
+    const rowColors = ['hl-diamond', 'hl-identify', 'hl-set', 'hl-branch'];
+    if (stepData.rows) {
+      stepData.rows.forEach((row, ri) => {
+        for (const vName of row.cells) {
+          for (const cell of parseCellsFromLabel(vName)) {
+            highlights[cell] = rowColors[ri % rowColors.length];
+          }
+        }
+      });
+    }
+    // Highlight fixpoint pair
+    if (stepData.cell_a) {
+      for (const cell of parseCellsFromLabel(stepData.cell_a)) {
+        highlights[cell] = 'hl-identify';
+      }
+    }
+    if (stepData.cell_b) {
+      for (const cell of parseCellsFromLabel(stepData.cell_b)) {
+        highlights[cell] = 'hl-identify';
       }
     }
   } else if (stepData.type === 'branch') {

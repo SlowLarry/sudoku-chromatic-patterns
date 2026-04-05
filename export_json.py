@@ -131,6 +131,13 @@ def translate_proof_tree(tree, iso):
                 {**row, 'cells': [translate_cell_name(c, iso) for c in row['cells']]}
                 for row in s['rows']
             ]
+        elif s['type'] == 'permutation_fixpoint':
+            s['rows'] = [
+                {**row, 'cells': [translate_cell_name(c, iso) for c in row['cells']]}
+                for row in s['rows']
+            ]
+            s['cell_a'] = translate_cell_name(s['cell_a'], iso)
+            s['cell_b'] = translate_cell_name(s['cell_b'], iso)
         elif s['type'] == 'pigeonhole_xwing':
             s['cycle'] = [translate_cell_name(v, iso) for v in s['cycle']]
             s['diagonal_1'] = [translate_cell_name(v, iso) for v in s['diagonal_1']]
@@ -807,6 +814,75 @@ def parse_proof_steps(lines):
                 'num_rows': len(rows),
                 'merge_pair': merge_pair,
                 'merges': merges,
+            })
+            continue
+
+        # Permutation fixpoint (non-terminal merge or terminal contradiction)
+        pfm = re.match(r'(\d+)\.\s+Permutation fixpoint:', stripped)
+        if pfm:
+            step_num = int(pfm.group(1))
+            rows = []
+            links_text = ''
+            cross_pair = ''
+            shared_desc = ''
+            cell_a = ''
+            cell_b = ''
+            is_contradiction = False
+            i += 1
+            while i < len(lines):
+                sl = lines[i].strip()
+                if not sl:
+                    i += 1
+                    continue
+                # Row/col: "row 5 {r5c3, r5c6, r5c9}"
+                row_m = re.match(r'(?:row|col)\s+(\d+)\s+\{(.+?)\}', sl)
+                if row_m:
+                    row_id = int(row_m.group(1))
+                    row_cells = [v.strip() for v in row_m.group(2).split(',')]
+                    rows.append({
+                        'row_id': row_id,
+                        'cells': row_cells,
+                    })
+                    i += 1
+                    continue
+                if sl.startswith('Parallel links:'):
+                    links_text = sl
+                    i += 1
+                    continue
+                # Cross pair line: "row 5 and row 8: ..."
+                cross_m = re.match(r'((?:row|col)\s+\d+)\s+and\s+((?:row|col)\s+\d+):', sl)
+                if cross_m:
+                    cross_pair = f'{cross_m.group(1)} and {cross_m.group(2)}'
+                    shared_desc = sl
+                    i += 1
+                    continue
+                # "→ color(r5c9) = color(r8c7). Identify."
+                merge_m = re.match(r'→\s*color\((.+?)\)\s*=\s*color\((.+?)\)\.\s*Identify\.', sl)
+                if merge_m:
+                    cell_a, cell_b = merge_m.group(1), merge_m.group(2)
+                    is_contradiction = False
+                    i += 1
+                    break
+                # "→ color(r5c9) = color(r8c7), but they are adjacent. Contradiction."
+                contra_m = re.match(r'→\s*color\((.+?)\)\s*=\s*color\((.+?)\),\s*but they are adjacent', sl)
+                if contra_m:
+                    cell_a, cell_b = contra_m.group(1), contra_m.group(2)
+                    is_contradiction = True
+                    i += 1
+                    break
+                # Skip informational lines
+                i += 1
+            steps.append({
+                'type': 'permutation_fixpoint',
+                'step': step_num,
+                'rows': rows,
+                'links': links_text,
+                'num_rows': len(rows),
+                'cross_pair': cross_pair,
+                'shared_desc': shared_desc,
+                'cell_a': cell_a,
+                'cell_b': cell_b,
+                'is_contradiction': is_contradiction,
             })
             continue
 

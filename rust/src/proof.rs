@@ -1687,6 +1687,260 @@ impl ProofGraph {
         results
     }
 
+    /// Permutation fixpoint: detect 4 full-house rows (or cols) with all 6
+    /// pairs conflicting, forming two same-parity pairs from different parallel
+    /// components. A cross-pair sharing 2 position-adjacencies yields a
+    /// transposition fixpoint (merge or contradiction).
+    ///
+    /// Returns Vec of (keep_v, remove_v, is_contradiction, partial ProofNode).
+    fn find_permutation_fixpoints(&self) -> Vec<(usize, usize, bool, ProofNode)> {
+        let all_houses = self.find_full_houses();
+        let mut results = Vec::new();
+
+        for is_row in [true, false] {
+            // Collect full triple houses (rows or cols with 3 distinct vertices),
+            // cells sorted by column (for rows) or by row (for cols).
+            let mut triples: Vec<(u8, [usize; 3], [u8; 3])> = Vec::new();
+            for h in &all_houses {
+                if is_row && h.htype != HouseType::Row { continue; }
+                if !is_row && h.htype != HouseType::Col { continue; }
+                if h.cells[0] == h.cells[1] || h.cells[0] == h.cells[2]
+                    || h.cells[1] == h.cells[2] { continue; }
+
+                let sort_keys: [u8; 3] = if is_row {
+                    [h.orig_cells[0] % 9, h.orig_cells[1] % 9, h.orig_cells[2] % 9]
+                } else {
+                    [h.orig_cells[0] / 9, h.orig_cells[1] / 9, h.orig_cells[2] / 9]
+                };
+
+                let mut order: [(u8, usize); 3] =
+                    [(sort_keys[0], 0), (sort_keys[1], 1), (sort_keys[2], 2)];
+                order.sort_by_key(|&(k, _)| k);
+
+                triples.push((
+                    h.index,
+                    [h.cells[order[0].1], h.cells[order[1].1], h.cells[order[2].1]],
+                    [h.orig_cells[order[0].1], h.orig_cells[order[1].1], h.orig_cells[order[2].1]],
+                ));
+            }
+
+            let n = triples.len();
+            if n < 4 { continue; }
+
+            // Parallel graph: edge iff all 3 same-position pairs are adjacent
+            let mut par_adj: Vec<u32> = vec![0; n];
+            for i in 0..n {
+                for j in (i + 1)..n {
+                    let all = (0..3).all(|k|
+                        self.adj[triples[i].1[k]] & (1 << triples[j].1[k]) != 0
+                    );
+                    if all {
+                        par_adj[i] |= 1 << j;
+                        par_adj[j] |= 1 << i;
+                    }
+                }
+            }
+
+            // Conflict graph: edge iff ≥1 same-position pair is adjacent
+            let mut conf_adj: Vec<u32> = vec![0; n];
+            for i in 0..n {
+                for j in (i + 1)..n {
+                    let any = (0..3).any(|k|
+                        self.adj[triples[i].1[k]] & (1 << triples[j].1[k]) != 0
+                    );
+                    if any {
+                        conf_adj[i] |= 1 << j;
+                        conf_adj[j] |= 1 << i;
+                    }
+                }
+            }
+
+            // Find parallel components via BFS
+            let mut comp_id = vec![usize::MAX; n];
+            let mut components: Vec<Vec<usize>> = Vec::new();
+            let mut visited = 0u32;
+            for start in 0..n {
+                if visited & (1 << start) != 0 { continue; }
+                let cid = components.len();
+                let mut comp = vec![start];
+                comp_id[start] = cid;
+                visited |= 1 << start;
+                let mut queue = VecDeque::new();
+                queue.push_back(start);
+                while let Some(u) = queue.pop_front() {
+                    let mut nbrs = par_adj[u] & !visited;
+                    while nbrs != 0 {
+                        let v = nbrs.trailing_zeros() as usize;
+                        nbrs &= nbrs - 1;
+                        visited |= 1 << v;
+                        comp_id[v] = cid;
+                        comp.push(v);
+                        queue.push_back(v);
+                    }
+                }
+                components.push(comp);
+            }
+
+            // Collect components with ≥2 members (can form same-parity pairs)
+            let big_comps: Vec<usize> = (0..components.len())
+                .filter(|&c| components[c].len() >= 2)
+                .collect();
+
+            if big_comps.len() < 2 { continue; }
+
+            // Try pairs of distinct parallel components
+            for ci_idx in 0..big_comps.len() {
+                for cj_idx in (ci_idx + 1)..big_comps.len() {
+                    let ca = &components[big_comps[ci_idx]];
+                    let cb = &components[big_comps[cj_idx]];
+
+                    // Try all directly-linked pairs within each component
+                    for ai in 0..ca.len() {
+                        for aj in (ai + 1)..ca.len() {
+                            let a1 = ca[ai];
+                            let a2 = ca[aj];
+                            if par_adj[a1] & (1 << a2) == 0 { continue; }
+
+                            for bi in 0..cb.len() {
+                                for bj in (bi + 1)..cb.len() {
+                                    let b1 = cb[bi];
+                                    let b2 = cb[bj];
+                                    if par_adj[b1] & (1 << b2) == 0 { continue; }
+
+                                    let quad = [a1, a2, b1, b2];
+                                    let quad_mask: u32 = quad.iter()
+                                        .fold(0u32, |m, &i| m | (1 << i));
+
+                                    // All 6 pairs must conflict
+                                    let all_conf = quad.iter().all(|&i|
+                                        (conf_adj[i] & quad_mask) == (quad_mask & !(1u32 << i))
+                                    );
+                                    if !all_conf { continue; }
+
+                                    // Try each cross-pair for 2-adjacency fixpoint
+                                    for &(x, y) in &[(a1, b1), (a1, b2), (a2, b1), (a2, b2)] {
+                                        let mut adj_count = 0;
+                                        let mut non_adj_pos = 0usize;
+                                        for k in 0..3 {
+                                            if self.adj[triples[x].1[k]] & (1 << triples[y].1[k]) != 0 {
+                                                adj_count += 1;
+                                            } else {
+                                                non_adj_pos = k;
+                                            }
+                                        }
+                                        if adj_count != 2 { continue; }
+
+                                        let keep_v = triples[x].1[non_adj_pos];
+                                        let remove_v = triples[y].1[non_adj_pos];
+                                        if keep_v == remove_v { continue; }
+
+                                        let is_contradiction = self.adj[keep_v] & (1 << remove_v) != 0;
+
+                                        // Build the ProofNode
+                                        let house_type = if is_row { "row" } else { "col" };
+                                        let vis_name = if is_row { "col" } else { "row" };
+
+                                        let mut house_names = Vec::new();
+                                        let mut cells_strs = Vec::new();
+                                        for &idx in &quad {
+                                            let (hi, ref vc, _) = triples[idx];
+                                            house_names.push(format!("{} {}", house_type, hi + 1));
+                                            cells_strs.push([
+                                                self.vertex_name(vc[0]),
+                                                self.vertex_name(vc[1]),
+                                                self.vertex_name(vc[2]),
+                                            ]);
+                                        }
+
+                                        // Parallel link descriptions for the two pairs
+                                        let mut links = Vec::new();
+                                        for &(p, q) in &[(a1, a2), (b1, b2)] {
+                                            let (hp, _, ref oc_p) = triples[p];
+                                            let (hq, _, ref oc_q) = triples[q];
+                                            let via: Vec<&str> = (0..3).map(|k| {
+                                                if is_row {
+                                                    if oc_p[k] % 9 == oc_q[k] % 9 { "col" }
+                                                    else { "box" }
+                                                } else {
+                                                    if oc_p[k] / 9 == oc_q[k] / 9 { "row" }
+                                                    else { "box" }
+                                                }
+                                            }).collect();
+                                            links.push(format!(
+                                                "{} {}\u{2194}{} {} ({})",
+                                                house_type, hp + 1,
+                                                house_type, hq + 1,
+                                                via.join(", "),
+                                            ));
+                                        }
+
+                                        let cross_pair = (
+                                            format!("{} {}", house_type, triples[x].0 + 1),
+                                            format!("{} {}", house_type, triples[y].0 + 1),
+                                        );
+
+                                        // Shared position descriptions
+                                        let mut shared_desc = Vec::new();
+                                        for k in 0..3 {
+                                            if k == non_adj_pos { continue; }
+                                            let cell_x_name = self.vertex_name(triples[x].1[k]);
+                                            let cell_y_name = self.vertex_name(triples[y].1[k]);
+                                            // Determine adjacency reason
+                                            let oc_x = triples[x].2[k];
+                                            let oc_y = triples[y].2[k];
+                                            let reason = if is_row {
+                                                if oc_x % 9 == oc_y % 9 {
+                                                    format!("{} {}", vis_name, oc_x % 9 + 1)
+                                                } else {
+                                                    format!("box {}", (oc_x / 9 / 3) * 3 + (oc_x % 9 / 3) + 1)
+                                                }
+                                            } else {
+                                                if oc_x / 9 == oc_y / 9 {
+                                                    format!("{} {}", vis_name, oc_x / 9 + 1)
+                                                } else {
+                                                    format!("box {}", (oc_x / 9 / 3) * 3 + (oc_x % 9 / 3) + 1)
+                                                }
+                                            };
+                                            shared_desc.push(format!(
+                                                "{}\u{2194}{} ({})",
+                                                cell_x_name, cell_y_name, reason
+                                            ));
+                                        }
+
+                                        let cell_a = self.vertex_name(keep_v);
+                                        let cell_b = self.vertex_name(remove_v);
+
+                                        let node = ProofNode::PermutationFixpoint {
+                                            house_type: house_type.to_string(),
+                                            house_names,
+                                            cells: cells_strs,
+                                            links,
+                                            cross_pair,
+                                            shared_desc,
+                                            cell_a: cell_a.clone(),
+                                            cell_b: cell_b.clone(),
+                                            is_contradiction,
+                                            next: if is_contradiction {
+                                                None
+                                            } else {
+                                                Some(Box::new(ProofNode::Failed))
+                                            },
+                                        };
+
+                                        let (kv, rv) = (keep_v.min(remove_v), keep_v.max(remove_v));
+                                        results.push((kv, rv, is_contradiction, node));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        results
+    }
+
     /// Find a forced deduction from full-house coloring constraints.
     ///
     /// Enumerates all valid 3-colorings of the full-house cell system
@@ -2166,7 +2420,7 @@ pub const TECH_GUARDIAN: u32     = 1 << 8;
 fn tech_label(flag: u32) -> &'static str {
     match flag {
         1 => "diamond",
-        2 => "set",
+        2 => "SET",
         4 => "ladder",
         8 => "hexagon",
         16 => "xwing",
@@ -2293,6 +2547,23 @@ pub enum ProofNode {
         merges: Vec<(String, String)>,  // the 3 cell pairs being merged
         next: Box<ProofNode>,
     },
+    /// Permutation fixpoint: 4 full-house rows (or columns) with all pairs
+    /// conflicting, forming two same-parity pairs from different parallel
+    /// components. Distinctness forces opposite inter-pair parity; a cross-pair
+    /// sharing 2 position adjacencies yields a transposition fixpoint (merge
+    /// or contradiction if the fixpoint cells are adjacent).
+    PermutationFixpoint {
+        house_type: String,
+        house_names: Vec<String>,       // all 4 house names
+        cells: Vec<[String; 3]>,        // cells per house sorted by position
+        links: Vec<String>,             // parallel link descriptions for the two pairs
+        cross_pair: (String, String),   // the two houses yielding the fixpoint
+        shared_desc: Vec<String>,       // shared position adjacency descriptions
+        cell_a: String,                 // fixpoint cell from first cross house
+        cell_b: String,                 // fixpoint cell from second cross house
+        is_contradiction: bool,         // true if cell_a, cell_b are adjacent
+        next: Option<Box<ProofNode>>,   // None if contradiction, Some if merge
+    },
     /// Terminal contradiction from full-house coloring constraint analysis.
     /// No valid 3-coloring of the house system exists.
     HouseColoringContradiction {
@@ -2339,6 +2610,9 @@ impl ProofNode {
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
             | ProofNode::Guardian { next, .. } => next.is_complete(),
+            ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
+                if *is_contradiction { true } else { next.as_ref().unwrap().is_complete() }
+            }
             ProofNode::Branch { same_color, diff_color, .. } => {
                 same_color.is_complete() && diff_color.is_complete()
             }
@@ -2361,6 +2635,9 @@ impl ProofNode {
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
             | ProofNode::Guardian { next, .. } => 1 + next.depth(),
+            ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
+                if *is_contradiction { 0 } else { 1 + next.as_ref().unwrap().depth() }
+            }
             ProofNode::Branch { same_color, diff_color, .. } => {
                 1 + same_color.depth().max(diff_color.depth())
             }
@@ -2382,6 +2659,9 @@ impl ProofNode {
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
             | ProofNode::Guardian { next, .. } => next.branch_count(),
+            ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
+                if *is_contradiction { 0 } else { next.as_ref().unwrap().branch_count() }
+            }
             ProofNode::Branch { same_color, diff_color, .. } => {
                 1 + same_color.branch_count() + diff_color.branch_count()
             }
@@ -2404,6 +2684,9 @@ impl ProofNode {
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
             | ProofNode::Guardian { next, .. } => next.diamond_count(),
+            ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
+                if *is_contradiction { 0 } else { next.as_ref().unwrap().diamond_count() }
+            }
             ProofNode::Branch { same_color, diff_color, .. } => {
                 same_color.diamond_count() + diff_color.diamond_count()
             }
@@ -2424,6 +2707,9 @@ impl ProofNode {
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
             | ProofNode::Guardian { next, .. } => next.odd_wheel_count(),
+            ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
+                if *is_contradiction { 0 } else { next.as_ref().unwrap().odd_wheel_count() }
+            }
             ProofNode::Branch { same_color, diff_color, .. } => {
                 same_color.odd_wheel_count() + diff_color.odd_wheel_count()
             }
@@ -2445,6 +2731,9 @@ impl ProofNode {
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
             | ProofNode::Guardian { next, .. } => next.circular_ladder_count(),
+            ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
+                if *is_contradiction { 0 } else { next.as_ref().unwrap().circular_ladder_count() }
+            }
             ProofNode::Branch { same_color, diff_color, .. } => {
                 same_color.circular_ladder_count() + diff_color.circular_ladder_count()
             }
@@ -2465,6 +2754,9 @@ impl ProofNode {
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
             | ProofNode::Guardian { next, .. } => next.bridged_hexagon_count(),
+            ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
+                if *is_contradiction { 0 } else { next.as_ref().unwrap().bridged_hexagon_count() }
+            }
             ProofNode::Branch { same_color, diff_color, .. } => {
                 same_color.bridged_hexagon_count() + diff_color.bridged_hexagon_count()
             }
@@ -2485,6 +2777,9 @@ impl ProofNode {
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
             | ProofNode::Guardian { next, .. } => next.set_equivalence_count(),
+            ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
+                if *is_contradiction { 0 } else { next.as_ref().unwrap().set_equivalence_count() }
+            }
             ProofNode::Branch { same_color, diff_color, .. } => {
                 same_color.set_equivalence_count() + diff_color.set_equivalence_count()
             }
@@ -2505,6 +2800,9 @@ impl ProofNode {
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. } => next.parity_transport_count(),
             ProofNode::ParityTransportDeduction { next, .. } => 1 + next.parity_transport_count(),
             ProofNode::ParityChainDeduction { next, .. } => 1 + next.parity_transport_count(),
+            ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
+                1 + if *is_contradiction { 0 } else { next.as_ref().unwrap().parity_transport_count() }
+            }
             ProofNode::Guardian { next, .. } => next.parity_transport_count(),
             ProofNode::Branch { same_color, diff_color, .. } => {
                 same_color.parity_transport_count() + diff_color.parity_transport_count()
@@ -2526,6 +2824,9 @@ impl ProofNode {
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
             | ProofNode::Guardian { next, .. } => next.pigeonhole_xwing_count(),
+            ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
+                if *is_contradiction { 0 } else { next.as_ref().unwrap().pigeonhole_xwing_count() }
+            }
             ProofNode::Branch { same_color, diff_color, .. } => {
                 same_color.pigeonhole_xwing_count() + diff_color.pigeonhole_xwing_count()
             }
@@ -2546,6 +2847,9 @@ impl ProofNode {
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. } => next.guardian_count(),
+            ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
+                if *is_contradiction { 0 } else { next.as_ref().unwrap().guardian_count() }
+            }
             ProofNode::Branch { same_color, diff_color, .. } => {
                 same_color.guardian_count() + diff_color.guardian_count()
             }
@@ -2568,6 +2872,9 @@ impl ProofNode {
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
             | ProofNode::Guardian { next, .. } => 1 + next.size(),
+            ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
+                if *is_contradiction { 1 } else { 1 + next.as_ref().unwrap().size() }
+            }
             ProofNode::Branch { same_color, diff_color, .. } => {
                 1 + same_color.size() + diff_color.size()
             }
@@ -2593,6 +2900,9 @@ impl ProofNode {
             }
             ProofNode::ParityTransportDeduction { next, .. } => TECH_PARITY | next.technique_signature(),
             ProofNode::ParityChainDeduction { next, .. } => TECH_PARITY | next.technique_signature(),
+            ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
+                TECH_PARITY | if *is_contradiction { 0 } else { next.as_ref().unwrap().technique_signature() }
+            }
             ProofNode::Branch { same_color, diff_color, .. } => {
                 TECH_BRANCH | same_color.technique_signature() | diff_color.technique_signature()
             }
@@ -2729,77 +3039,12 @@ fn find_best_proof(
         }
     }
 
-    // Terminal / non-terminal: house coloring constraint
-    if disabled & TECH_PARITY == 0 {
-        if let Some(hcc) = graph.find_house_coloring_deduction() {
-            match hcc {
-                HouseColoringResult::Contradiction { houses } => {
-                    let house_names: Vec<String> = houses.iter().map(|h| format_house(h)).collect();
-                    return ProofNode::HouseColoringContradiction { houses: house_names };
-                }
-                _ => {} // non-terminal cases handled below
-            }
-        }
-    }
-
     if depth_remaining == 0 {
         return ProofNode::Failed;
     }
 
     let mut best: Option<ProofNode> = None;
     let mut best_size = size_budget;
-
-    // Non-terminal: house coloring deduction (merge or edge)
-    if disabled & TECH_PARITY == 0 {
-        if let Some(hcc) = graph.find_house_coloring_deduction() {
-            match hcc {
-                HouseColoringResult::ForcedSame(a, b, houses) => {
-                    let house_names: Vec<String> = houses.iter().map(|h| format_house(h)).collect();
-                    let cell_a = graph.vertex_name(a);
-                    let cell_b = graph.vertex_name(b);
-                    let mut g = graph.clone();
-                    let (keep, remove) = (a.min(b), a.max(b));
-                    g.merge(keep, remove);
-                    let next = find_best_proof(&g, branches_left, depth_remaining - 1, best_size - 1, disabled);
-                    if next.is_complete() {
-                        let total = 1 + next.size();
-                        if total < best_size {
-                            best_size = total;
-                            best = Some(ProofNode::ParityTransportDeduction {
-                                houses: house_names,
-                                cell_a,
-                                cell_b,
-                                forced_same: true,
-                                next: Box::new(next),
-                            });
-                        }
-                    }
-                }
-                HouseColoringResult::ForcedDiff(a, b, houses) => {
-                    let house_names: Vec<String> = houses.iter().map(|h| format_house(h)).collect();
-                    let cell_a = graph.vertex_name(a);
-                    let cell_b = graph.vertex_name(b);
-                    let mut g = graph.clone();
-                    g.add_edge(a, b);
-                    let next = find_best_proof(&g, branches_left, depth_remaining - 1, best_size - 1, disabled);
-                    if next.is_complete() {
-                        let total = 1 + next.size();
-                        if total < best_size {
-                            best_size = total;
-                            best = Some(ProofNode::ParityTransportDeduction {
-                                houses: house_names,
-                                cell_a,
-                                cell_b,
-                                forced_same: false,
-                                next: Box::new(next),
-                            });
-                        }
-                    }
-                }
-                HouseColoringResult::Contradiction { .. } => {} // already handled above
-            }
-        }
-    }
 
     // Try all diamond reductions
     if disabled & TECH_DIAMOND == 0 {
@@ -2995,6 +3240,49 @@ fn find_best_proof(
     }
     }
 
+    // Try permutation fixpoint deductions (2 same-parity pairs, opposite parity → fixpoint merge)
+    if disabled & TECH_PARITY == 0 {
+    let fps = graph.find_permutation_fixpoints();
+    for (keep, remove, is_contradiction, partial_node) in fps {
+        if is_contradiction {
+            // Terminal — size 1
+            if 1 < best_size {
+                best_size = 1;
+                best = Some(partial_node);
+            }
+            continue;
+        }
+        let mut g = graph.clone();
+        g.merge(keep, remove);
+
+        let next = find_best_proof(&g, branches_left, depth_remaining - 1, best_size - 1, disabled);
+        if next.is_complete() {
+            let total = 1 + next.size();
+            if total < best_size {
+                best_size = total;
+                if let ProofNode::PermutationFixpoint {
+                    house_type, house_names, cells, links,
+                    cross_pair, shared_desc, cell_a, cell_b,
+                    is_contradiction: ic, ..
+                } = partial_node {
+                    best = Some(ProofNode::PermutationFixpoint {
+                        house_type,
+                        house_names,
+                        cells,
+                        links,
+                        cross_pair,
+                        shared_desc,
+                        cell_a,
+                        cell_b,
+                        is_contradiction: ic,
+                        next: Some(Box::new(next)),
+                    });
+                }
+            }
+        }
+    }
+    }
+
     // Try branches (only if allowed)
     if disabled & TECH_BRANCH == 0 && branches_left > 0 {
         let pairs = graph.branch_candidates();
@@ -3083,47 +3371,6 @@ fn find_greedy_proof(
     // Terminal: parity transport (pigeonhole chain)
     if let Some(pc) = graph.find_parity_chain() {
         return pc;
-    }
-
-    // Terminal / non-terminal: house coloring constraint
-    if let Some(hcc) = graph.find_house_coloring_deduction() {
-        match hcc {
-            HouseColoringResult::Contradiction { houses } => {
-                let house_names: Vec<String> = houses.iter().map(|h| format_house(h)).collect();
-                return ProofNode::HouseColoringContradiction { houses: house_names };
-            }
-            HouseColoringResult::ForcedSame(a, b, houses) => {
-                let house_names: Vec<String> = houses.iter().map(|h| format_house(h)).collect();
-                let cell_a = graph.vertex_name(a);
-                let cell_b = graph.vertex_name(b);
-                let mut g = graph.clone();
-                let (keep, remove) = (a.min(b), a.max(b));
-                g.merge(keep, remove);
-                let next = find_greedy_proof(&g, branches_left, depth_remaining - 1);
-                return ProofNode::ParityTransportDeduction {
-                    houses: house_names,
-                    cell_a,
-                    cell_b,
-                    forced_same: true,
-                    next: Box::new(next),
-                };
-            }
-            HouseColoringResult::ForcedDiff(a, b, houses) => {
-                let house_names: Vec<String> = houses.iter().map(|h| format_house(h)).collect();
-                let cell_a = graph.vertex_name(a);
-                let cell_b = graph.vertex_name(b);
-                let mut g = graph.clone();
-                g.add_edge(a, b);
-                let next = find_greedy_proof(&g, branches_left, depth_remaining - 1);
-                return ProofNode::ParityTransportDeduction {
-                    houses: house_names,
-                    cell_a,
-                    cell_b,
-                    forced_same: false,
-                    next: Box::new(next),
-                };
-            }
-        }
     }
 
     if depth_remaining == 0 {
@@ -3241,6 +3488,35 @@ fn find_greedy_proof(
                 merge_pair,
                 merges,
                 next: Box::new(next),
+            };
+        }
+    }
+
+    // Priority 3.6: permutation fixpoint (after parity chain deduction, before ladder)
+    let fps = graph.find_permutation_fixpoints();
+    if let Some((keep, remove, is_contradiction, partial_node)) = fps.into_iter().next() {
+        if is_contradiction {
+            return partial_node;
+        }
+        let mut g = graph.clone();
+        g.merge(keep, remove);
+        let next = find_greedy_proof(&g, branches_left, depth_remaining - 1);
+        if let ProofNode::PermutationFixpoint {
+            house_type, house_names, cells, links,
+            cross_pair, shared_desc, cell_a, cell_b,
+            is_contradiction: ic, ..
+        } = partial_node {
+            return ProofNode::PermutationFixpoint {
+                house_type,
+                house_names,
+                cells,
+                links,
+                cross_pair,
+                shared_desc,
+                cell_a,
+                cell_b,
+                is_contradiction: ic,
+                next: Some(Box::new(next)),
             };
         }
     }
@@ -3585,6 +3861,66 @@ fn format_node(node: &ProofNode, step: &mut usize, indent: usize) -> String {
                 );
             }
             s += &format_node(next, step, indent);
+            s
+        }
+        ProofNode::PermutationFixpoint {
+            house_type, house_names, cells, links,
+            cross_pair, shared_desc, cell_a, cell_b,
+            is_contradiction, next
+        } => {
+            *step += 1;
+            let vis_name = if house_type == "row" { "column" } else { "row" };
+            let mut s = format!(
+                "{}{}.  Permutation fixpoint:\n",
+                pad, step,
+            );
+            for i in 0..house_names.len() {
+                s += &format!(
+                    "{}    {} {{{}}}\n",
+                    pad, house_names[i], cells[i].join(", "),
+                );
+            }
+            s += &format!(
+                "{}    Parallel links: {}\n",
+                pad, links.join("; "),
+            );
+            s += &format!(
+                "{}    \u{2192} {{{}}} and {{{}}} each have same permutation parity.\n",
+                pad,
+                [&house_names[0], &house_names[1]].iter().map(|s| s.as_str()).collect::<Vec<_>>().join(", "),
+                [&house_names[2], &house_names[3]].iter().map(|s| s.as_str()).collect::<Vec<_>>().join(", "),
+            );
+            s += &format!(
+                "{}    Each pair shares a {} \u{2192} 4 distinct permutations.\n",
+                pad, vis_name,
+            );
+            s += &format!(
+                "{}    Same parity class has only 3 permutations \u{2192} pairs must use opposite parity classes.\n",
+                pad,
+            );
+            s += &format!(
+                "{}    {} and {}: {} adjacent.\n",
+                pad, cross_pair.0, cross_pair.1,
+                shared_desc.join("; "),
+            );
+            s += &format!(
+                "{}    Relative permutation is odd with 2 non-fixed points \u{2192} transposition fixing the third position.\n",
+                pad,
+            );
+            if *is_contradiction {
+                s += &format!(
+                    "{}    \u{2192} color({}) = color({}), but they are adjacent. Contradiction.\n",
+                    pad, cell_a, cell_b,
+                );
+            } else {
+                s += &format!(
+                    "{}    \u{2192} color({}) = color({}). Identify.\n",
+                    pad, cell_a, cell_b,
+                );
+                if let Some(n) = next {
+                    s += &format_node(n, step, indent);
+                }
+            }
             s
         }
         ProofNode::PigeonholeXwing { cycle, clash_1: _, clash_2: _, trace_1, trace_2 } => {
