@@ -146,6 +146,14 @@ def translate_proof_tree(tree, iso):
             s['clash_2'] = [translate_cell_name(v, iso) for v in s['clash_2']]
             s['trace_1'] = [translate_trace_line(t, iso) for t in s.get('trace_1', [])]
             s['trace_2'] = [translate_trace_line(t, iso) for t in s.get('trace_2', [])]
+        elif s['type'] == 'gradient_chain':
+            s['rows'] = [
+                {**row, 'cells': [translate_cell_name(c, iso) for c in row['cells']]}
+                for row in s['rows']
+            ]
+            # gradient_links and distinctness contain cell refs in free text — translate them
+            s['gradient_links'] = [translate_trace_line(l, iso) for l in s['gradient_links']]
+            s['distinctness'] = [translate_trace_line(l, iso) for l in s['distinctness']]
         elif s['type'] == 'branch':
             s['vertex_a'] = translate_cell_name(s['vertex_a'], iso)
             s['vertex_b'] = translate_cell_name(s['vertex_b'], iso)
@@ -964,6 +972,73 @@ def parse_proof_steps(lines):
                     'forced_same': forced_same,
                 })
             i += 1
+            continue
+
+        # Gradient chain step
+        wcm = re.match(r'(\d+)\.\s+Gradient chain:', stripped)
+        if wcm:
+            step_num = int(wcm.group(1))
+            i += 1
+            # Skip 2 δ definition lines
+            if i < len(lines) and 'color(B)' in lines[i]:
+                i += 1
+            if i < len(lines) and '3 color pairs' in lines[i]:
+                i += 1
+            # Collect row lines: "row N: cA, cB (also cC)"
+            rows = []
+            while i < len(lines):
+                rl = lines[i].strip()
+                rm_row = re.match(r'row (\d+): (.+)', rl)
+                if rm_row:
+                    row_num = int(rm_row.group(1))
+                    rest = rm_row.group(2)
+                    # Strip optional "(also ...)" suffix and parse cells
+                    also_m = re.match(r'(.+?) \(also (.+?)\)', rest)
+                    if also_m:
+                        cells = [c.strip() for c in also_m.group(1).split(',')]
+                        cells.append(also_m.group(2).strip())
+                    else:
+                        cells = [c.strip() for c in rest.split(',')]
+                    rows.append({'row': row_num, 'cells': cells})
+                    i += 1
+                else:
+                    break
+            # Collect gradient link lines until "→ ... same δ" summary
+            gradient_links = []
+            while i < len(lines):
+                wl = lines[i].strip()
+                if wl.startswith('\u2192') and 'same \u03b4' in wl:
+                    # Extract contra_rows from "→ row 5, row 6, row 7, row 9 have same δ."
+                    contra_m = re.findall(r'row \d+', wl)
+                    contra_rows = contra_m if contra_m else []
+                    i += 1
+                    break
+                gradient_links.append(wl)
+                i += 1
+            else:
+                contra_rows = []
+            # Collect distinctness header + lines
+            distinctness = []
+            if i < len(lines) and 'pairwise distinct' in lines[i].strip():
+                i += 1
+                while i < len(lines):
+                    dl = lines[i].strip()
+                    if dl.startswith('r') and '\u2194' in dl:
+                        distinctness.append(dl)
+                        i += 1
+                    else:
+                        break
+            # Skip "4 distinct pairs..." conclusion line
+            if i < len(lines) and 'Contradiction' in lines[i].strip():
+                i += 1
+            steps.append({
+                'type': 'gradient_chain',
+                'step': step_num,
+                'rows': rows,
+                'gradient_links': gradient_links,
+                'contra_rows': contra_rows,
+                'distinctness': distinctness,
+            })
             continue
 
         # Branch step

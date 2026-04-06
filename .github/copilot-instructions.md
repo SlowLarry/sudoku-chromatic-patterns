@@ -7,7 +7,7 @@ This project performs an exhaustive search for **minimal 4-chromatic patterns** 
 ### Current state (completed)
 
 - **Pattern search**: exhaustive search completed for N=10 through N=16
-- **Proof engine**: Rust-based, generates proofs using 14 proof techniques (including Guardian)
+- **Proof engine**: Rust-based, generates proofs using 15 proof techniques (including Guardian, PermutationFixpoint)
 - **Web viewer**: interactive viewer with proof step highlighting, deployed via GitHub Pages
 - **Pattern counts**: N=10 (32), N=12 (60), N=13 (832), N=14 (620), N=15 (4,507), N=16 (19,750) = 25,801 total
 
@@ -30,7 +30,7 @@ This project performs an exhaustive search for **minimal 4-chromatic patterns** 
 | Component | Language | Location | Purpose |
 |-----------|----------|----------|---------|
 | Pattern search | Python | `src/sudoku_graph_searches/` | Exhaustive enumeration of minimal 4-chromatic patterns |
-| Proof engine | Rust | `rust/src/proof.rs` (~3200 lines) | Generate human-readable non-3-colorability proofs |
+| Proof engine | Rust | `rust/src/proof.rs` (~3800 lines) | Generate human-readable non-3-colorability proofs |
 | Export pipeline | Python | `export_json.py` | Parse proof text → JSON for web viewer |
 | Web viewer | JS/CSS/HTML | `web/app.js`, `web/index.html`, `web/styles.css` | Interactive proof visualization |
 | Pattern data | JSON | `web/data/patterns.json` (~43 MB) | All patterns with proofs for the web viewer |
@@ -48,7 +48,7 @@ This project performs an exhaustive search for **minimal 4-chromatic patterns** 
 
 ## Proof engine architecture
 
-### ProofNode enum (14 proof techniques)
+### ProofNode enum (15 proof techniques)
 
 **Terminal contradictions** (size 1):
 - `K4Contradiction` — 4-clique found
@@ -65,6 +65,7 @@ This project performs an exhaustive search for **minimal 4-chromatic patterns** 
 - `CircularLadder` — 3-prism satellites forced distinct + continue
 - `SetEquivalence` — multiset equation deduction (merge, virtual edges, or contradiction); requires ≥2 houses per side (1-house SET = diamond)
 - `ParityTransportDeduction` — house constraint forces merge/edge + continue
+- `PermutationFixpoint` — 4 full houses with pairwise column collisions → parity argument → transposition fixpoint merge (see below)
 - `Branch` — Hajós-style case analysis (same_color / diff_color)
 - `Failed` — proof search exhausted
 
@@ -72,9 +73,25 @@ This project performs an exhaustive search for **minimal 4-chromatic patterns** 
 
 1. **Optimal proof** (`find_best_proof`): tries all techniques, minimizes total proof size via iterative deepening on branch count. Checks terminals first (K₄, odd wheel, parity, bridged hex, X-wing), then tries all diamonds/ladders/SET/branches recursively.
 
-2. **Greedy proof** (`find_greedy_proof`): strict priority order for difficulty classification. Priority: K₄ → Parity → Diamond → Guardian → SET → Circular Ladder → Bridged Hexagon → X-wing → Odd Wheel → Branch. First applicable technique is always taken.
+2. **Greedy proof** (`find_greedy_proof`): strict priority order for difficulty classification. Priority: K₄ → trivalue oddagon → parity chain → Diamond → Guardian → SET → parity chain deduction → PermutationFixpoint → Circular Ladder → Odd Wheel → Branch. First applicable technique is always taken.
 
 `prove_pattern(cells)` runs both and returns `ProofResult` with the optimal proof tree + greedy difficulty metrics.
+
+### PermutationFixpoint technique
+
+Detects 4 full houses (rows or columns, each with exactly 3 pattern cells) where all 6 pairs of houses share a column (or row). This forces 4 distinct permutations of 3 colors, which split into exactly two parity classes (even/odd). Parallel-linked pairs must be same parity; with only 3 permutations per class, pigeonhole forces the two pairs into opposite classes. A cross-pair sharing 2 positions then has a transposition as its relative permutation, yielding a fixpoint (two cells forced to the same color → merge).
+
+Proof text follows the explicit logical chain:
+1. List all 4 houses and their cells
+2. Show parallel links (which pairs are same-parity)
+3. "All 6 pairs share a column → 4 distinct permutations."
+4. "{pair1} same parity; {pair2} same parity."
+5. "Only 3 per parity class → opposite classes."
+6. "row X and row Y share 2 columns: [explicit cells]."
+7. "Opposite parity → relative permutation is a transposition."
+8. "Fixpoint: color(A) = color(B). Identify."
+
+Uses `TECH_PARITY` flag, counted under `parity_transport_count`.
 
 ### Multi-proof support
 
@@ -281,3 +298,13 @@ wsl bash -c "source `$HOME/.cargo/env; cd '${env:WSL_DIR}'; ./rust/target/releas
 - X-wing trace lines have a specific format parsed by both `export_json.py` and `web/app.js` (`parseXwingTraceLine`). Changes must be synchronized.
 - The web viewer is vanilla JS with no build step or framework.
 - CSS uses dark theme colors (`#0d1117` background, `#c9d1d9` text, `#1f6feb` accent).
+
+### Proof explicitness requirements
+
+Proofs must be **fully explicit** — every logical step the reader needs to verify must be spelled out in the proof text. No "black box" techniques that just state a conclusion without showing the reasoning.
+
+- Each proof step must trace its logical chain so a human reader can follow and verify it
+- Parity-based arguments must state: which structures collide, why permutations are distinct, which pairs share parity, why pigeonhole forces opposite classes, and what the resulting fixpoint/contradiction is
+- X-wing traces must show each case with the full chain of forced colorings
+- Avoid techniques that merely restate the problem (e.g., "this house system has no valid 3-coloring" without showing why)
+- When adding or modifying a technique, the proof text quality matters as much as correctness — the output is the product
