@@ -27,39 +27,36 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Greedy proof (diamond+parity) ===
+=== Greedy proof (parity) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Diamond {r6c6, r7c6, r8c6, r9c5} (spine r7c6—r8c6).
-      → color(r6c6) = color(r9c5). Identify.
-  2.  Diamond {r6c8, r6c3, [r6c6=r9c5], r9c3} (spine r6c3—[r6c6=r9c5]).
-      → color(r6c8) = color(r9c3). Identify.
-  3.  Diamond {[r6c8=r9c3], r5c9, r9c9, r7c9} (spine r5c9—r9c9).
-      → color([r6c8=r9c3]) = color(r7c9). Identify.
-  4.  Gradient chain:
+  1.  Gradient chain (with identification):
       For each row, δ = color(B) − color(A) mod 3, where A and B are the first and second listed cells.
       δ ∈ {−1, +1}; 3 color pairs per δ value.
-      row 6: [r6c6=r9c5], [r6c8=r7c9=r9c3] (also r6c3)
+      row 6: r6c6, r6c8 (also r6c3)
       row 8: r8c6, r8c7 (also r8c3)
-      row 7: r7c6, [r6c8=r7c9=r9c3]
-      row 9: [r6c6=r9c5], r9c9 (also [r6c8=r7c9=r9c3])
-      Rows 6 and 8: r6c6↔r8c6 (col 6), r6c8↔r8c7 (box 6), r6c3↔r8c3 (col 3) — derangement → same δ.
+      row 7: r7c6, r7c9
+      row 9: r9c5, r9c9 (also r9c3)
       Rows 8 and 9: r8c6↔r9c5 (box 8), r8c7↔r9c9 (box 9), r8c3↔r9c3 (col 3) — derangement → same δ.
       Rows 8, 7, 9: {r8c6, r7c6, r9c5} in box 8, {r8c7, r7c9, r9c9} in box 9 — circular ladder of length 3 → same δ.
-      → row 6, row 7, row 8, row 9 have same δ. 4 rows; only 3 color pairs per δ value.
-      row 6, row 7, row 8, row 9 pairwise distinct:
-        r6↔r7: r6c6↔r7c6 (col 6) → pairs differ.
-        r6↔r8: r6c6↔r8c6 (col 6) → pairs differ.
-        r6↔r9: r6c8↔r9c9 (box 6) → pairs differ.
-        r7↔r8: r7c6↔r8c6 (col 6) → pairs differ.
-        r7↔r9: r7c6↔r9c5 (box 8) → pairs differ.
-        r8↔r9: r8c6↔r9c5 (box 8) → pairs differ.
-      4 distinct pairs, only 3 per δ class. Contradiction.
+      Rows 6 and 8: r6c6↔r8c6 (col 6), r6c3↔r8c3 (col 3) — 2 of 3 positions.
+        Relative permutation is 3-cycle (same δ) or transposition (opposite δ, fixing r6c8 and r8c7).
+      Case 1 (same δ): row 6, row 7, row 8, row 9 have same δ. 4 rows; only 3 color pairs per δ value.
+        row 6, row 7, row 8, row 9 pairwise distinct:
+          r6↔r7: r6c6↔r7c6 (col 6) → pairs differ.
+          r6↔r8: r6c6↔r8c6 (col 6) → pairs differ.
+          r6↔r9: r6c3↔r9c3 (col 3) → same δ, pairs differ.
+          r7↔r8: r7c6↔r8c6 (col 6) → pairs differ.
+          r7↔r9: r7c6↔r9c5 (box 8) → pairs differ.
+          r8↔r9: r8c6↔r9c5 (box 8) → pairs differ.
+        4 distinct pairs, only 3 per δ class. Contradiction.
+      Case 2 (opposite δ): color(r6c8) = color(r8c7). Identify.
+  2.  K₄ on {r5c9, [r6c8=r8c7], r7c9, r9c9}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_diamond] (ladder+xwing) ===
+=== Alt proof 1/1 [no_parity] (ladder+xwing) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
@@ -90,7 +87,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 2/60: PROVED cells=12 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=1 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=3
+pattern 2/60: PROVED cells=12 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=1 set_equivalences=0 parity_transports=0 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=1 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=3
 000000000000000000000000000000000000000000001001001010001001000001010001010001001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -102,7 +99,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Greedy proof (diamond) ===
+=== Greedy proof (diamond+parity) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
@@ -110,13 +107,34 @@ Proof of non-3-colorability:
       → color(r6c3) = color(r9c2). Identify.
   2.  Diamond {r6c8, [r6c3=r9c2], r6c6, r9c6} (spine [r6c3=r9c2]—r6c6).
       → color(r6c8) = color(r9c6). Identify.
-  3.  Diamond {[r6c8=r9c6], r5c9, r9c9, r8c9} (spine r5c9—r9c9).
+  3.  Gradient chain (with identification):
+      For each row, δ = color(B) − color(A) mod 3, where A and B are the first and second listed cells.
+      δ ∈ {−1, +1}; 3 color pairs per δ value.
+      row 6: [r6c3=r9c2], r6c6 (also [r6c8=r9c6])
+      row 9: [r6c3=r9c2], [r6c8=r9c6] (also r9c9)
+      row 7: r7c3, r7c6
+      row 8: r8c3, r8c5 (also r8c9)
+      Rows 8 and 9: r8c3↔r9c2 (box 7), r8c5↔r9c6 (box 8), r8c9↔r9c9 (col 9) — derangement → same δ.
+      Rows 9, 7, 8: {r9c2, r7c3, r8c3} in box 7, {r9c6, r7c6, r8c5} in box 8 — circular ladder of length 3 → same δ.
+      Rows 6 and 9: r6c6↔r9c6 (col 6), r6c8↔r9c9 (box 6) — 2 of 3 positions.
+        Relative permutation is 3-cycle (same δ) or transposition (opposite δ, fixing [r6c3=r9c2] and [r6c3=r9c2]).
+      Case 1 (same δ): row 6, row 7, row 8, row 9 have same δ. 4 rows; only 3 color pairs per δ value.
+        row 6, row 7, row 8, row 9 pairwise distinct:
+          r6↔r7: r6c3↔r7c3 (col 3) → pairs differ.
+          r6↔r8: r6c3↔r8c3 (col 3) → pairs differ.
+          r6↔r9: r6c6↔r9c6 (col 6) → pairs differ.
+          r7↔r8: r7c3↔r8c3 (col 3) → pairs differ.
+          r7↔r9: r7c3↔r9c2 (box 7) → pairs differ.
+          r8↔r9: r8c3↔r9c2 (box 7) → pairs differ.
+        4 distinct pairs, only 3 per δ class. Contradiction.
+      Case 2 (opposite δ): color([r6c3=r9c2]) = color([r6c3=r9c2]). Identify.
+  4.  Diamond {[r6c8=r9c6], r5c9, r9c9, r8c9} (spine r5c9—r9c9).
       → color([r6c8=r9c6]) = color(r8c9). Identify.
-  4.  Diamond {r6c6, [r6c3=r9c2], [r6c8=r8c9=r9c6], r8c3} (spine [r6c3=r9c2]—[r6c8=r8c9=r9c6]).
-      → color(r6c6) = color(r8c3). Identify.
-  5.  K₄ on {[r6c6=r8c3], [r6c8=r8c9=r9c6], r7c6, r8c5}. Contradiction.
-
-  Therefore the pattern is not 3-colorable. □
+  5.  Diamond {r6c6, [r6c8=r8c9=r9c6], r7c6, r8c5} (spine [r6c8=r8c9=r9c6]—r7c6).
+      → color(r6c6) = color(r8c5). Identify.
+  6.  Diamond {r7c6, [r6c6=r8c5], [r6c8=r8c9=r9c6], r8c3} (spine [r6c6=r8c5]—[r6c8=r8c9=r9c6]).
+      → color(r7c6) = color(r8c3). Identify.
+      (proof search failed — depth limit reached)
 
 === Alt proof 1/1 [no_hexagon] (xwing) ===
 Proof of non-3-colorability:
@@ -1921,7 +1939,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 24/60: PROVED cells=12 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=2 greedy_parity_transports=2 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
+pattern 24/60: PROVED cells=12 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=2 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000001001001001001010000000000001010001010001001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -1950,45 +1968,53 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Greedy proof (diamond+SET+parity) ===
+=== Greedy proof (parity) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  SET: {row 5, row 6, row 8} − {col 3, col 6, col 9}.
-      Remainder: {r6c8, r8c5} = {r9c6, r9c9}.
-      → Both sides forced all-distinct. Virtual edges added.
-  2.  SET: {row 5, row 6, row 9} − {col 3, col 6, col 9}.
-      Remainder: {r6c8, r9c2} = {r8c3, r8c9}.
-      → Both sides forced all-distinct. Virtual edges added.
-  3.  Permutation fixpoint:
-      row 5 {r5c3, r5c6, r5c9}
-      row 6 {r6c3, r6c6, r6c8}
-      row 8 {r8c3, r8c5, r8c9}
-      row 9 {r9c2, r9c6, r9c9}
-      Parallel links: row 5↔row 6 (col, col, box); row 8↔row 9 (box, box, col)
-      All 6 pairs share a column → 4 distinct permutations.
-      {row 5, row 6} same parity; {row 8, row 9} same parity.
-      Only 3 per parity class → opposite classes.
-      row 5 and row 8 share 2 columns: r5c3↔r8c3 (col 3), r5c9↔r8c9 (col 9).
-      Opposite parity → relative permutation is a transposition.
-      Fixpoint: color(r5c6) = color(r8c5). Identify.
-  4.  Diamond {r5c9, r5c3, [r5c6=r8c5], r8c3} (spine r5c3—[r5c6=r8c5]).
-      → color(r5c9) = color(r8c3). Identify.
-  5.  Diamond {[r5c6=r8c5], r5c3, [r5c9=r8c3], r6c3} (spine r5c3—[r5c9=r8c3]).
-      → color([r5c6=r8c5]) = color(r6c3). Identify.
-  6.  Diamond {r5c3, [r5c6=r6c3=r8c5], [r5c9=r8c3], r6c8} (spine [r5c6=r6c3=r8c5]—[r5c9=r8c3]).
-      → color(r5c3) = color(r6c8). Identify.
-  7.  Parity transport:
-      row 5 {[r5c3=r6c8], [r5c6=r6c3=r8c5], [r5c9=r8c3]}
-      row 6 {[r5c6=r6c3=r8c5], r6c6, [r5c3=r6c8]}
-      row 8 {[r5c9=r8c3], [r5c6=r6c3=r8c5], r8c9}
-      row 9 {r9c2, r9c6, r9c9}
-      Parallel links: row 5↔row 6 (col, col, box); row 5↔row 9 (box, col, col); row 8↔row 9 (box, box, col)
-      → same permutation parity.
-      Each pair shares a column → distinct permutations.
-      4 same-parity permutations from 3 available → pigeonhole contradiction.
-
-  Therefore the pattern is not 3-colorable. □
+  1.  Gradient chain (with identification):
+      For each row, δ = color(B) − color(A) mod 3, where A and B are the first and second listed cells.
+      δ ∈ {−1, +1}; 3 color pairs per δ value.
+      row 6: r6c3, r6c6 (also r6c8)
+      row 5: r5c3, r5c6 (also r5c9)
+      row 8: r8c3, r8c5 (also r8c9)
+      row 9: r9c2, r9c6 (also r9c9)
+      Rows 5 and 6: r5c3↔r6c3 (col 3), r5c6↔r6c6 (col 6), r5c9↔r6c8 (box 6) — derangement → same δ.
+      Rows 8 and 9: r8c3↔r9c2 (box 7), r8c5↔r9c6 (box 8), r8c9↔r9c9 (col 9) — derangement → same δ.
+      Rows 5 and 8: r5c3↔r8c3 (col 3), r5c9↔r8c9 (col 9) — 2 of 3 positions.
+        Relative permutation is 3-cycle (same δ) or transposition (opposite δ, fixing r5c6 and r8c5).
+      Case 1 (same δ): row 5, row 6, row 8, row 9 have same δ. 4 rows; only 3 color pairs per δ value.
+        row 5, row 6, row 8, row 9 pairwise distinct:
+          r5↔r6: r5c3↔r6c3 (col 3) → pairs differ.
+          r5↔r8: r5c3↔r8c3 (col 3) → pairs differ.
+          r5↔r9: r5c6↔r9c6 (col 6) → pairs differ.
+          r6↔r8: r6c3↔r8c3 (col 3) → pairs differ.
+          r6↔r9: r6c6↔r9c6 (col 6) → pairs differ.
+          r8↔r9: r8c3↔r9c2 (box 7) → pairs differ.
+        4 distinct pairs, only 3 per δ class. Contradiction.
+      Case 2 (opposite δ): color(r5c6) = color(r8c5). Identify.
+  2.  Gradient chain (with identification):
+      For each row, δ = color(B) − color(A) mod 3, where A and B are the first and second listed cells.
+      δ ∈ {−1, +1}; 3 color pairs per δ value.
+      row 6: r6c3, r6c6 (also r6c8)
+      row 5: r5c3, [r5c6=r8c5] (also r5c9)
+      row 8: r8c3, [r5c6=r8c5] (also r8c9)
+      row 9: r9c2, r9c6 (also r9c9)
+      Rows 5 and 6: r5c3↔r6c3 (col 3), r5c6↔r6c6 (col 6), r5c9↔r6c8 (box 6) — derangement → same δ.
+      Rows 8 and 9: r8c3↔r9c2 (box 7), r8c5↔r9c6 (box 8), r8c9↔r9c9 (col 9) — derangement → same δ.
+      Rows 5 and 8: r5c3↔r8c3 (col 3), r5c9↔r8c9 (col 9) — 2 of 3 positions.
+        Relative permutation is 3-cycle (same δ) or transposition (opposite δ, fixing [r5c6=r8c5] and [r5c6=r8c5]).
+      Case 1 (same δ): row 5, row 6, row 8, row 9 have same δ. 4 rows; only 3 color pairs per δ value.
+        row 5, row 6, row 8, row 9 pairwise distinct:
+          r5↔r6: r5c3↔r6c3 (col 3) → pairs differ.
+          r5↔r8: r5c3↔r8c3 (col 3) → pairs differ.
+          r5↔r9: r5c6↔r9c6 (col 6) → pairs differ.
+          r6↔r8: r6c3↔r8c3 (col 3) → pairs differ.
+          r6↔r9: r6c6↔r9c6 (col 6) → pairs differ.
+          r8↔r9: r8c3↔r9c2 (box 7) → pairs differ.
+        4 distinct pairs, only 3 per δ class. Contradiction.
+      Case 2 (opposite δ): color([r5c6=r8c5]) = color([r5c6=r8c5]). Identify.
+      (proof search failed — depth limit reached)
 
 pattern 25/60: PROVED cells=12 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=1 pigeonhole_xwings=0 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=1 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
 000000000000000000000000000000000000001001001001010010000000000001001001010001010
@@ -2023,23 +2049,32 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 26/60: PROVED cells=12 depth=1 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=1 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=1 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=3
+pattern 26/60: PROVED cells=12 depth=1 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=1 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=2 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=4
 000000000000000000000000000000000000001001001001010010000000000001001100010001010
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Permutation fixpoint:
-      row 5 {r5c3, r5c6, r5c9}
-      row 6 {r6c3, r6c5, r6c8}
-      row 8 {r8c3, r8c6, r8c7}
-      row 9 {r9c2, r9c6, r9c8}
-      Parallel links: row 5↔row 6 (col, box, box); row 8↔row 9 (box, col, box)
-      All 6 pairs share a column → 4 distinct permutations.
-      {row 5, row 6} same parity; {row 8, row 9} same parity.
-      Only 3 per parity class → opposite classes.
-      row 5 and row 8 share 2 columns: r5c3↔r8c3 (col 3), r5c6↔r8c6 (col 6).
-      Opposite parity → relative permutation is a transposition.
-      Fixpoint: color(r5c9) = color(r8c7). Identify.
+  1.  Gradient chain (with identification):
+      For each row, δ = color(B) − color(A) mod 3, where A and B are the first and second listed cells.
+      δ ∈ {−1, +1}; 3 color pairs per δ value.
+      row 6: r6c3, r6c5 (also r6c8)
+      row 5: r5c3, r5c6 (also r5c9)
+      row 8: r8c3, r8c6 (also r8c7)
+      row 9: r9c2, r9c6 (also r9c8)
+      Rows 5 and 6: r5c3↔r6c3 (col 3), r5c6↔r6c5 (box 5), r5c9↔r6c8 (box 6) — derangement → same δ.
+      Rows 8 and 9: r8c3↔r9c2 (box 7), r8c6↔r9c6 (col 6), r8c7↔r9c8 (box 9) — derangement → same δ.
+      Rows 5 and 8: r5c3↔r8c3 (col 3), r5c6↔r8c6 (col 6) — 2 of 3 positions.
+        Relative permutation is 3-cycle (same δ) or transposition (opposite δ, fixing r5c9 and r8c7).
+      Case 1 (same δ): row 5, row 6, row 8, row 9 have same δ. 4 rows; only 3 color pairs per δ value.
+        row 5, row 6, row 8, row 9 pairwise distinct:
+          r5↔r6: r5c3↔r6c3 (col 3) → pairs differ.
+          r5↔r8: r5c3↔r8c3 (col 3) → pairs differ.
+          r5↔r9: r5c6↔r9c6 (col 6) → pairs differ.
+          r6↔r8: r6c3↔r8c3 (col 3) → pairs differ.
+          r6↔r9: r6c8↔r9c8 (col 8) → same δ, pairs differ.
+          r8↔r9: r8c3↔r9c2 (box 7) → pairs differ.
+        4 distinct pairs, only 3 per δ class. Contradiction.
+      Case 2 (opposite δ): color(r5c9) = color(r8c7). Identify.
   2.  Pigeonhole X-wing on {r5c6, [r5c9=r8c7], r6c8, r6c5}:
       Diagonals: {r5c6, r6c8} and {[r5c9=r8c7], r6c5} (non-adjacent).
       By pigeonhole, one diagonal must share a color.
@@ -2061,35 +2096,88 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Greedy proof (diamond+parity) ===
+=== Greedy proof (parity) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Permutation fixpoint:
-      row 5 {r5c3, r5c6, r5c9}
-      row 6 {r6c3, r6c5, r6c8}
-      row 8 {r8c3, r8c6, r8c7}
-      row 9 {r9c2, r9c6, r9c8}
-      Parallel links: row 5↔row 6 (col, box, box); row 8↔row 9 (box, col, box)
-      All 6 pairs share a column → 4 distinct permutations.
-      {row 5, row 6} same parity; {row 8, row 9} same parity.
-      Only 3 per parity class → opposite classes.
-      row 5 and row 8 share 2 columns: r5c3↔r8c3 (col 3), r5c6↔r8c6 (col 6).
-      Opposite parity → relative permutation is a transposition.
-      Fixpoint: color(r5c9) = color(r8c7). Identify.
+  1.  Gradient chain (with identification):
+      For each row, δ = color(B) − color(A) mod 3, where A and B are the first and second listed cells.
+      δ ∈ {−1, +1}; 3 color pairs per δ value.
+      row 6: r6c3, r6c5 (also r6c8)
+      row 5: r5c3, r5c6 (also r5c9)
+      row 8: r8c3, r8c6 (also r8c7)
+      row 9: r9c2, r9c6 (also r9c8)
+      Rows 5 and 6: r5c3↔r6c3 (col 3), r5c6↔r6c5 (box 5), r5c9↔r6c8 (box 6) — derangement → same δ.
+      Rows 8 and 9: r8c3↔r9c2 (box 7), r8c6↔r9c6 (col 6), r8c7↔r9c8 (box 9) — derangement → same δ.
+      Rows 5 and 8: r5c3↔r8c3 (col 3), r5c6↔r8c6 (col 6) — 2 of 3 positions.
+        Relative permutation is 3-cycle (same δ) or transposition (opposite δ, fixing r5c9 and r8c7).
+      Case 1 (same δ): row 5, row 6, row 8, row 9 have same δ. 4 rows; only 3 color pairs per δ value.
+        row 5, row 6, row 8, row 9 pairwise distinct:
+          r5↔r6: r5c3↔r6c3 (col 3) → pairs differ.
+          r5↔r8: r5c3↔r8c3 (col 3) → pairs differ.
+          r5↔r9: r5c6↔r9c6 (col 6) → pairs differ.
+          r6↔r8: r6c3↔r8c3 (col 3) → pairs differ.
+          r6↔r9: r6c8↔r9c8 (col 8) → same δ, pairs differ.
+          r8↔r9: r8c3↔r9c2 (box 7) → pairs differ.
+        4 distinct pairs, only 3 per δ class. Contradiction.
+      Case 2 (opposite δ): color(r5c9) = color(r8c7). Identify.
+  2.  Gradient chain (with identification):
+      For each row, δ = color(B) − color(A) mod 3, where A and B are the first and second listed cells.
+      δ ∈ {−1, +1}; 3 color pairs per δ value.
+      row 6: r6c3, r6c5 (also r6c8)
+      row 5: r5c3, r5c6 (also [r5c9=r8c7])
+      row 8: r8c3, r8c6 (also [r5c9=r8c7])
+      row 9: r9c2, r9c6 (also r9c8)
+      Rows 5 and 6: r5c3↔r6c3 (col 3), r5c6↔r6c5 (box 5), r5c9↔r6c8 (box 6) — derangement → same δ.
+      Rows 8 and 9: r8c3↔r9c2 (box 7), r8c6↔r9c6 (col 6), r8c7↔r9c8 (box 9) — derangement → same δ.
+      Rows 5 and 8: r5c3↔r8c3 (col 3), r5c6↔r8c6 (col 6) — 2 of 3 positions.
+        Relative permutation is 3-cycle (same δ) or transposition (opposite δ, fixing [r5c9=r8c7] and [r5c9=r8c7]).
+      Case 1 (same δ): row 5, row 6, row 8, row 9 have same δ. 4 rows; only 3 color pairs per δ value.
+        row 5, row 6, row 8, row 9 pairwise distinct:
+          r5↔r6: r5c3↔r6c3 (col 3) → pairs differ.
+          r5↔r8: r5c3↔r8c3 (col 3) → pairs differ.
+          r5↔r9: r5c6↔r9c6 (col 6) → pairs differ.
+          r6↔r8: r6c3↔r8c3 (col 3) → pairs differ.
+          r6↔r9: r6c8↔r9c8 (col 8) → same δ, pairs differ.
+          r8↔r9: r8c3↔r9c2 (box 7) → pairs differ.
+        4 distinct pairs, only 3 per δ class. Contradiction.
+      Case 2 (opposite δ): color([r5c9=r8c7]) = color([r5c9=r8c7]). Identify.
+      (proof search failed — depth limit reached)
+
+=== Alt proof 1/2 [no_xwing] (diamond+parity) ===
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Gradient chain (with identification):
+      For each row, δ = color(B) − color(A) mod 3, where A and B are the first and second listed cells.
+      δ ∈ {−1, +1}; 3 color pairs per δ value.
+      row 6: r6c3, r6c5 (also r6c8)
+      row 5: r5c3, r5c6 (also r5c9)
+      row 8: r8c3, r8c6 (also r8c7)
+      row 9: r9c2, r9c6 (also r9c8)
+      Rows 5 and 6: r5c3↔r6c3 (col 3), r5c6↔r6c5 (box 5), r5c9↔r6c8 (box 6) — derangement → same δ.
+      Rows 8 and 9: r8c3↔r9c2 (box 7), r8c6↔r9c6 (col 6), r8c7↔r9c8 (box 9) — derangement → same δ.
+      Rows 5 and 8: r5c3↔r8c3 (col 3), r5c6↔r8c6 (col 6) — 2 of 3 positions.
+        Relative permutation is 3-cycle (same δ) or transposition (opposite δ, fixing r5c9 and r8c7).
+      Case 1 (same δ): row 5, row 6, row 8, row 9 have same δ. 4 rows; only 3 color pairs per δ value.
+        row 5, row 6, row 8, row 9 pairwise distinct:
+          r5↔r6: r5c3↔r6c3 (col 3) → pairs differ.
+          r5↔r8: r5c3↔r8c3 (col 3) → pairs differ.
+          r5↔r9: r5c6↔r9c6 (col 6) → pairs differ.
+          r6↔r8: r6c3↔r8c3 (col 3) → pairs differ.
+          r6↔r9: r6c8↔r9c8 (col 8) → same δ, pairs differ.
+          r8↔r9: r8c3↔r9c2 (box 7) → pairs differ.
+        4 distinct pairs, only 3 per δ class. Contradiction.
+      Case 2 (opposite δ): color(r5c9) = color(r8c7). Identify.
   2.  Diamond {r5c6, r5c3, [r5c9=r8c7], r8c3} (spine r5c3—[r5c9=r8c7]).
       → color(r5c6) = color(r8c3). Identify.
-  3.  Diamond {[r5c9=r8c7], r5c3, [r5c6=r8c3], r6c3} (spine r5c3—[r5c6=r8c3]).
-      → color([r5c9=r8c7]) = color(r6c3). Identify.
-  4.  Diamond {r5c3, [r5c6=r8c3], [r5c9=r6c3=r8c7], r6c5} (spine [r5c6=r8c3]—[r5c9=r6c3=r8c7]).
-      → color(r5c3) = color(r6c5). Identify.
-  5.  Diamond {[r5c6=r8c3], [r5c3=r6c5], [r5c9=r6c3=r8c7], r6c8} (spine [r5c3=r6c5]—[r5c9=r6c3=r8c7]).
+  3.  Diamond {[r5c6=r8c3], r6c3, r6c5, r6c8} (spine r6c3—r6c5).
       → color([r5c6=r8c3]) = color(r6c8). Identify.
-  6.  K₄ on {[r5c6=r6c8=r8c3], r9c2, r9c6, r9c8}. Contradiction.
+  4.  K₄ on {[r5c6=r6c8=r8c3], r9c2, r9c6, r9c8}. Contradiction.
 
   Therefore the pattern is not 3-colorable. □
 
-=== Alt proof 1/1 [no_parity] (diamond+xwing+branch) ===
+=== Alt proof 2/2 [no_parity] (diamond+xwing+branch) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
@@ -2622,7 +2710,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 33/60: PROVED cells=12 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=1 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=2
+pattern 33/60: PROVED cells=12 depth=0 diamonds=0 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=1 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=3
 000000000000000000000000000000000001000000001001001010000001001000010010001001100
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -2651,7 +2739,35 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Greedy proof (diamond+parity) ===
+=== Greedy proof (parity) ===
+Proof of non-3-colorability:
+  Assume for contradiction it is 3-colorable.
+
+  1.  Gradient chain (with identification):
+      For each row, δ = color(B) − color(A) mod 3, where A and B are the first and second listed cells.
+      δ ∈ {−1, +1}; 3 color pairs per δ value.
+      row 6: r6c6, r6c8 (also r6c3)
+      row 9: r9c6, r9c7 (also r9c3)
+      row 7: r7c6, r7c9
+      row 8: r8c5, r8c8
+      Rows 9, 7, 8: {r9c6, r7c6, r8c5} in box 8, {r9c7, r7c9, r8c8} in box 9 — circular ladder of length 3 → same δ.
+      Rows 6 and 9: r6c6↔r9c6 (col 6), r6c3↔r9c3 (col 3) — 2 of 3 positions.
+        Relative permutation is 3-cycle (same δ) or transposition (opposite δ, fixing r6c8 and r9c7).
+      Case 1 (same δ): row 6, row 7, row 8, row 9 have same δ. 4 rows; only 3 color pairs per δ value.
+        row 6, row 7, row 8, row 9 pairwise distinct:
+          r6↔r7: r6c6↔r7c6 (col 6) → pairs differ.
+          r6↔r8: r6c8↔r8c8 (col 8) → pairs differ.
+          r6↔r9: r6c6↔r9c6 (col 6) → pairs differ.
+          r7↔r8: r7c6↔r8c5 (box 8) → pairs differ.
+          r7↔r9: r7c6↔r9c6 (col 6) → pairs differ.
+          r8↔r9: r8c5↔r9c6 (box 8) → pairs differ.
+        4 distinct pairs, only 3 per δ class. Contradiction.
+      Case 2 (opposite δ): color(r6c8) = color(r9c7). Identify.
+  2.  K₄ on {r4c9, r5c9, [r6c8=r9c7], r7c9}. Contradiction.
+
+  Therefore the pattern is not 3-colorable. □
+
+=== Alt proof 1/1 [no_xwing] (diamond+parity) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
@@ -3608,7 +3724,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-pattern 46/60: PROVED cells=12 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=0 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=4
+pattern 46/60: PROVED cells=12 depth=2 diamonds=2 odd_wheels=0 circular_ladders=0 bridged_hexagons=0 set_equivalences=0 parity_transports=0 pigeonhole_xwings=1 guardians=0 branches=0 complete=true greedy_branches=0 greedy_odd_wheels=0 greedy_circular_ladders=0 greedy_bridged_hexagons=0 greedy_set_equivalences=0 greedy_parity_transports=1 greedy_pigeonhole_xwings=0 greedy_guardians=0 proofs=4
 000000000000000000000001001000000000000000000001001010001000001001000010010001001
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
@@ -3639,7 +3755,7 @@ Proof of non-3-colorability:
 
   Therefore the pattern is not 3-colorable. □
 
-=== Greedy proof (diamond) ===
+=== Greedy proof (diamond+parity) ===
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
@@ -3647,13 +3763,35 @@ Proof of non-3-colorability:
       → color(r6c3) = color(r9c2). Identify.
   2.  Diamond {r6c8, [r6c3=r9c2], r6c6, r9c6} (spine [r6c3=r9c2]—r6c6).
       → color(r6c8) = color(r9c6). Identify.
-  3.  Diamond {r6c6, [r6c3=r9c2], [r6c8=r9c6], r9c9} (spine [r6c3=r9c2]—[r6c8=r9c6]).
-      → color(r6c6) = color(r9c9). Identify.
-  4.  Diamond {r3c9, r3c6, [r6c6=r9c9], [r6c8=r9c6]} (spine r3c6—[r6c6=r9c9]).
-      → color(r3c9) = color([r6c8=r9c6]). Identify.
-  5.  K₄ on {[r3c9=r6c8=r9c6], [r6c6=r9c9], r7c9, r8c8}. Contradiction.
-
-  Therefore the pattern is not 3-colorable. □
+  3.  Gradient chain (with identification):
+      For each row, δ = color(B) − color(A) mod 3, where A and B are the first and second listed cells.
+      δ ∈ {−1, +1}; 3 color pairs per δ value.
+      row 6: [r6c3=r9c2], [r6c8=r9c6] (also r6c6)
+      row 9: [r6c3=r9c2], r9c9 (also [r6c8=r9c6])
+      row 7: r7c3, r7c9
+      row 8: r8c3, r8c8
+      Rows 9, 7, 8: {r9c2, r7c3, r8c3} in box 7, {r9c9, r7c9, r8c8} in box 9 — circular ladder of length 3 → same δ.
+      Rows 6 and 9: r6c8↔r9c9 (box 6), r6c6↔r9c6 (col 6) — 2 of 3 positions.
+        Relative permutation is 3-cycle (same δ) or transposition (opposite δ, fixing [r6c3=r9c2] and [r6c3=r9c2]).
+      Case 1 (same δ): row 6, row 7, row 8, row 9 have same δ. 4 rows; only 3 color pairs per δ value.
+        row 6, row 7, row 8, row 9 pairwise distinct:
+          r6↔r7: r6c3↔r7c3 (col 3) → pairs differ.
+          r6↔r8: r6c3↔r8c3 (col 3) → pairs differ.
+          r6↔r9: r6c8↔r9c9 (box 6) → pairs differ.
+          r7↔r8: r7c3↔r8c3 (col 3) → pairs differ.
+          r7↔r9: r7c3↔r9c2 (box 7) → pairs differ.
+          r8↔r9: r8c3↔r9c2 (box 7) → pairs differ.
+        4 distinct pairs, only 3 per δ class. Contradiction.
+      Case 2 (opposite δ): color([r6c3=r9c2]) = color([r6c3=r9c2]). Identify.
+  4.  Diamond {r3c9, r7c9, r9c9, r8c8} (spine r7c9—r9c9).
+      → color(r3c9) = color(r8c8). Identify.
+  5.  Diamond {[r3c9=r8c8], r3c6, [r6c8=r9c6], r6c6} (spine r3c6—[r6c8=r9c6]).
+      → color([r3c9=r8c8]) = color(r6c6). Identify.
+  6.  Diamond {r3c6, [r3c9=r6c6=r8c8], [r6c8=r9c6], r9c9} (spine [r3c9=r6c6=r8c8]—[r6c8=r9c6]).
+      → color(r3c6) = color(r9c9). Identify.
+  7.  Diamond {[r6c8=r9c6], [r3c6=r9c9], [r3c9=r6c6=r8c8], r7c9} (spine [r3c6=r9c9]—[r3c9=r6c6=r8c8]).
+      → color([r6c8=r9c6]) = color(r7c9). Identify.
+      (proof search failed — depth limit reached)
 
 === Alt proof 1/2 [no_diamond] (xwing+branch) ===
 Proof of non-3-colorability:

@@ -2328,6 +2328,440 @@ impl ProofGraph {
         None
     }
 
+    /// Find gradient chain deductions with one "weak" (2-position) link.
+    /// Returns Vec<(keep_vertex, remove_vertex, partial_ProofNode)>.
+    fn find_gradient_chain_deductions(&self) -> Vec<(usize, usize, ProofNode)> {
+        let mut results = Vec::new();
+
+        let mut cell_vertex: Vec<(u8, usize)> = Vec::new();
+        let verts = self.active_verts();
+        for &v in &verts {
+            for &c in &self.labels[v] {
+                cell_vertex.push((c, v));
+            }
+        }
+
+        let mut by_row: [Vec<(u8, usize)>; 9] = Default::default();
+        for &(c, v) in &cell_vertex {
+            let r = c / 9;
+            by_row[r as usize].push((c, v));
+        }
+
+        for s1 in 0u8..3 {
+            for s2 in (s1 + 1)..3 {
+                let s3 = 3 - s1 - s2;
+
+                struct WRow {
+                    row: u8,
+                    v1: usize, v2: usize,
+                    oc1: u8, oc2: u8,
+                    v3: Option<usize>,
+                    oc3: Option<u8>,
+                }
+
+                let mut wrows: Vec<WRow> = Vec::new();
+
+                for row in 0u8..9 {
+                    let cells = &by_row[row as usize];
+                    let mut c_s1: Option<(u8, usize)> = None;
+                    let mut c_s2: Option<(u8, usize)> = None;
+                    let mut c_s3: Option<(u8, usize)> = None;
+                    for &(c, v) in cells {
+                        let col = c % 9;
+                        let stack = col / 3;
+                        if stack == s1 { c_s1 = Some((c, v)); }
+                        if stack == s2 { c_s2 = Some((c, v)); }
+                        if stack == s3 { c_s3 = Some((c, v)); }
+                    }
+                    if let (Some((oc1, v1)), Some((oc2, v2))) = (c_s1, c_s2) {
+                        if v1 != v2 {
+                            wrows.push(WRow {
+                                row, v1, v2, oc1, oc2,
+                                v3: c_s3.map(|(_, v)| v),
+                                oc3: c_s3.map(|(c, _)| c),
+                            });
+                        }
+                    }
+                }
+
+                let n = wrows.len();
+                if n < 4 { continue; }
+
+                // Build strong wind_adj (same as find_gradient_chain)
+                let mut wind_adj: Vec<u32> = vec![0; n];
+
+                // Band cycles (CL3)
+                for band in 0u8..3 {
+                    let band_indices: Vec<usize> = (0..n)
+                        .filter(|&i| wrows[i].row / 3 == band)
+                        .collect();
+                    if band_indices.len() >= 3 {
+                        for ai in 0..band_indices.len() {
+                            for bi in (ai + 1)..band_indices.len() {
+                                for ci in (bi + 1)..band_indices.len() {
+                                    let a = band_indices[ai];
+                                    let b = band_indices[bi];
+                                    let c = band_indices[ci];
+                                    let box_s1a = (wrows[a].oc1 / 9 / 3) * 3 + (wrows[a].oc1 % 9) / 3;
+                                    let box_s1b = (wrows[b].oc1 / 9 / 3) * 3 + (wrows[b].oc1 % 9) / 3;
+                                    let box_s1c = (wrows[c].oc1 / 9 / 3) * 3 + (wrows[c].oc1 % 9) / 3;
+                                    if box_s1a != box_s1b || box_s1a != box_s1c { continue; }
+                                    let box_s2a = (wrows[a].oc2 / 9 / 3) * 3 + (wrows[a].oc2 % 9) / 3;
+                                    let box_s2b = (wrows[b].oc2 / 9 / 3) * 3 + (wrows[b].oc2 % 9) / 3;
+                                    let box_s2c = (wrows[c].oc2 / 9 / 3) * 3 + (wrows[c].oc2 % 9) / 3;
+                                    if box_s2a != box_s2b || box_s2a != box_s2c { continue; }
+                                    let v1s = [wrows[a].v1, wrows[b].v1, wrows[c].v1];
+                                    let v2s = [wrows[a].v2, wrows[b].v2, wrows[c].v2];
+                                    if v1s[0] == v1s[1] || v1s[0] == v1s[2] || v1s[1] == v1s[2] { continue; }
+                                    if v2s[0] == v2s[1] || v2s[0] == v2s[2] || v2s[1] == v2s[2] { continue; }
+                                    wind_adj[a] |= 1 << b; wind_adj[b] |= 1 << a;
+                                    wind_adj[a] |= 1 << c; wind_adj[c] |= 1 << a;
+                                    wind_adj[b] |= 1 << c; wind_adj[c] |= 1 << b;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Derangement links
+                for i in 0..n {
+                    if wrows[i].v3.is_none() { continue; }
+                    for j in (i + 1)..n {
+                        if wrows[j].v3.is_none() { continue; }
+                        let vi3 = wrows[i].v3.unwrap();
+                        let vj3 = wrows[j].v3.unwrap();
+                        let adj_s1 = self.adj[wrows[i].v1] & (1 << wrows[j].v1) != 0;
+                        let adj_s2 = self.adj[wrows[i].v2] & (1 << wrows[j].v2) != 0;
+                        let adj_s3 = self.adj[vi3] & (1 << vj3) != 0;
+                        if adj_s1 && adj_s2 && adj_s3 {
+                            wind_adj[i] |= 1 << j;
+                            wind_adj[j] |= 1 << i;
+                        }
+                    }
+                }
+
+                // Build weak_adj: 2-position links (any 2 of 3 positions adjacent)
+                let mut weak_adj: Vec<u32> = vec![0; n];
+                for i in 0..n {
+                    if wrows[i].v3.is_none() { continue; }
+                    for j in (i + 1)..n {
+                        if wrows[j].v3.is_none() { continue; }
+                        if wind_adj[i] & (1 << j) != 0 { continue; } // already strong
+                        let adj_s1 = self.adj[wrows[i].v1] & (1 << wrows[j].v1) != 0;
+                        let adj_s2 = self.adj[wrows[i].v2] & (1 << wrows[j].v2) != 0;
+                        let adj_s3 = {
+                            let vi3 = wrows[i].v3.unwrap();
+                            let vj3 = wrows[j].v3.unwrap();
+                            self.adj[vi3] & (1 << vj3) != 0
+                        };
+                        let adj_count = adj_s1 as u8 + adj_s2 as u8 + adj_s3 as u8;
+                        if adj_count >= 2 {
+                            weak_adj[i] |= 1 << j;
+                            weak_adj[j] |= 1 << i;
+                        }
+                    }
+                }
+
+                // Combined adjacency
+                let mut combined_adj: Vec<u32> = vec![0; n];
+                for i in 0..n {
+                    combined_adj[i] = wind_adj[i] | weak_adj[i];
+                }
+
+                // Find components in combined graph
+                let mut visited = 0u32;
+                for start in 0..n {
+                    if visited & (1 << start) != 0 { continue; }
+                    if combined_adj[start] == 0 { visited |= 1 << start; continue; }
+
+                    let mut comp = 1u32 << start;
+                    let mut queue = VecDeque::new();
+                    queue.push_back(start);
+                    visited |= 1 << start;
+                    while let Some(u) = queue.pop_front() {
+                        let mut nbrs = combined_adj[u] & !visited;
+                        while nbrs != 0 {
+                            let v = nbrs.trailing_zeros() as usize;
+                            nbrs &= nbrs - 1;
+                            visited |= 1 << v;
+                            comp |= 1 << v;
+                            queue.push_back(v);
+                        }
+                    }
+
+                    if comp.count_ones() < 4 { continue; }
+
+                    // Must have at least one weak edge in this component
+                    let mut weak_i_found = None;
+                    {
+                        let mut m = comp;
+                        while m != 0 {
+                            let i = m.trailing_zeros() as usize;
+                            m &= m - 1;
+                            let wn = weak_adj[i] & comp;
+                            if wn != 0 {
+                                weak_i_found = Some((i, wn.trailing_zeros() as usize));
+                                break;
+                            }
+                        }
+                    }
+                    let (weak_i, weak_j) = match weak_i_found {
+                        Some(pair) => pair,
+                        None => continue,
+                    };
+
+                    let mut members: Vec<usize> = Vec::new();
+                    let mut m = comp;
+                    while m != 0 { members.push(m.trailing_zeros() as usize); m &= m - 1; }
+
+                    // Build pair-distinctness adjacency
+                    let mut dist_adj: Vec<u32> = vec![0; n];
+                    for &i in &members {
+                        for &j in &members {
+                            if i >= j { continue; }
+                            let adj_s1 = self.adj[wrows[i].v1] & (1 << wrows[j].v1) != 0;
+                            let adj_s2 = self.adj[wrows[i].v2] & (1 << wrows[j].v2) != 0;
+                            let adj_s3 = match (wrows[i].v3, wrows[j].v3) {
+                                (Some(vi3), Some(vj3)) => self.adj[vi3] & (1 << vj3) != 0,
+                                _ => false,
+                            };
+                            if adj_s1 || adj_s2 || adj_s3 {
+                                dist_adj[i] |= 1 << j;
+                                dist_adj[j] |= 1 << i;
+                            }
+                        }
+                    }
+
+                    // Try 4-subsets for pigeonhole
+                    let nm = members.len();
+                    let mut found_sub = false;
+                    for a in 0..nm {
+                        if found_sub { break; }
+                        for b in (a + 1)..nm {
+                            if found_sub { break; }
+                            for c in (b + 1)..nm {
+                                if found_sub { break; }
+                                for d in (c + 1)..nm {
+                                    let sub = [members[a], members[b],
+                                               members[c], members[d]];
+                                    let sub_mask: u32 = sub.iter()
+                                        .fold(0u32, |acc, &i| acc | (1 << i));
+
+                                    let all_distinct = sub.iter().all(|&i|
+                                        (dist_adj[i] & sub_mask) == (sub_mask & !(1u32 << i))
+                                    );
+                                    if !all_distinct { continue; }
+
+                                    // Build proof node. BFS from lowest-degree node.
+                                    let mut ordered: Vec<usize> = Vec::new();
+                                    {
+                                        let bfs_start = members.iter()
+                                            .min_by_key(|&&i| (combined_adj[i] & comp).count_ones())
+                                            .copied().unwrap();
+                                        let mut bfs_visited = 0u32;
+                                        let mut bfs_queue = VecDeque::new();
+                                        bfs_queue.push_back(bfs_start);
+                                        bfs_visited |= 1 << bfs_start;
+                                        while let Some(u) = bfs_queue.pop_front() {
+                                            ordered.push(u);
+                                            let mut nbrs = combined_adj[u] & comp & !bfs_visited;
+                                            while nbrs != 0 {
+                                                let v = nbrs.trailing_zeros() as usize;
+                                                nbrs &= nbrs - 1;
+                                                bfs_visited |= 1 << v;
+                                                bfs_queue.push_back(v);
+                                            }
+                                        }
+                                    }
+
+                                    // Build chain_rows in BFS order
+                                    let mut chain_rows: Vec<(String, Vec<String>)> = Vec::new();
+                                    for &idx in &ordered {
+                                        let wr = &wrows[idx];
+                                        let row_name = format!("row {}", wr.row + 1);
+                                        let mut cnames = vec![
+                                            self.vertex_name(wr.v1),
+                                            self.vertex_name(wr.v2),
+                                        ];
+                                        if let Some(v3) = wr.v3 {
+                                            cnames.push(self.vertex_name(v3));
+                                        }
+                                        chain_rows.push((row_name, cnames));
+                                    }
+
+                                    // Helper: house description
+                                    let house_desc = |oc_a: u8, oc_b: u8| -> String {
+                                        let ca = oc_a % 9;
+                                        let cb = oc_b % 9;
+                                        if ca == cb {
+                                            format!("{}\u{2194}{} (col {})", cell_name(oc_a), cell_name(oc_b), ca + 1)
+                                        } else {
+                                            let bx = (oc_a / 9 / 3) * 3 + ca / 3;
+                                            format!("{}\u{2194}{} (box {})", cell_name(oc_a), cell_name(oc_b), bx + 1)
+                                        }
+                                    };
+
+                                    // Build gradient link descriptions (strong links only)
+                                    let mut gradient_links: Vec<String> = Vec::new();
+
+                                    // Derangement links
+                                    for &i in &ordered {
+                                        if wrows[i].v3.is_none() { continue; }
+                                        for &j in &ordered {
+                                            if j <= i { continue; }
+                                            if wrows[j].v3.is_none() { continue; }
+                                            if wind_adj[i] & (1 << j) == 0 { continue; }
+                                            // Only include strong derangement links
+                                            let vi3 = wrows[i].v3.unwrap();
+                                            let vj3 = wrows[j].v3.unwrap();
+                                            let a1 = self.adj[wrows[i].v1] & (1 << wrows[j].v1) != 0;
+                                            let a2 = self.adj[wrows[i].v2] & (1 << wrows[j].v2) != 0;
+                                            let a3 = self.adj[vi3] & (1 << vj3) != 0;
+                                            if a1 && a2 && a3 {
+                                                let d1 = house_desc(wrows[i].oc1, wrows[j].oc1);
+                                                let d2 = house_desc(wrows[i].oc2, wrows[j].oc2);
+                                                let d3 = house_desc(wrows[i].oc3.unwrap(), wrows[j].oc3.unwrap());
+                                                gradient_links.push(format!(
+                                                    "Rows {} and {}: {}, {}, {} \u{2014} derangement \u{2192} same \u{03b4}.",
+                                                    wrows[i].row + 1, wrows[j].row + 1,
+                                                    d1, d2, d3,
+                                                ));
+                                            }
+                                        }
+                                    }
+
+                                    // CL3 links
+                                    for band in 0u8..3 {
+                                        let band_members: Vec<usize> = ordered.iter()
+                                            .filter(|&&i| wrows[i].row / 3 == band)
+                                            .cloned().collect();
+                                        if band_members.len() >= 3 {
+                                            let bm = &band_members;
+                                            let box_s1 = (wrows[bm[0]].oc1 / 9 / 3) * 3 + (wrows[bm[0]].oc1 % 9) / 3;
+                                            let box_s2 = (wrows[bm[0]].oc2 / 9 / 3) * 3 + (wrows[bm[0]].oc2 % 9) / 3;
+                                            let in_same_boxes = bm.iter().all(|&i| {
+                                                let b1 = (wrows[i].oc1 / 9 / 3) * 3 + (wrows[i].oc1 % 9) / 3;
+                                                let b2 = (wrows[i].oc2 / 9 / 3) * 3 + (wrows[i].oc2 % 9) / 3;
+                                                b1 == box_s1 && b2 == box_s2
+                                            });
+                                            if in_same_boxes {
+                                                let box1_cells: Vec<String> = bm.iter().map(|&i|
+                                                    cell_name(wrows[i].oc1)
+                                                ).collect();
+                                                let box2_cells: Vec<String> = bm.iter().map(|&i|
+                                                    cell_name(wrows[i].oc2)
+                                                ).collect();
+                                                let row_names: Vec<String> = bm.iter().map(|&i|
+                                                    format!("{}", wrows[i].row + 1)
+                                                ).collect();
+                                                gradient_links.push(format!(
+                                                    "Rows {}: {{{}}} in box {}, {{{}}} in box {} \u{2014} circular ladder of length 3 \u{2192} same \u{03b4}.",
+                                                    row_names.join(", "),
+                                                    box1_cells.join(", "), box_s1 + 1,
+                                                    box2_cells.join(", "), box_s2 + 1,
+                                                ));
+                                            }
+                                        }
+                                    }
+
+                                    // Build weak link description
+                                    // Recompute adjacency for the weak pair to find merge
+                                    let wk_adj_s1 = self.adj[wrows[weak_i].v1] & (1 << wrows[weak_j].v1) != 0;
+                                    let wk_adj_s2 = self.adj[wrows[weak_i].v2] & (1 << wrows[weak_j].v2) != 0;
+                                    let wk_adj_s3 = {
+                                        let vi3 = wrows[weak_i].v3.unwrap();
+                                        let vj3 = wrows[weak_j].v3.unwrap();
+                                        self.adj[vi3] & (1 << vj3) != 0
+                                    };
+
+                                    // Collect house descriptions for adjacent positions
+                                    let mut link_parts = Vec::new();
+                                    if wk_adj_s1 { link_parts.push(house_desc(wrows[weak_i].oc1, wrows[weak_j].oc1)); }
+                                    if wk_adj_s2 { link_parts.push(house_desc(wrows[weak_i].oc2, wrows[weak_j].oc2)); }
+                                    if wk_adj_s3 { link_parts.push(house_desc(wrows[weak_i].oc3.unwrap(), wrows[weak_j].oc3.unwrap())); }
+                                    let weak_link_desc = format!(
+                                        "Rows {} and {}: {} \u{2014} 2 of 3 positions.",
+                                        wrows[weak_i].row + 1, wrows[weak_j].row + 1,
+                                        link_parts.join(", "),
+                                    );
+
+                                    // Merge pair: the cells at the NON-adjacent position
+                                    let (merge_v_a, merge_v_b, _merge_oc_a, _merge_oc_b) = if !wk_adj_s1 {
+                                        (wrows[weak_i].v1, wrows[weak_j].v1, wrows[weak_i].oc1, wrows[weak_j].oc1)
+                                    } else if !wk_adj_s2 {
+                                        (wrows[weak_i].v2, wrows[weak_j].v2, wrows[weak_i].oc2, wrows[weak_j].oc2)
+                                    } else {
+                                        (wrows[weak_i].v3.unwrap(), wrows[weak_j].v3.unwrap(),
+                                         wrows[weak_i].oc3.unwrap(), wrows[weak_j].oc3.unwrap())
+                                    };
+                                    let merge_a_name = self.vertex_name(merge_v_a);
+                                    let merge_b_name = self.vertex_name(merge_v_b);
+                                    let keep = merge_v_a.min(merge_v_b);
+                                    let remove = merge_v_a.max(merge_v_b);
+
+                                    // Build contra rows and distinctness
+                                    let contra_rows: Vec<String> = sub.iter()
+                                        .map(|&idx| format!("row {}", wrows[idx].row + 1))
+                                        .collect();
+
+                                    let mut distinctness: Vec<String> = Vec::new();
+                                    for si in 0..4 {
+                                        for sj in (si + 1)..4 {
+                                            let ii = sub[si];
+                                            let jj = sub[sj];
+                                            let adj_s1 = self.adj[wrows[ii].v1] & (1 << wrows[jj].v1) != 0;
+                                            let adj_s2 = self.adj[wrows[ii].v2] & (1 << wrows[jj].v2) != 0;
+                                            let adj_s3 = match (wrows[ii].v3, wrows[jj].v3) {
+                                                (Some(vi3), Some(vj3)) => self.adj[vi3] & (1 << vj3) != 0,
+                                                _ => false,
+                                            };
+                                            if adj_s1 {
+                                                distinctness.push(format!(
+                                                    "r{}\u{2194}r{}: {} \u{2192} pairs differ.",
+                                                    wrows[ii].row + 1, wrows[jj].row + 1,
+                                                    house_desc(wrows[ii].oc1, wrows[jj].oc1),
+                                                ));
+                                            } else if adj_s2 {
+                                                distinctness.push(format!(
+                                                    "r{}\u{2194}r{}: {} \u{2192} pairs differ.",
+                                                    wrows[ii].row + 1, wrows[jj].row + 1,
+                                                    house_desc(wrows[ii].oc2, wrows[jj].oc2),
+                                                ));
+                                            } else if adj_s3 {
+                                                let oci3 = wrows[ii].oc3.unwrap();
+                                                let ocj3 = wrows[jj].oc3.unwrap();
+                                                distinctness.push(format!(
+                                                    "r{}\u{2194}r{}: {} \u{2192} same \u{03b4}, pairs differ.",
+                                                    wrows[ii].row + 1, wrows[jj].row + 1,
+                                                    house_desc(oci3, ocj3),
+                                                ));
+                                            }
+                                        }
+                                    }
+
+                                    results.push((keep, remove, ProofNode::GradientChainDeduction {
+                                        chain_rows,
+                                        gradient_links,
+                                        weak_link_desc,
+                                        contra_rows,
+                                        distinctness,
+                                        merge_a: merge_a_name,
+                                        merge_b: merge_b_name,
+                                        next: Box::new(ProofNode::Failed),
+                                    }));
+                                    found_sub = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        results
+    }
+
     /// Find a forced deduction from full-house coloring constraints.
     ///
     /// Enumerates all valid 3-colorings of the full-house cell system
@@ -2960,6 +3394,20 @@ pub enum ProofNode {
         contra_rows: Vec<String>,                // the 4 row names forming the contradiction
         distinctness: Vec<String>,               // 6 lines for pairwise distinctness
     },
+    /// Gradient chain deduction: like GradientChain but one link is "weak"
+    /// (2 of 3 positions adjacent). Same-δ case gives pigeonhole contradiction;
+    /// opposite-δ case means the transposition fixes the third color
+    /// (non-shared cells have same color → merge), then continue.
+    GradientChainDeduction {
+        chain_rows: Vec<(String, Vec<String>)>,
+        gradient_links: Vec<String>,
+        weak_link_desc: String,
+        contra_rows: Vec<String>,
+        distinctness: Vec<String>,
+        merge_a: String,
+        merge_b: String,
+        next: Box<ProofNode>,
+    },
     /// Terminal contradiction from full-house coloring constraint analysis.
     /// No valid 3-coloring of the house system exists.
     HouseColoringContradiction {
@@ -3006,7 +3454,8 @@ impl ProofNode {
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
-            | ProofNode::Guardian { next, .. } => next.is_complete(),
+            | ProofNode::Guardian { next, .. }
+            | ProofNode::GradientChainDeduction { next, .. } => next.is_complete(),
             ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
                 if *is_contradiction { true } else { next.as_ref().unwrap().is_complete() }
             }
@@ -3031,7 +3480,8 @@ impl ProofNode {
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
-            | ProofNode::Guardian { next, .. } => 1 + next.depth(),
+            | ProofNode::Guardian { next, .. }
+            | ProofNode::GradientChainDeduction { next, .. } => 1 + next.depth(),
             ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
                 if *is_contradiction { 0 } else { 1 + next.as_ref().unwrap().depth() }
             }
@@ -3055,7 +3505,8 @@ impl ProofNode {
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
-            | ProofNode::Guardian { next, .. } => next.branch_count(),
+            | ProofNode::Guardian { next, .. }
+            | ProofNode::GradientChainDeduction { next, .. } => next.branch_count(),
             ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
                 if *is_contradiction { 0 } else { next.as_ref().unwrap().branch_count() }
             }
@@ -3080,7 +3531,8 @@ impl ProofNode {
             ProofNode::CircularLadder { next, .. }
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
-            | ProofNode::Guardian { next, .. } => next.diamond_count(),
+            | ProofNode::Guardian { next, .. }
+            | ProofNode::GradientChainDeduction { next, .. } => next.diamond_count(),
             ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
                 if *is_contradiction { 0 } else { next.as_ref().unwrap().diamond_count() }
             }
@@ -3103,7 +3555,8 @@ impl ProofNode {
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
-            | ProofNode::Guardian { next, .. } => next.odd_wheel_count(),
+            | ProofNode::Guardian { next, .. }
+            | ProofNode::GradientChainDeduction { next, .. } => next.odd_wheel_count(),
             ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
                 if *is_contradiction { 0 } else { next.as_ref().unwrap().odd_wheel_count() }
             }
@@ -3127,7 +3580,8 @@ impl ProofNode {
             ProofNode::DiamondMerge { next, .. }
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
-            | ProofNode::Guardian { next, .. } => next.circular_ladder_count(),
+            | ProofNode::Guardian { next, .. }
+            | ProofNode::GradientChainDeduction { next, .. } => next.circular_ladder_count(),
             ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
                 if *is_contradiction { 0 } else { next.as_ref().unwrap().circular_ladder_count() }
             }
@@ -3150,7 +3604,8 @@ impl ProofNode {
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
-            | ProofNode::Guardian { next, .. } => next.bridged_hexagon_count(),
+            | ProofNode::Guardian { next, .. }
+            | ProofNode::GradientChainDeduction { next, .. } => next.bridged_hexagon_count(),
             ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
                 if *is_contradiction { 0 } else { next.as_ref().unwrap().bridged_hexagon_count() }
             }
@@ -3173,7 +3628,8 @@ impl ProofNode {
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
-            | ProofNode::Guardian { next, .. } => next.set_equivalence_count(),
+            | ProofNode::Guardian { next, .. }
+            | ProofNode::GradientChainDeduction { next, .. } => next.set_equivalence_count(),
             ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
                 if *is_contradiction { 0 } else { next.as_ref().unwrap().set_equivalence_count() }
             }
@@ -3198,6 +3654,7 @@ impl ProofNode {
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. } => next.parity_transport_count(),
             ProofNode::ParityTransportDeduction { next, .. } => 1 + next.parity_transport_count(),
             ProofNode::ParityChainDeduction { next, .. } => 1 + next.parity_transport_count(),
+            ProofNode::GradientChainDeduction { next, .. } => 1 + next.parity_transport_count(),
             ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
                 1 + if *is_contradiction { 0 } else { next.as_ref().unwrap().parity_transport_count() }
             }
@@ -3221,7 +3678,8 @@ impl ProofNode {
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
-            | ProofNode::Guardian { next, .. } => next.pigeonhole_xwing_count(),
+            | ProofNode::Guardian { next, .. }
+            | ProofNode::GradientChainDeduction { next, .. } => next.pigeonhole_xwing_count(),
             ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
                 if *is_contradiction { 0 } else { next.as_ref().unwrap().pigeonhole_xwing_count() }
             }
@@ -3244,7 +3702,8 @@ impl ProofNode {
             ProofNode::Guardian { next, .. } => 1 + next.guardian_count(),
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
             | ProofNode::ParityTransportDeduction { next, .. }
-            | ProofNode::ParityChainDeduction { next, .. } => next.guardian_count(),
+            | ProofNode::ParityChainDeduction { next, .. }
+            | ProofNode::GradientChainDeduction { next, .. } => next.guardian_count(),
             ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
                 if *is_contradiction { 0 } else { next.as_ref().unwrap().guardian_count() }
             }
@@ -3270,7 +3729,8 @@ impl ProofNode {
             ProofNode::DiamondMerge { next, .. } | ProofNode::CircularLadder { next, .. }
             | ProofNode::ParityTransportDeduction { next, .. }
             | ProofNode::ParityChainDeduction { next, .. }
-            | ProofNode::Guardian { next, .. } => 1 + next.size(),
+            | ProofNode::Guardian { next, .. }
+            | ProofNode::GradientChainDeduction { next, .. } => 1 + next.size(),
             ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
                 if *is_contradiction { 1 } else { 1 + next.as_ref().unwrap().size() }
             }
@@ -3299,6 +3759,7 @@ impl ProofNode {
             }
             ProofNode::ParityTransportDeduction { next, .. } => TECH_PARITY | next.technique_signature(),
             ProofNode::ParityChainDeduction { next, .. } => TECH_PARITY | next.technique_signature(),
+            ProofNode::GradientChainDeduction { next, .. } => TECH_PARITY | next.technique_signature(),
             ProofNode::PermutationFixpoint { is_contradiction, next, .. } => {
                 TECH_PARITY | if *is_contradiction { 0 } else { next.as_ref().unwrap().technique_signature() }
             }
@@ -3477,6 +3938,38 @@ fn find_best_proof(
                     spine_v: spine_v_name,
                     next: Box::new(next),
                 });
+            }
+        }
+    }
+    }
+
+    // Try gradient chain deductions (2-position weak link → case split)
+    if disabled & TECH_PARITY == 0 {
+    let gcds = graph.find_gradient_chain_deductions();
+    for (keep, remove, partial_node) in gcds {
+        let mut g = graph.clone();
+        g.merge(keep, remove);
+
+        let next = find_best_proof(&g, branches_left, depth_remaining - 1, best_size - 1, disabled);
+        if next.is_complete() {
+            let total = 1 + next.size();
+            if total < best_size {
+                best_size = total;
+                if let ProofNode::GradientChainDeduction {
+                    chain_rows, gradient_links, weak_link_desc,
+                    contra_rows, distinctness, merge_a, merge_b, ..
+                } = partial_node {
+                    best = Some(ProofNode::GradientChainDeduction {
+                        chain_rows,
+                        gradient_links,
+                        weak_link_desc,
+                        contra_rows,
+                        distinctness,
+                        merge_a,
+                        merge_b,
+                        next: Box::new(next),
+                    });
+                }
             }
         }
     }
@@ -3786,6 +4279,29 @@ fn find_greedy_proof(
 
     if depth_remaining == 0 {
         return ProofNode::Failed;
+    }
+
+    // Priority 0: gradient chain deduction (2-position weak link → merge)
+    let gcds = graph.find_gradient_chain_deductions();
+    if let Some((keep, remove, partial_node)) = gcds.into_iter().next() {
+        let mut g = graph.clone();
+        g.merge(keep, remove);
+        let next = find_greedy_proof(&g, branches_left, depth_remaining - 1);
+        if let ProofNode::GradientChainDeduction {
+            chain_rows, gradient_links, weak_link_desc,
+            contra_rows, distinctness, merge_a, merge_b, ..
+        } = partial_node {
+            return ProofNode::GradientChainDeduction {
+                chain_rows,
+                gradient_links,
+                weak_link_desc,
+                contra_rows,
+                distinctness,
+                merge_a,
+                merge_b,
+                next: Box::new(next),
+            };
+        }
     }
 
     // Priority 1: diamond (first found, apply greedily)
@@ -4281,6 +4797,63 @@ fn format_node(node: &ProofNode, step: &mut usize, indent: usize) -> String {
                 "{}    4 distinct pairs, only 3 per \u{03b4} class. Contradiction.\n",
                 pad,
             );
+            s
+        }
+        ProofNode::GradientChainDeduction { chain_rows, gradient_links, weak_link_desc, contra_rows, distinctness, merge_a, merge_b, next } => {
+            *step += 1;
+            let mut s = format!(
+                "{}{}.  Gradient chain (with identification):\n",
+                pad, step,
+            );
+            s += &format!(
+                "{}    For each row, \u{03b4} = color(B) \u{2212} color(A) mod 3, where A and B are the first and second listed cells.\n",
+                pad,
+            );
+            s += &format!(
+                "{}    \u{03b4} \u{2208} {{\u{2212}1, +1}}; 3 color pairs per \u{03b4} value.\n",
+                pad,
+            );
+            for (row_name, cnames) in chain_rows {
+                if cnames.len() > 2 {
+                    s += &format!(
+                        "{}    {}: {}, {} (also {})\n",
+                        pad, row_name, cnames[0], cnames[1], cnames[2],
+                    );
+                } else {
+                    s += &format!(
+                        "{}    {}: {}, {}\n",
+                        pad, row_name, cnames[0], cnames[1],
+                    );
+                }
+            }
+            for link in gradient_links {
+                s += &format!("{}    {}\n", pad, link);
+            }
+            s += &format!("{}    {}\n", pad, weak_link_desc);
+            s += &format!(
+                "{}      Relative permutation is 3-cycle (same \u{03b4}) or transposition (opposite \u{03b4}, fixing {} and {}).\n",
+                pad, merge_a, merge_b,
+            );
+            s += &format!(
+                "{}    Case 1 (same \u{03b4}): {} have same \u{03b4}. 4 rows; only 3 color pairs per \u{03b4} value.\n",
+                pad, contra_rows.join(", "),
+            );
+            s += &format!(
+                "{}      {} pairwise distinct:\n",
+                pad, contra_rows.join(", "),
+            );
+            for d in distinctness {
+                s += &format!("{}        {}\n", pad, d);
+            }
+            s += &format!(
+                "{}      4 distinct pairs, only 3 per \u{03b4} class. Contradiction.\n",
+                pad,
+            );
+            s += &format!(
+                "{}    Case 2 (opposite \u{03b4}): color({}) = color({}). Identify.\n",
+                pad, merge_a, merge_b,
+            );
+            s += &format_node(next, step, indent);
             s
         }
         ProofNode::ParityChainDeduction { house_type, house_names, cells, links, merge_pair, merges, next } => {

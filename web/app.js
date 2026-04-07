@@ -678,6 +678,8 @@ function renderProofSteps(steps, depth) {
       html += renderPermutationFixpointStep(step, depth);
     } else if (step.type === 'gradient_chain') {
       html += renderGradientChainStep(step, depth);
+    } else if (step.type === 'gradient_chain_deduction') {
+      html += renderGradientChainDeductionStep(step, depth);
     } else if (step.type === 'branch') {
       html += renderBranchStep(step, depth);
     }
@@ -898,6 +900,49 @@ function renderGradientChainStep(step, depth) {
   }
 
   html += `<br><span class="step-k4">4 distinct pairs, only 3 per \u03b4 class. Contradiction.</span>` +
+    `</div>`;
+  return html;
+}
+
+function renderGradientChainDeductionStep(step, depth) {
+  const allCells = step.rows.flatMap(row => row.cells);
+  const data = escapeAttr(JSON.stringify({
+    type: 'gradient_chain_deduction',
+    cells: allCells,
+    rows: step.rows,
+    merge_a: step.merge_a,
+    merge_b: step.merge_b,
+  }));
+
+  let html = `<div class="proof-step" data-step='${data}'>` +
+    `<span class="step-num">${step.step}.</span> ` +
+    `<span class="step-diamond">Gradient chain (with identification)</span>:` +
+    `<br>&nbsp;&nbsp;\u03b4 = color(B) \u2212 color(A) mod 3 \u2208 {\u22121, +1}; 3 color pairs per \u03b4 value.`;
+
+  for (const row of step.rows) {
+    const mainCells = row.cells.slice(0, 2).map(v => `<span class="step-vertex">${esc(v)}</span>`).join(', ');
+    const also = row.cells.length > 2 ? ` (also <span class="step-vertex">${esc(row.cells[2])}</span>)` : '';
+    html += `<br>&nbsp;&nbsp;row ${row.row}: ${mainCells}${also}`;
+  }
+
+  for (const link of step.gradient_links) {
+    html += `<br>&nbsp;&nbsp;<span class="step-identify">${esc(link)}</span>`;
+  }
+
+  if (step.weak_link_desc) {
+    html += `<br>&nbsp;&nbsp;<span class="step-identify" style="color:#d29922">${esc(step.weak_link_desc)}</span>`;
+  }
+
+  const contraLabel = (step.contra_rows || []).join(', ') || `${step.rows.length} rows`;
+  html += `<br>&nbsp;&nbsp;<b>Case 1</b> (same \u03b4): ${contraLabel} have same \u03b4.`;
+  html += `<br>&nbsp;&nbsp;Pairwise distinct:`;
+  for (const d of step.distinctness) {
+    html += `<br>&nbsp;&nbsp;&nbsp;&nbsp;${esc(d)}`;
+  }
+  html += `<br>&nbsp;&nbsp;<span class="step-k4">4 distinct pairs, only 3 per \u03b4 class. Contradiction.</span>`;
+
+  html += `<br>&nbsp;&nbsp;<b>Case 2</b> (opposite \u03b4): ` +
+    `<span class="step-identify">color(${esc(step.merge_a)}) = color(${esc(step.merge_b)}). Identify.</span>` +
     `</div>`;
   return html;
 }
@@ -1404,6 +1449,28 @@ function highlightProofStep(pattern, el) {
         }
       });
     }
+  } else if (stepData.type === 'gradient_chain_deduction') {
+    const rowColors = ['hl-diamond', 'hl-identify', 'hl-set', 'hl-branch'];
+    if (stepData.rows) {
+      stepData.rows.forEach((row, ri) => {
+        for (const vName of row.cells) {
+          for (const cell of parseCellsFromLabel(vName)) {
+            highlights[cell] = rowColors[ri % rowColors.length];
+          }
+        }
+      });
+    }
+    // Override merge cells
+    if (stepData.merge_a) {
+      for (const cell of parseCellsFromLabel(stepData.merge_a)) {
+        highlights[cell] = 'hl-identify';
+      }
+    }
+    if (stepData.merge_b) {
+      for (const cell of parseCellsFromLabel(stepData.merge_b)) {
+        highlights[cell] = 'hl-identify';
+      }
+    }
   } else if (stepData.type === 'branch') {
     // Two branch vertices: blue + orange
     const brA = parseCellsFromLabel(stepData.vertex_a);
@@ -1783,6 +1850,27 @@ function proofToText(p) {
           lines.push(`${indent}     ${d}`);
         }
         lines.push(`${indent}   4 distinct pairs, only 3 per \u03b4 class. Contradiction.`);
+      } else if (s.type === 'gradient_chain_deduction') {
+        lines.push(`${indent}${s.step}. Gradient chain (with identification):`);
+        lines.push(`${indent}   \u03b4 = color(B) \u2212 color(A) mod 3 \u2208 {\u22121, +1}; 3 color pairs per \u03b4 value.`);
+        for (const row of s.rows) {
+          const mainCells = row.cells.slice(0, 2).join(', ');
+          const also = row.cells.length > 2 ? ` (also ${row.cells[2]})` : '';
+          lines.push(`${indent}   row ${row.row}: ${mainCells}${also}`);
+        }
+        for (const link of s.gradient_links) {
+          lines.push(`${indent}   ${link}`);
+        }
+        if (s.weak_link_desc) {
+          lines.push(`${indent}   ${s.weak_link_desc}`);
+        }
+        const contraLabel = (s.contra_rows || []).join(', ') || `${s.rows.length} rows`;
+        lines.push(`${indent}   Case 1 (same \u03b4): ${contraLabel} have same \u03b4.`);
+        for (const d of s.distinctness) {
+          lines.push(`${indent}     ${d}`);
+        }
+        lines.push(`${indent}   4 distinct pairs, only 3 per \u03b4 class. Contradiction.`);
+        lines.push(`${indent}   Case 2 (opposite \u03b4): color(${s.merge_a}) = color(${s.merge_b}). Identify.`);
       } else if (s.type === 'branch') {
         lines.push(`${indent}${s.step}. Branch on ${s.vertex_a}, ${s.vertex_b}:`);
         lines.push(`${indent}\tCase A: color(${s.vertex_a}) = color(${s.vertex_b}). Identify.`);

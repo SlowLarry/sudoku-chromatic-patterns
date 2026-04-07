@@ -154,6 +154,18 @@ def translate_proof_tree(tree, iso):
             # gradient_links and distinctness contain cell refs in free text — translate them
             s['gradient_links'] = [translate_trace_line(l, iso) for l in s['gradient_links']]
             s['distinctness'] = [translate_trace_line(l, iso) for l in s['distinctness']]
+        elif s['type'] == 'gradient_chain_deduction':
+            s['rows'] = [
+                {**row, 'cells': [translate_cell_name(c, iso) for c in row['cells']]}
+                for row in s['rows']
+            ]
+            s['gradient_links'] = [translate_trace_line(l, iso) for l in s['gradient_links']]
+            s['weak_link_desc'] = translate_trace_line(s['weak_link_desc'], iso)
+            s['distinctness'] = [translate_trace_line(l, iso) for l in s['distinctness']]
+            if s.get('merge_a'):
+                s['merge_a'] = translate_cell_name(s['merge_a'], iso)
+            if s.get('merge_b'):
+                s['merge_b'] = translate_cell_name(s['merge_b'], iso)
         elif s['type'] == 'branch':
             s['vertex_a'] = translate_cell_name(s['vertex_a'], iso)
             s['vertex_b'] = translate_cell_name(s['vertex_b'], iso)
@@ -1038,6 +1050,90 @@ def parse_proof_steps(lines):
                 'gradient_links': gradient_links,
                 'contra_rows': contra_rows,
                 'distinctness': distinctness,
+            })
+            continue
+
+        # Gradient chain deduction step (with identification)
+        gcdm = re.match(r'(\d+)\.\s+Gradient chain \(with identification\):', stripped)
+        if gcdm:
+            step_num = int(gcdm.group(1))
+            i += 1
+            # Skip 2 δ definition lines
+            if i < len(lines) and 'color(B)' in lines[i]:
+                i += 1
+            if i < len(lines) and '3 color pairs' in lines[i]:
+                i += 1
+            # Collect row lines
+            rows = []
+            while i < len(lines):
+                rl = lines[i].strip()
+                rm_row = re.match(r'row (\d+): (.+)', rl)
+                if rm_row:
+                    row_num = int(rm_row.group(1))
+                    rest = rm_row.group(2)
+                    also_m = re.match(r'(.+?) \(also (.+?)\)', rest)
+                    if also_m:
+                        cells = [c.strip() for c in also_m.group(1).split(',')]
+                        cells.append(also_m.group(2).strip())
+                    else:
+                        cells = [c.strip() for c in rest.split(',')]
+                    rows.append({'row': row_num, 'cells': cells})
+                    i += 1
+                else:
+                    break
+            # Collect gradient link lines (strong links)
+            gradient_links = []
+            weak_link_desc = ''
+            while i < len(lines):
+                wl = lines[i].strip()
+                if '2 of 3 positions' in wl:
+                    weak_link_desc = wl
+                    i += 1
+                    break
+                gradient_links.append(wl)
+                i += 1
+            # Skip "Relative permutation..." line and extract merge cells
+            merge_a = ''
+            merge_b = ''
+            if i < len(lines) and 'Relative permutation' in lines[i].strip():
+                pm = re.search(r'fixing (.+?) and (.+?)\)', lines[i].strip())
+                if pm:
+                    merge_a = pm.group(1)
+                    merge_b = pm.group(2)
+                i += 1
+            # Skip "Case 1 (same δ):" line
+            if i < len(lines) and 'Case 1' in lines[i].strip():
+                cm = re.findall(r'row \d+', lines[i].strip())
+                contra_rows = cm if cm else []
+                i += 1
+            else:
+                contra_rows = []
+            # Skip distinctness header + collect distinctness lines
+            distinctness = []
+            if i < len(lines) and 'pairwise distinct' in lines[i].strip():
+                i += 1
+                while i < len(lines):
+                    dl = lines[i].strip()
+                    if dl.startswith('r') and '\u2194' in dl:
+                        distinctness.append(dl)
+                        i += 1
+                    else:
+                        break
+            # Skip "4 distinct pairs..." and "Case 2..." lines
+            if i < len(lines) and 'Contradiction' in lines[i].strip():
+                i += 1
+            if i < len(lines) and 'Case 2' in lines[i].strip():
+                i += 1
+            steps.append({
+                'type': 'gradient_chain_deduction',
+                'step': step_num,
+                'rows': rows,
+                'gradient_links': gradient_links,
+                'weak_link_desc': weak_link_desc,
+                'contra_rows': contra_rows,
+                'distinctness': distinctness,
+                'merge_a': merge_a,
+                'merge_b': merge_b,
             })
             continue
 
