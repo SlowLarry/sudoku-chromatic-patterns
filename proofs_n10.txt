@@ -437,7 +437,7 @@ pattern 10/32: PROVED cells=10 depth=0 diamonds=0 odd_wheels=0 circular_ladders=
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Gradient chain:
+  1.  δ-chain:
       For each row, δ = color(B) − color(A) mod 3, where A and B are the first and second listed cells.
       δ ∈ {−1, +1}; 3 color pairs per δ value.
       row 6: r6c6, r6c9 (also r6c3)
@@ -462,7 +462,7 @@ Proof of non-3-colorability:
 Proof of non-3-colorability:
   Assume for contradiction it is 3-colorable.
 
-  1.  Gradient chain:
+  1.  δ-chain:
       For each row, δ = color(B) − color(A) mod 3, where A and B are the first and second listed cells.
       δ ∈ {−1, +1}; 3 color pairs per δ value.
       row 6: r6c6, r6c9 (also r6c3)

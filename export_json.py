@@ -986,8 +986,8 @@ def parse_proof_steps(lines):
             i += 1
             continue
 
-        # Gradient chain step
-        wcm = re.match(r'(\d+)\.\s+Gradient chain:', stripped)
+        # δ-chain step
+        wcm = re.match(r'(\d+)\.\s+δ-chain:', stripped)
         if wcm:
             step_num = int(wcm.group(1))
             i += 1
@@ -1053,8 +1053,8 @@ def parse_proof_steps(lines):
             })
             continue
 
-        # Gradient chain deduction step (with identification)
-        gcdm = re.match(r'(\d+)\.\s+Gradient chain \(with identification\):', stripped)
+        # δ-chain deduction step (with identification)
+        gcdm = re.match(r'(\d+)\.\s+δ-chain \(with identification\):', stripped)
         if gcdm:
             step_num = int(gcdm.group(1))
             i += 1

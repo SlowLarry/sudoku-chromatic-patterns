@@ -2303,7 +2303,7 @@ impl ProofGraph {
                                                 let oci3 = wrows[i].oc3.unwrap();
                                                 let ocj3 = wrows[j].oc3.unwrap();
                                                 distinctness.push(format!(
-                                                    "r{}\u{2194}r{}: {} \u{2192} same \u{03b4}, pairs differ.",
+                                                    "r{}\u{2194}r{}: {} \u{2192} third cells; same pair + same \u{03b4} forces same color, but adjacent. Pairs differ.",
                                                     wrows[i].row + 1, wrows[j].row + 1,
                                                     house_desc(oci3, ocj3),
                                                 ));
@@ -2694,6 +2694,10 @@ impl ProofGraph {
                                         (wrows[weak_i].v3.unwrap(), wrows[weak_j].v3.unwrap(),
                                          wrows[weak_i].oc3.unwrap(), wrows[weak_j].oc3.unwrap())
                                     };
+                                    // Skip if both rows share this vertex (self-merge after prior identification)
+                                    if merge_v_a == merge_v_b {
+                                        continue;
+                                    }
                                     let merge_a_name = self.vertex_name(merge_v_a);
                                     let merge_b_name = self.vertex_name(merge_v_b);
                                     let keep = merge_v_a.min(merge_v_b);
@@ -2731,7 +2735,7 @@ impl ProofGraph {
                                                 let oci3 = wrows[ii].oc3.unwrap();
                                                 let ocj3 = wrows[jj].oc3.unwrap();
                                                 distinctness.push(format!(
-                                                    "r{}\u{2194}r{}: {} \u{2192} same \u{03b4}, pairs differ.",
+                                                    "r{}\u{2194}r{}: {} \u{2192} third cells; same pair + same \u{03b4} forces same color, but adjacent. Pairs differ.",
                                                     wrows[ii].row + 1, wrows[jj].row + 1,
                                                     house_desc(oci3, ocj3),
                                                 ));
@@ -4755,7 +4759,7 @@ fn format_node(node: &ProofNode, step: &mut usize, indent: usize) -> String {
         ProofNode::GradientChain { chain_rows, gradient_links, contra_rows, distinctness } => {
             *step += 1;
             let mut s = format!(
-                "{}{}.  Gradient chain:\n",
+                "{}{}.  \u{03b4}-chain:\n",
                 pad, step,
             );
             s += &format!(
@@ -4802,7 +4806,7 @@ fn format_node(node: &ProofNode, step: &mut usize, indent: usize) -> String {
         ProofNode::GradientChainDeduction { chain_rows, gradient_links, weak_link_desc, contra_rows, distinctness, merge_a, merge_b, next } => {
             *step += 1;
             let mut s = format!(
-                "{}{}.  Gradient chain (with identification):\n",
+                "{}{}.  \u{03b4}-chain (with identification):\n",
                 pad, step,
             );
             s += &format!(

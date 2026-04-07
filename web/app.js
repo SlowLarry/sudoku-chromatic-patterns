@@ -878,7 +878,7 @@ function renderGradientChainStep(step, depth) {
 
   let html = `<div class="proof-step" data-step='${data}'>` +
     `<span class="step-num">${step.step}.</span> ` +
-    `<span class="step-k4">Gradient chain</span>:` +
+    `<span class="step-k4">δ-chain</span>:` +
     `<br>&nbsp;&nbsp;\u03b4 = color(B) \u2212 color(A) mod 3 \u2208 {\u22121, +1}; 3 color pairs per \u03b4 value.`;
 
   for (const row of step.rows) {
@@ -916,7 +916,7 @@ function renderGradientChainDeductionStep(step, depth) {
 
   let html = `<div class="proof-step" data-step='${data}'>` +
     `<span class="step-num">${step.step}.</span> ` +
-    `<span class="step-diamond">Gradient chain (with identification)</span>:` +
+    `<span class="step-diamond">δ-chain (with identification)</span>:` +
     `<br>&nbsp;&nbsp;\u03b4 = color(B) \u2212 color(A) mod 3 \u2208 {\u22121, +1}; 3 color pairs per \u03b4 value.`;
 
   for (const row of step.rows) {
@@ -1834,7 +1834,7 @@ function proofToText(p) {
         }
         lines.push(`${indent}   ${s.num_rows} same-parity permutations from 3 available \u2192 pigeonhole contradiction.`);
       } else if (s.type === 'gradient_chain') {
-        lines.push(`${indent}${s.step}. Gradient chain:`);
+        lines.push(`${indent}${s.step}. δ-chain:`);
         lines.push(`${indent}   \u03b4 = color(B) \u2212 color(A) mod 3 \u2208 {\u22121, +1}; 3 color pairs per \u03b4 value.`);
         for (const row of s.rows) {
           const mainCells = row.cells.slice(0, 2).join(', ');
@@ -1851,7 +1851,7 @@ function proofToText(p) {
         }
         lines.push(`${indent}   4 distinct pairs, only 3 per \u03b4 class. Contradiction.`);
       } else if (s.type === 'gradient_chain_deduction') {
-        lines.push(`${indent}${s.step}. Gradient chain (with identification):`);
+        lines.push(`${indent}${s.step}. δ-chain (with identification):`);
         lines.push(`${indent}   \u03b4 = color(B) \u2212 color(A) mod 3 \u2208 {\u22121, +1}; 3 color pairs per \u03b4 value.`);
         for (const row of s.rows) {
           const mainCells = row.cells.slice(0, 2).join(', ');
